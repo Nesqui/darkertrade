@@ -8,6 +8,7 @@ import { ViteSSG } from "vite-ssg";
 import generatedRoutes from "~pages";
 import { setupLayouts } from "virtual:generated-layouts";
 import { initApi } from './hooks';
+import { createPinia } from 'pinia'
 
 const routes = setupLayouts(generatedRoutes);
 initApi()
@@ -17,7 +18,8 @@ initApi()
 // .mount('#app')
 
 ViteSSG(App, { routes }, ({ app, router, routes, isClient, initialState }) => {
-    app.use(ElementPlus)
-    app.use(router)
-  });
-  
+  const pinia = createPinia()
+  app.use(pinia)
+  app.use(ElementPlus)
+  app.use(router)
+});
