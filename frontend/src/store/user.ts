@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { User } from '../hooks'
+import { useStorage } from '@vueuse/core'
 
 export const useUserStore = defineStore('user', () => {
-    const currentUser = ref<User>()
-    const token = ref<string>()
+    const currentUser = useStorage('currentUser', {})
+    const token = useStorage('token', '')
 
-    const isAuth = () => !!currentUser.value
+    const isAuth = computed(() => !!currentUser.value)
 
     const saveUser = (user:User) => {
         currentUser.value = user

@@ -25,7 +25,7 @@ const tradeMeta = ref<TradeMeta>({
 <template>
   <div class="main" >
     <TopMenu :tradeMeta="tradeMeta"/>
-    <div class="trade" v-if="userStore.isAuth()">
+    <div class="trade" v-if="userStore.isAuth">
       <LeftMenu :trade-meta="tradeMeta" />
       <TradeDetails :trade-meta="tradeMeta" />
       <RightMenu :trade-meta="tradeMeta" />

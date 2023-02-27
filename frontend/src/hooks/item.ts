@@ -7,7 +7,6 @@ export interface QueryItemDto {
 export const useItemApi = () => {
     const { axiosClient } = useApi()
 
-    const isAuth = () => true
     const findAll = async (params: QueryItemDto):Promise<Item[]> => {
         const res = await axiosClient('item', {
             params
@@ -21,7 +20,6 @@ export const useItemApi = () => {
 
     return {
         findAll,
-        isAuth,
         getImg
     }
 }
