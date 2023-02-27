@@ -4,9 +4,9 @@ export type Slot =
     | 'Head'
     | 'Chest'
     | 'Legs'
-    | 'Foots'
+    | 'Boots'
     | 'Weapon'
-    | 'Hand'
+    | 'Gloves'
     | ''
 
 export type ItemName =

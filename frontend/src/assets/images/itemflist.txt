@@ -1,0 +1,93 @@
+Badger Pendant
+Fox Pendant
+Necklace of Peace
+Ox Pendant
+Rat Pendant
+
+Adventurer Boots
+Heavy Boots
+Laced Turnshoe
+Lightfoot Boots
+Old Shoes
+Plate Boots
+Rugged Boots
+Wizard Shoes
+
+Dark Plate Armor
+Doublet
+Fine Cuirass
+Frock
+Marauder Outfit
+Mystic Vestments
+Northern Full Tunic
+Oracle Robe
+Padded Tunic
+Regal Gambeson
+Templar Armor
+Warden Outfit
+
+Heavy Gauntlet
+Leather Gloves
+Rawhide Gloves
+Reinforced Gloves
+Riveted Gloves
+
+Armet
+Barbuta Helmet
+Chapel De Fer
+Chaperon
+Gjermundbu
+Kettle Hat
+Leather Cap
+Ranger Hood
+Rogue Cowl
+Viking Helmet
+Visored Barbuta Helmet
+Wizard Hat
+Cloth Pants
+Heavy Leather Leggings
+Leather Leggings
+Loose Trousers
+Padded Leggings
+Plate Pants
+
+Ring of Courage
+Ring of Quickness
+Ring of Resolve
+Ring of Survival
+
+Arming Sword
+Bardiche
+Battle Axe
+Buckler
+Castillon Dagger
+Crossbow
+Crystal Ball
+Crystal Sword
+Double Axe
+Falchion
+Felling Axe
+Flanged Mace
+Halberd
+Hatchet
+Heater Shield
+Horsemans Axe
+Kris Dagger
+Longbow
+Longsword
+Morning Star
+Pavise
+Quarterstaff
+Rapier
+Recurve Bow
+Rondel Dagger
+Round Shield
+Short Sword
+Spear
+Spellbook
+Stiletto Dagger
+Survival Bow
+War Maul
+Windlass Crossbow
+Wizard Staff
+Zweihander
