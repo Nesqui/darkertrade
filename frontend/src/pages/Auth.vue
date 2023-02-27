@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import Registration from "../components/Registration.vue"
+import Login from "../components/Login.vue"
+
+const mode = ref<'signIn' | 'signUp'>('signIn')
 </script>
 
 <template>
     <div class="auth">
         <div class="wrapper">
-            <h2 class="item-title">Authorization</h2>
+            <h2 class="item-title">Authorization | {{mode}}</h2>
 
             <div class="wrapper-body">
-                <div>
-                    <el-input placeholder="Login"></el-input>
-                    <el-input placeholder="Password"></el-input>
-                </div>
+                <Registration v-if="mode === 'signUp'"/>
+                <Login v-else/>
                 <img src="../assets/images/Artworks/c_m_rogue.png" alt="">
             </div>
+
+            <el-button @click="mode = 'signUp'" v-if="mode === 'signIn'" link>Signup</el-button>
+            <el-button @click="mode = 'signIn'" v-if="mode === 'signUp'" link>Already have account</el-button>
         </div>
 
     </div>
@@ -32,6 +37,10 @@ import { ref } from 'vue'
 
     .el-input {
         width: 150px;
+    }
+
+    .el-button {
+        color: var(--el-color-primary);
     }
 
     .wrapper {
