@@ -6,8 +6,7 @@ import { useStorage } from '@vueuse/core'
 export const useUserStore = defineStore('user', () => {
     const currentUser = useStorage('currentUser', {})
     const token = useStorage('token', '')
-
-    const isAuth = computed(() => !!currentUser.value)
+    const isAuth = computed(() => !!token.value)
 
     const saveUser = (user:User) => {
         currentUser.value = user
