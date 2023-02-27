@@ -1,0 +1,125 @@
+@import './base.css';
+
+@font-face {
+    font-family: "Solmoe";
+    src: local("Solmoe"),
+        url("../fonts/Solmoe.ttf") format("truetype");
+}
+
+html,
+body {
+    overflow: hidden;
+    margin: 0;
+    background: var(--el-color-primary);
+    color: var(--el-text-color-regular);
+    font-family: "Montserrat";
+}
+
+h2 {
+    font-weight: 800;
+    font-size: 26px;
+    margin: 0 0 1.25rem 0;
+}
+
+h3 {
+    font-weight: 700;
+    font-size: 20px;
+    margin: 0 0 .2rem 0;
+}
+
+.el-button {
+    // height: var(--el-component-size);
+    padding: 8px 35px;
+}
+
+.el-button--large {
+    height: var(--el-component-size);
+}
+
+.el-button:focus,
+.el-button:hover {
+    color: var(--button-hover-text-color)
+}
+
+a,
+button {
+    font-family: "Montserrat";
+}
+
+.main {
+    width: 100vw;
+    height: 100vh;
+}
+
+
+a:hover,
+button:hover {
+    text-decoration: underline;
+}
+
+.trade {
+    display: grid;
+    height: 100%;
+    grid-template-columns: 1fr 4fr 1fr;
+}
+
+.wrapper {
+    border-radius: 10px;
+    position: relative;
+    background-color: var(--el-color-danger);
+    -webkit-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    -moz-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    padding: 1rem 2rem;
+    color: var(--el-color-primary);
+    overflow-y: auto;
+    max-height: 800px;
+    outline: none;
+}
+
+.item-frame {
+    border: 5px ridge var(--el-border-color);
+    background-color: rgb(0, 0, 0, 0.85);
+    cursor: pointer;
+    font-size: 28px;
+    border-radius: 5px;
+    color: var(--color-text);
+}
+
+.item-frame:hover {
+    background-color: var(--el-color-primary-dark-2);
+}
+
+.item-description {
+    // border: 5px ridge var(--el-border-color);
+    // background-color: rgb(0, 0, 0, 0.85);
+    // color: var(--color-text);
+    text-transform: uppercase;
+    padding: 1rem;
+    // border-radius: 5px;
+}
+
+.item-title {
+    font-family: "Solmoe";
+    font-size: 16px;
+    text-align: center;
+    font-weight: 600;
+}
+
+::-webkit-scrollbar {
+    width: 16px;
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #d4aa70;
+    border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-clip: padding-box;
+    border: 5px solid rgba(0, 0, 0, 0);
+}

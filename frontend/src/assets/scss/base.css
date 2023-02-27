@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800');
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700');
+
+:root {
+  --color-text: #C69749;
+  --el-color-primary: #000000;
+  --el-button-hover-border-color: unset;
+  --el-border: unset;
+  --el-component-size: 52px;
+  --el-border-radius-base: 6px;
+  --el-border-color: #282A3A;
+  --el-color-danger: #C69749;
+  --el-input-focus-border-color: #3F0071;
+  --el-color-primary-light-3: #282A3A;
+  --el-color-primary-dark-2: #282A3A;
+  --el-color-primary-light-9: #282A3A;
+  --el-text-color-regular: #C69749;
+  --el-color-info: #735F32;
+  --el-text-color-primary: #C69749;
+  --shadow-attention-transparent: rgb(198, 151, 73, 0.3);
+  --el-fill-color-blank: rgb(0, 0, 0, 0.85);
+  --el-border-color-hover: #282A3A;
+  --scroll-width: 16px;
+  --button-hover-text-color: #C69749;
+  --el-bg-color-overlay: rgb(0, 0, 0, 0.85);
+  --el-border-color-light: #282A3A;
+  --el-button-disabled-bg-color: #000000;
+  --el-fill-color-light: #282A3A;
+}
