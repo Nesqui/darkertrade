@@ -16,7 +16,7 @@ const userStore = useUserStore()
 const tradeMeta = ref<TradeMeta>({
   mode: 'sale'
 })
-
+console.log({isAuth:userStore.isAuth})
 // onBeforeMount(() => {
 //   if (!userStore.currentUser)
 // })
