@@ -17,7 +17,7 @@ import { User } from 'src/user/user.entity';
 
 @Controller('existing-item')
 export class ExistingItemController {
-  constructor(private readonly existingItemService: ExistingItemService) {}
+  constructor(private readonly existingItemService: ExistingItemService) { }
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -33,10 +33,16 @@ export class ExistingItemController {
     return this.existingItemService.findAll();
   }
 
+  @Get('similar/:id')
+  findSimilar(@Param('id') id: string) {
+    return this.existingItemService.findSimilar(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.existingItemService.findOne(+id);
   }
+
 
   @Patch(':id')
   update(

@@ -17,7 +17,7 @@ export class ExistingItemService {
     private statRepository: typeof Stat,
     @Inject('ITEMS_REPOSITORY')
     private itemRepository: typeof Item,
-  ) {}
+  ) { }
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
     const item = await this.existingItemRepository.create(
@@ -49,6 +49,16 @@ export class ExistingItemService {
 
     if (!item) throw new NotFoundException('Item not found');
     return item;
+  }
+
+  async findSimilar(id: number) {
+    // sequelize.op
+    const item = await this.existingItemRepository.findAll({
+      where: {},
+      include: [this.statRepository, this.itemRepository, this.userRepository],
+    });
+    //logic
+    return item
   }
 
   update(id: number, updateExistingItemDto: UpdateExistingItemDto) {
