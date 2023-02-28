@@ -29,11 +29,13 @@ export class ExistingItemController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.existingItemService.findAll();
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {
     return this.existingItemService.findOne(+id);
   }
