@@ -27,14 +27,14 @@ h3 {
     margin: 0 0 .2rem 0;
 }
 
-input:-webkit-autofill{
+input:-webkit-autofill {
     -webkit-text-fill-color: yellow !important;
 }
 
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
-input:-webkit-autofill:active{
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px white inset !important;
 }
 
@@ -116,6 +116,17 @@ button:hover {
     font-size: 16px;
     text-align: center;
     font-weight: 600;
+}
+
+.el-popper.is-dark {
+    background: var(--el-color-primary-light-9);
+    border: 1px solid var(--el-color-primary);
+}
+
+.el-popper.is-dark .el-popper__arrow::before {
+    border: 1px solid var(--el-color-primary);
+    background: var(--el-color-primary-light-9);
+    right: 0;
 }
 
 ::-webkit-scrollbar {

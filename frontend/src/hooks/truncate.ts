@@ -1,0 +1,1 @@
+export const truncate = (str: string, maxLength: number = 15) => str.length > maxLength ? str.split(" ").map(word => word[0]).join("").toUpperCase() : str

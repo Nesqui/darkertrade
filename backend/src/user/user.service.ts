@@ -28,6 +28,15 @@ export class UserService {
     });
   }
 
+  async findByNickname(nickname: string) {
+    return await this.usersRepository.findOne({
+      where: { nickname, active: true },
+      attributes: {
+        exclude: ['password'],
+      }
+    });
+  }
+
   update(id: number, updateUserDto: UpdateUserDto) {
     return `This action updates a #${id} user`;
   }

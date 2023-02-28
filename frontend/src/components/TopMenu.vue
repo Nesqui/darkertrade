@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { TradeMeta } from '../App.vue'
+import { User } from '../hooks'
 import { useUserStore } from '../store'
 
 const userStore = useUserStore()
@@ -10,10 +11,13 @@ const isAuth = computed(() => userStore.isAuth)
 <template>
   <div class="top-menu">
     <div v-if="isAuth" class="top-menu__item">
-      <el-button link @click="$router.push('wtb')">Want to buy</el-button>
+      <el-button link @click="$router.push('/wtb')">Want to buy</el-button>
     </div>
     <div v-if="isAuth" class="top-menu__item">
-      <el-button link @click="$router.push('wts')">Want to sell</el-button>
+      <el-button link @click="$router.push('/wts')">Want to sell</el-button>
+    </div>
+    <div v-if="isAuth" class="top-menu__item">
+      <el-button link @click="$router.push(`/user/${userStore.currentUser.nickname}/items`)">My items</el-button>
     </div>
     <div v-if="isAuth" class="top-menu__item">
       <el-button link @click="userStore.logout">Logout</el-button>

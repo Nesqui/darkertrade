@@ -19,6 +19,16 @@ const router = createRouter({
       name: "WTB",
       component: () => import("~pages/WTB.vue"),
     },
+    {
+      path: "/user/:nickname",
+      component: () => import("~pages/User.vue"),
+      children: [{
+        path: "items",
+        name: "my-items",
+        component: () => import("~pages/Items.vue"),
+      }]
+    },
+
   ],
 });
 

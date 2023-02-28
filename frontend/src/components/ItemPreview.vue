@@ -1,9 +1,18 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue'
-import { Item, QueryItemDto, useItemApi } from '../hooks'
+import { Attribute, Item, QueryItemDto, Stat, truncate, useItemApi } from '../hooks'
+import { useAttributesStore } from '../store/attributes'
 const itemApi = useItemApi()
+const attributeStore = useAttributesStore()
+const attributes = attributeStore.attributes
 
-const itemProp = defineProps<{ item: Item }>()
+const getAttributeNameById = (attributeId: number) => {
+    const currentAttribute = attributes.find(a => a.id === attributeId)
+    if (!currentAttribute)
+        return "Attribute not found!"
+    return currentAttribute.name
+}
+defineProps<{ item: Item, stats: Stat[] }>();
 </script>
 
 <template>
@@ -15,16 +24,22 @@ const itemProp = defineProps<{ item: Item }>()
             <div class="item-img"> <img :src="itemApi.getImg(item)" alt=""></div>
             <div class="item-description">
                 <span class="item-description__title">Attributes:</span>
-                <span><label>Slot:</label> {{ item.slot }}</span>
+                <el-tooltip class="box-item" effect="dark" :content="getAttributeNameById(stat.attributeId)" placement="top"
+                    v-for="(stat, index) in stats" :key="index">
+                    <div class="stat">
+                        {{ truncate(getAttributeNameById(stat.attributeId), 23) }}: {{ stat.value > 0 ? `+${stat.value}` : stat.value }}
+                    </div>
+                </el-tooltip>
+                <div class="stat">Slot: {{ item.slot }}</div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-$frameWidth: 170px;
+$frameWidth: 188px;
 $frameHeight: 220px;
-$item-description-padding: .7rem;
+$item-description-padding: .7rem .5rem;
 
 .item-preview {
 
@@ -33,7 +48,7 @@ $item-description-padding: .7rem;
         flex-direction: column;
         align-items: center;
         gap: 15px;
-        height: $frameHeight;
+        min-height: $frameHeight;
         width: $frameWidth;
     }
 
@@ -54,17 +69,20 @@ $item-description-padding: .7rem;
     }
 
     .item-description {
-        font-size: 16px;
-        padding: $item-description-padding;
+        padding-right: 5px;
         display: flex;
         flex-direction: column;
-        flex: 1;
-        gap: 5px;
-        align-items: center;
         font-size: 12px;
+        width: 100%;
+        line-height: 15px;
+
+        .stat {
+            font-size: 11px;
+            font-weight: 600;
+        }
 
         &__title {
-            font-weight: 600;
+            margin-bottom: .25rem;
         }
     }
 }

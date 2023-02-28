@@ -1,23 +1,29 @@
 <script setup lang="ts">
 import { Stats } from 'fs';
-import { onBeforeMount, ref } from 'vue'
-import { Item, QueryItemDto, initAttributesApi, Attribute, useItemApi, ExistingItem, Stat, StatSymbol } from '../hooks'
+import { computed, onBeforeMount, ref } from 'vue'
+import { Item, QueryItemDto, initAttributesApi, Attribute, useItemApi, ExistingItem, Stat, StatSymbol, initExistingItemApi } from '../hooks'
+import { useAttributesStore } from '../store/attributes';
 import ItemPreview from './ItemPreview.vue';
 
 const itemApi = useItemApi()
 
-defineProps<{ item: Item }>()
+const itemProp = defineProps<{ item: Item }>()
 const attributeApi = initAttributesApi()
-
-const attributes = ref<Attribute[]>([])
-const existingItem = ref<ExistingItem>({})
-
+const attributeStore = useAttributesStore()
+const attributes = attributeStore.attributes
+const existingItemApi = initExistingItemApi()
 const name = ref('')
-const value = ref(0)
+const value = ref(1)
 const valueRef = ref()
 const symbol = ref<StatSymbol>('>=')
 const stats = ref<Stat[]>([])
 const attributeId = ref<number>(0)
+const loading = ref(false)
+
+const existingItem = computed(():ExistingItem => ({
+    itemId: itemProp.item.id!,
+    stats: stats.value
+}))
 
 interface StatOption {
     value: StatSymbol
@@ -35,15 +41,15 @@ const options = ref<StatOption[]>([{
 
 const querySearch = (queryString: string, cb: any) => {
     const results = queryString
-        ? attributes.value.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
-        : attributes.value
+        ? attributes.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+        : attributes
     // call callback function to return suggestions
     cb(results)
 }
 
-const clearData = () => {
+const clearForm = () => {
     name.value = ''
-    value.value = 0
+    value.value = 1
     attributeId.value = 0
 }
 
@@ -54,21 +60,29 @@ const addStat = () => {
         symbol: symbol.value
     })
 
-    clearData()
+    clearForm()
 }
 
-const handleSelect = (attribute) => {
+const handleSelect = (attribute: Attribute) => {
     attributeId.value = attribute.id
     valueRef.value.focus()
 }
 
-const deleteStat = (index) => {
+const deleteStat = (index: number) => {
     stats.value.splice(index, 1)
 }
 
-onBeforeMount(async () => {
-    attributes.value = await attributeApi.findAll()
-})
+const createExistingItem = async () => {
+    loading.value = true 
+    try {
+        await existingItemApi.create(existingItem.value)
+    } catch (error) {
+        
+    } finally {
+        loading.value = false
+    }
+}
+
 </script>
 
 <template>
@@ -76,7 +90,7 @@ onBeforeMount(async () => {
         <h2>Item creator</h2>
         <el-row justify="space-between">
             <el-col :span="6">
-                <ItemPreview :item="item" />
+                <ItemPreview :item="item" :stats="stats" />
             </el-col>
             <el-col :span="18">
                 <el-row :gutter="7">
@@ -110,6 +124,10 @@ onBeforeMount(async () => {
                         </div>
                     </el-col>
                 </el-row>
+                <div class="actions">
+                    <el-button :disabled="!stats.length || loading" @click="createExistingItem" size="large">Create item</el-button>
+                    <el-button :disabled="!stats.length || loading" @click="createExistingItem" size="large">Create item and Publish</el-button>
+                </div>
             </el-col>
         </el-row>
     </div>
@@ -126,6 +144,13 @@ onBeforeMount(async () => {
         justify-content: space-between;
         align-items: center;
         margin-bottom: .25rem;
+    }
+
+    .actions {
+        display: flex;
+        width: 100%;
+        justify-content: end;
+        padding-top: 2rem;
     }
 
     .stats-details {

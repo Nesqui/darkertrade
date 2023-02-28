@@ -4,16 +4,16 @@ import { User } from '../hooks'
 import { useStorage } from '@vueuse/core'
 
 export const useUserStore = defineStore('user', () => {
-    const currentUser = useStorage('currentUser', {})
+    const currentUser = useStorage('currentUser', {} as User)
     const token = useStorage('token', '')
     const isAuth = computed(() => !!token.value)
 
-    const saveUser = (user:User) => {
+    const saveUser = (user: User) => {
         currentUser.value = user
     }
 
     const logout = () => {
-        currentUser.value = {}
+        currentUser.value = { id: 0, nickname: '', password: "", name: "", lastName: "", discord: '', active: false}
         token.value = ""
     }
 

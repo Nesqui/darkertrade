@@ -14,7 +14,6 @@ export const initAttributesApi = () => {
         const res = await axiosClient('attribute')
         return res.data
     }
-
     return {
         findAll
     }

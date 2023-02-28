@@ -43,7 +43,7 @@ onBeforeMount(async () => {
     </div>
     <div class="item-list">
       <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-        <ItemPreview @click="item.id = currentItem.id; item.name = currentItem.name" :item="currentItem" />
+        <ItemPreview @click="item.id = currentItem.id; item.name = currentItem.name" :item="currentItem" :stats="[]" />
       </div>
     </div>
   </div>
