@@ -6,7 +6,9 @@ import {
   Unique,
   Min,
   Max,
+  BelongsTo,
 } from 'sequelize-typescript';
+import { Stat } from 'src/stat/stat.entity';
 
 @Table
 export class Attribute extends Model {

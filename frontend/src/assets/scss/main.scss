@@ -27,6 +27,17 @@ h3 {
     margin: 0 0 .2rem 0;
 }
 
+input:-webkit-autofill{
+    -webkit-text-fill-color: yellow !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
 .el-button {
     // height: var(--el-component-size);
     padding: 8px 35px;
@@ -70,11 +81,12 @@ button:hover {
     -webkit-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
     -moz-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
     box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
-    padding: 1rem 2rem;
+    padding: 1.25rem 1.55rem;
     color: var(--el-color-primary);
     overflow-y: auto;
     max-height: 800px;
     outline: none;
+    box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
 }
 
 .item-frame {

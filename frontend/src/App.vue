@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 import LeftMenu from './components/LeftMenu.vue'
 import RightMenu from './components/RightMenu.vue'
 import TopMenu from './components/TopMenu.vue'
@@ -16,16 +16,14 @@ const userStore = useUserStore()
 const tradeMeta = ref<TradeMeta>({
   mode: 'sale'
 })
-console.log({isAuth:userStore.isAuth})
-// onBeforeMount(() => {
-//   if (!userStore.currentUser)
-// })
+
+const isAuth = computed(() => userStore.isAuth)
 </script>
 
 <template>
   <div class="main" >
     <TopMenu :tradeMeta="tradeMeta"/>
-    <div class="trade" v-if="userStore.isAuth">
+    <div class="trade" v-if="isAuth">
       <LeftMenu :trade-meta="tradeMeta" />
       <TradeDetails :trade-meta="tradeMeta" />
       <RightMenu :trade-meta="tradeMeta" />

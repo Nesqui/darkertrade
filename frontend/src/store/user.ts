@@ -12,6 +12,11 @@ export const useUserStore = defineStore('user', () => {
         currentUser.value = user
     }
 
+    const logout = () => {
+        currentUser.value = {}
+        token.value = ""
+    }
+
     const saveToken = (jwtToken: string) => {
         token.value = jwtToken
     }
@@ -20,6 +25,8 @@ export const useUserStore = defineStore('user', () => {
         currentUser,
         isAuth,
         saveUser,
-        saveToken
+        saveToken,
+        logout,
+        token
     }
 })

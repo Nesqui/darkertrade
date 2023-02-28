@@ -1,5 +1,8 @@
 import type { AxiosInstance } from 'axios'
 import axios from 'axios'
+import { ElNotification } from 'element-plus'
+import { computed } from 'vue'
+import { useUserStore } from '../store'
 
 let axiosClient: AxiosInstance
 
@@ -10,10 +13,12 @@ export function initApi() {
 
     axiosClient.interceptors.request.use(
         (request) => {
-            //   const userStore = useUserStore()
-            //   const token = computed(() => userStore.token)
-            //   request.headers = { ...request.headers, Authorization: `Bearer ${token.value}` }
-            //   debug('Request', request.url, request.data, request.params)
+              const userStore = useUserStore()
+              const token = computed(() => userStore.token)
+              console.log({token: token.value});
+              
+              request.headers = { ...request.headers, Authorization: `Bearer ${token.value}` }
+              debug('Request', request.url, request.data, request.params)
             return request
         })
 
@@ -34,9 +39,14 @@ export function initApi() {
             const { response } = error
             console.log(response);
             
-            //   if (response.status === 401 || response.data.message === 'TokenExpiredError') {
-            //     emitter.emit('authorize')
-            //   }
+              if (response.status === 401 || response.data.message === 'TokenExpiredError') {
+                const userStore = useUserStore()
+                userStore.logout()
+                ElNotification({
+                    message: "Session expired. Please login again"
+                })
+                debug('error 401', response)
+              }
 
             debug('Error', response.data)
         },

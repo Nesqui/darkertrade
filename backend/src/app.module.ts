@@ -7,6 +7,10 @@ import { UserModule } from './user/user.module';
 import { ItemModule } from './item/item.module';
 import { AttributeModule } from './attribute/attribute.module';
 import { AuthModule } from './auth/auth.module';
+import { ExistingItemModule } from './existing-item/existing-item.module';
+import { StatModule } from './stat/stat.module';
+import { AuctionModule } from './auction/auction.module';
+import { BidModule } from './bid/bid.module';
 
 @Module({
   imports: [
@@ -18,6 +22,10 @@ import { AuthModule } from './auth/auth.module';
     ItemModule,
     AttributeModule,
     AuthModule,
+    ExistingItemModule,
+    StatModule,
+    AuctionModule,
+    BidModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
+import { jwtConstants } from '../constants';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -22,10 +23,13 @@ export class JwtAuthGuard implements CanActivate {
       if (bearer !== 'Bearer' || !token) {
         throw new Error('Invalid token');
       }
-
-      req.user = this.jwtService.verify(token);
+      req.user = this.jwtService.verify(token, {
+        secret: jwtConstants.secret,
+      });
       return true;
     } catch (e) {
+      console.log('Auth error', e);
+
       throw new UnauthorizedException({ message: 'User not authorized' });
     }
   }

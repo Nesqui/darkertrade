@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { TradeMeta } from '../App.vue'
+import { useUserStore } from '../store'
 
+const userStore = useUserStore()
+const isAuth = computed(() => userStore.isAuth)
 </script>
 
 <template>
   <div class="top-menu">
-    <div class="top-menu__item">
+    <div v-if="isAuth" class="top-menu__item">
       <el-button link @click="$router.push('wtb')">Want to buy</el-button>
     </div>
-    <div class="top-menu__item">
+    <div v-if="isAuth" class="top-menu__item">
       <el-button link @click="$router.push('wts')">Want to sell</el-button>
+    </div>
+    <div v-if="isAuth" class="top-menu__item">
+      <el-button link @click="userStore.logout">Logout</el-button>
     </div>
   </div>
 </template>

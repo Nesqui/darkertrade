@@ -39,7 +39,7 @@ onBeforeMount(async () => {
   <div class="wrapper">
     <div class="actions">
       <el-input v-model="searchString" @input="search" placeholder="search"></el-input>
-      <el-button @click="clearItem">Back</el-button>
+      <el-button size="large" @click="clearItem">Back</el-button>
     </div>
     <div class="item-list">
       <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
@@ -53,7 +53,7 @@ onBeforeMount(async () => {
 $frameWidth: 100px;
 $frameHeight: 100px;
 $item-description-padding: .7rem;
-$step: 1.5rem;
+$step: 1rem;
 
 .wrapper {
   padding: $step;
