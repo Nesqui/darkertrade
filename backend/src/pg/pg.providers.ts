@@ -1,7 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { Attribute } from 'src/attribute/attribute.entity';
-import { Auction } from 'src/auction/auction.entity';
 import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
@@ -48,15 +47,7 @@ export const pgProviders = [
         database: ConfigService.get('PG_DATABASE'),
         operatorsAliases: ConfigService.get('PG_OPERATORSALIASES'),
       });
-      sequelize.addModels([
-        User,
-        Item,
-        Attribute,
-        Stat,
-        ExistingItem,
-        Auction,
-        Bid,
-      ]);
+      sequelize.addModels([User, Item, Attribute, Stat, ExistingItem, Bid]);
       await sequelize.sync({
         alter: true,
       });

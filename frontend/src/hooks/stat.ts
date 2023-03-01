@@ -1,11 +1,8 @@
 import { useApi } from "."
 
-export type StatSymbol = '>=' | '='
-
 export interface Stat {
     id?: number
     value: number
-    symbol: StatSymbol
     attributeId: number
 }
 

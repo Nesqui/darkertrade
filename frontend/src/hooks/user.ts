@@ -10,7 +10,7 @@ export interface User {
     password: string;
     name: string;
     lastName: string;
-    discord: string;
+    discord?: string;
     active: boolean;
 }
 

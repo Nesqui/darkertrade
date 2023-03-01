@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
-import { ExistingItem, initExistingItemApi, Item, QueryItemDto, useItemApi } from '../hooks'
+import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
 import { useAttributesStore } from '../store';
 const attributeStore = useAttributesStore()
@@ -22,6 +22,7 @@ const clear = () => {
 }
 
 const filteredItems = computed(() => {
+  if (!Array.isArray(props.items) || !props.items.length) return []
   let filteredData = [...props.items]
   if (props.filterItem.slot)
     filteredData = props.items.filter(item => item.slot === props.filterItem.slot)
@@ -54,22 +55,26 @@ const choseItem = async (currentItem: Item) => {
 <template>
   <div class="wrapper">
     <div class="actions">
-      <el-input v-model="searchString" :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
+      <el-input v-model="searchString"
+        :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
       <el-button size="large" @click="clear">Clear</el-button>
     </div>
     <div v-if="!chosenItem && !filteredItems?.length">
       <p>Currently no items here</p>
     </div>
-    <div v-else-if="!chosenItem" class="item-list">
-      <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-        <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+    <div class="item-list__wrapper">
+      <div v-if="!chosenItem && filteredItems?.length" class="item-list">
+        <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
+          <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+        </div>
+      </div>
+      <div v-else class="item-list">
+        <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
+          <ItemPreview :item="chosenItem" :offerType="existingItem.offerType" :stats="existingItem.stats" />
+        </div>
       </div>
     </div>
-    <div v-else class="item-list">
-      <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-        <ItemPreview :item="chosenItem" :stats="existingItem.stats" />
-      </div>
-    </div>
+
   </div>
 </template>
 
@@ -94,11 +99,10 @@ $step: 1rem;
 .item-list {
   overflow-y: auto;
   overflow-x: hidden;
-
   display: grid;
+
   gap: $step;
   grid-template-columns: 1fr 1fr 1fr;
-
 }
 
 .actions {

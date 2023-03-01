@@ -2,10 +2,11 @@
 import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { ExistingItem, initExistingItemApi, initUserApi, Item, User } from '../../../hooks'
+import ItemList from '../../../components/ItemList.vue';
+import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, User } from '../../../hooks'
 
-const existingItemApi = initExistingItemApi()
-const existingItems = ref<ExistingItem[]>()
+const itemApi = initItemApi()
+const items = ref<Item[]>()
 const userApi = initUserApi()
 const loading = ref(true)
 const user = ref<User>()
@@ -24,7 +25,9 @@ onBeforeMount(async () => {
                 ElNotification('User not found')
                 return
             }
-            existingItems.value = await existingItemApi.findAll({ userId: user.value.id })
+            const res = await itemApi.findUserItems(user.value.id)
+            if (res)
+                items.value = res
         }
     } catch (error) {
         ElNotification({
@@ -39,7 +42,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="my-items">
-        <item-list :filter-item="filterItem" :items="existingItems"></item-list>
+        <ItemList :filter-item="filterItem" :items="items || []"></ItemList>
     </div>
 </template>
 

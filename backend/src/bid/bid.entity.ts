@@ -7,7 +7,6 @@ import {
   ForeignKey,
   BelongsTo,
 } from 'sequelize-typescript';
-import { Auction } from 'src/auction/auction.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
 
@@ -22,12 +21,6 @@ export class Bid extends Model {
 
   @ForeignKey(() => User)
   userId: User;
-
-  @BelongsTo(() => Auction)
-  auction: Auction;
-
-  @ForeignKey(() => Auction)
-  auctionId: Auction;
 
   @BelongsTo(() => ExistingItem)
   existingItem: ExistingItem;

@@ -17,7 +17,7 @@ defineProps<{ item: Item }>()
             <div @click="item.slot = 'Legs'" class="item-frame darker-title legs">L</div>
             <div @click="item.slot = 'Boots'" class="item-frame darker-title boots">B</div>
             <div @click="item.slot = 'Weapon'" class="item-frame darker-title weapon">W</div>
-            <div class="item-frame item-description">
+            <div class="item-frame no-hover item-description">
                 <span><label class="darker-title">A</label>Amulet</span>
                 <span><label class="darker-title">R</label>Ring</span>
                 <span><label class="darker-title">H</label>Head</span>

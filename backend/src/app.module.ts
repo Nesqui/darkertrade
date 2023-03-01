@@ -9,7 +9,6 @@ import { AttributeModule } from './attribute/attribute.module';
 import { AuthModule } from './auth/auth.module';
 import { ExistingItemModule } from './existing-item/existing-item.module';
 import { StatModule } from './stat/stat.module';
-import { AuctionModule } from './auction/auction.module';
 import { BidModule } from './bid/bid.module';
 
 @Module({
@@ -24,7 +23,6 @@ import { BidModule } from './bid/bid.module';
     AuthModule,
     ExistingItemModule,
     StatModule,
-    AuctionModule,
     BidModule,
   ],
   controllers: [AppController],

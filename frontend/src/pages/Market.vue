@@ -2,9 +2,9 @@
 import { onBeforeMount, ref } from 'vue'
 import Human from '../components/Human.vue';
 import ItemList from '../components/ItemList.vue';
-import { Item, useItemApi } from '../hooks';
+import { Item, initItemApi } from '../hooks';
 
-const itemApi = useItemApi()
+const itemApi = initItemApi()
 const items = ref<Item[]>([])
 
 const filterItem = ref<Item>({

@@ -1,22 +1,44 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
-import { Attribute, Item, QueryItemDto, Stat, truncate, useItemApi } from '../hooks'
+import { onBeforeMount, PropType, ref } from 'vue'
+import { Attribute, Item, QueryItemDto, Stat, truncate, initItemApi } from '../hooks'
 import { useAttributesStore } from '../store'
-const itemApi = useItemApi()
+const itemApi = initItemApi()
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 
-defineProps<{ item: Item, stats: Stat[] }>();
+defineProps({
+    item: {
+        type: Object as PropType<Item>
+    },
+    stats: {
+        type: Object as PropType<Stat[]>
+    }, noHover: {
+        type: Boolean,
+        required: false,
+    },
+    offerType: {
+        type: String as PropType<'WTB' | 'WTS'>,
+        required: false,
+    },
+    wantedPrice: {
+        required: false,
+        type: Number
+    }
+});
 </script>
 
 <template>
     <div class="item-preview">
-        <div class="item-frame">
+        <div class="item-frame" :class="{ 'no-hover': noHover }">
+            <div class="offer-header" v-if="offerType">
+                <label class="darker-title">{{ offerType }}</label>
+            </div>
+            <div class="divider" v-if="offerType"/>
             <div class="item-header">
-                <label class="darker-title">{{ item.name || 'Empty item' }}</label>
+                <label class="darker-title">{{ item?.name || 'Empty item' }}</label>
             </div>
             <div class="item-img">
-                <img v-if="item.id" :src="itemApi.getImg(item)" alt="">
+                <img v-if="item?.id" :src="itemApi.getImg(item)" alt="">
                 <div v-else class="img-avatar"></div>
             </div>
             <div class="divider" v-if="stats.length"></div>
@@ -27,6 +49,7 @@ defineProps<{ item: Item, stats: Stat[] }>();
                 </div>
                 <div class="divider"></div>
                 <div class="stat">Slot: {{ item.slot || 'Empty slot' }}</div>
+                <div class="stat" v-if="wantedPrice">Wanted price: {{ wantedPrice }} gold</div>
             </div>
         </div>
     </div>
@@ -38,7 +61,6 @@ $frameHeight: 220px;
 $item-description-padding: .7rem .5rem;
 
 .item-preview {
-
     .item-frame {
         display: flex;
         flex-direction: column;

@@ -1,22 +1,28 @@
 <script setup lang="ts">
 import { Stats } from 'fs';
 import { computed, onBeforeMount, ref } from 'vue'
-import { Item, QueryItemDto, initAttributesApi, Attribute, useItemApi, ExistingItem, Stat, StatSymbol, initExistingItemApi } from '../hooks'
+import { Item, QueryItemDto, initAttributesApi, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
+import { ElNotification } from 'element-plus';
+import router from '../router';
 
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
 const attributes = attributeStore.attributes
 const existingItemApi = initExistingItemApi()
+const maxAttributes = 8
 const name = ref('')
 const value = ref(1)
+const wantedPrice = ref(100)
+const offerType = ref<'WTB' | 'WTS'>('WTB')
+
 const valueRef = ref()
-const symbol = ref<StatSymbol>('>=')
 const stats = ref<Stat[]>([])
+const published = ref(false)
 const attributeId = ref<number>(0)
 const loading = ref(false)
-const itemApi = useItemApi()
+const itemApi = initItemApi()
 
 const items = ref<Item[]>([])
 
@@ -28,22 +34,11 @@ const item = ref<Item>({
 
 const existingItem = computed((): ExistingItem => ({
     itemId: item.value.id!,
-    stats: stats.value
+    stats: stats.value,
+    published: published.value,
+    wantedPrice: wantedPrice.value,
+    offerType: offerType.value
 }))
-
-interface StatOption {
-    value: StatSymbol
-    label: StatSymbol
-}
-
-const options = ref<StatOption[]>([{
-    value: '>=',
-    label: '>=',
-},
-{
-    value: '=',
-    label: '=',
-}])
 
 const itemSearch = (queryString: string, cb: any) => {
     const results = queryString
@@ -54,9 +49,15 @@ const itemSearch = (queryString: string, cb: any) => {
 }
 
 const attributeSearch = (queryString: string, cb: any) => {
-    const results = queryString
-        ? attributes.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
-        : attributes
+    let results = attributes
+
+    if (stats.value.length) {
+        results = results.filter(attribute => !stats.value.find(stat => stat.attributeId === attribute.id))
+    }
+
+    queryString
+        ? results.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+        : results
     // call callback function to return suggestions
     cb(results)
 }
@@ -67,13 +68,29 @@ const clearForm = () => {
     attributeId.value = 0
 }
 
+
+const addStatValidator = computed(() => {
+    if (stats.value.length >= maxAttributes) {
+        return false
+    }
+
+    if (!attributeId.value || !value.value) {
+        return false
+    }
+
+    if (stats.value.find(stat => stat.attributeId === attributeId.value)) {
+        return false
+    }
+
+    return true
+})
+
 const addStat = () => {
+    if (!addStatValidator.value) return
     stats.value.push({
         attributeId: attributeId.value,
         value: value.value,
-        symbol: symbol.value
     })
-
     clearForm()
 }
 
@@ -95,12 +112,20 @@ const deleteStat = (index: number) => {
 const createExistingItem = async () => {
     loading.value = true
     try {
-        await existingItemApi.create(existingItem.value)
+        const { user, id } = await existingItemApi.create(existingItem.value)
+        router.push(`/user/${user?.nickname}/items/${id}`)
     } catch (error) {
-
+        ElNotification({
+            message: JSON.stringify(error)
+        })
     } finally {
         loading.value = false
     }
+}
+
+const createAndPublish = async () => {
+    published.value = true
+    await createExistingItem()
 }
 
 const clear = () => {
@@ -121,44 +146,68 @@ onBeforeMount(async () => {
 
 <template>
     <div class="item-creator wrapper">
-        <h2>Item creator</h2>
+        <h2>Item creator | {{ offerType }}</h2>
         <div class="item-creator__wrapper">
-            <ItemPreview :item="item" :stats="stats" />
-            <div v-if="!item.id" class="item-creator__item">
-                <el-autocomplete value-key="name" v-model="item.name" :fetch-suggestions="itemSearch" clearable
+            <div class="item-creator__item">
+                <el-autocomplete value-key="name" v-model="item.name" clearable :fetch-suggestions="itemSearch"
                     placeholder="Item name" @select="handleSelectItem" />
-            </div>
-            <div v-else class="item-creator__attributes">
                 <div class="item-creator__attributes__actions">
-                    <el-autocomplete value-key="name" v-model="name" :fetch-suggestions="attributeSearch" clearable
-                        placeholder="Stat name" @select="handleSelectAttribute" />
-                    <el-input placeholder="Value" ref="valueRef" v-model="value" />
-
-                    <el-select v-model="symbol" class="m-2" placeholder="Select">
-                        <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value" />
-                    </el-select>
-                    <el-button size="large" :disabled="!attributeId" @click="addStat">Add</el-button>
+                    <div>
+                        <div class="sub-title">
+                            Wanted price (Optional)
+                        </div>
+                        <el-input type="number" placeholder="Wanted Price" maxlength="5"
+                            v-model.number="wantedPrice"></el-input>
+                    </div>
+                    <el-button size="large" v-if="offerType === 'WTS'" @click="offerType = 'WTB'">Want to buy</el-button>
+                    <el-button size="large" v-if="offerType === 'WTB'" @click="offerType = 'WTS'">
+                        Want to sell
+                    </el-button>
+                </div>
+                <div class="item-creator__attributes__actions">
+                    <div>
+                        <div class="sub-title">
+                            Stat name
+                        </div>
+                        <el-autocomplete value-key="name" v-model="name" :fetch-suggestions="attributeSearch" clearable
+                            placeholder="Stat name" @select="handleSelectAttribute" />
+                    </div>
+                    <div>
+                        <div class="sub-title">
+                            Stat value
+                        </div>
+                        <el-input placeholder="Value" maxlength="3" ref="valueRef" v-model="value" />
+                    </div>
+                    <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
                 </div>
                 <div class="stats">
                     <h3 v-if="stats.length">Selected stats:</h3>
                     <div class="stats-item" v-for="(stat, index) in stats" :key="index">
                         <span class="stats-details">
                             {{ (attributes.find(a => a.id === stat.attributeId))?.name }}
-                            {{ stat.symbol }}{{ stat.value }}
+                            {{ stat.value }}
                         </span>
                         <el-button @click="() => deleteStat(index)">Delete</el-button>
                     </div>
                 </div>
-
-                <div class="item-creator__actions">
-                    <el-button @click="clear" size="large">
-                        Back</el-button>
-                    <el-button :disabled="!stats.length || loading" @click="createExistingItem" size="large">Create
-                        item</el-button>
-                    <el-button :disabled="!stats.length || loading" @click="createExistingItem" size="large">Create item and
-                        Publish</el-button>
-                </div>
             </div>
+            <ItemPreview :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="stats" />
+        </div>
+
+
+        <div class="item-creator__actions">
+            <div>
+                <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
+                    size="large">Create
+                    item
+                    and
+                    Publish</el-button>
+                <el-button :disabled="!stats.length || loading || !item.id" @click="createExistingItem" size="large">Create
+                    item</el-button>
+            </div>
+            <el-button v-if="item.id || stats.length" @click="clear" size="large">
+                Clear</el-button>
+
         </div>
     </div>
 </template>
@@ -170,13 +219,25 @@ onBeforeMount(async () => {
     &__wrapper {
         display: flex;
         gap: 1rem;
+        margin-bottom: 2rem;
     }
 
     &__item {
         width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: .25rem;
+    }
+
+    &__attributes {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
     }
 
     &__attributes__actions {
+        align-items: flex-end;
+        // justify-content: flex-end;
         display: flex;
         gap: .25rem;
     }
@@ -184,11 +245,13 @@ onBeforeMount(async () => {
     // CREATE AND PUBLISH BUTTONS
     &__actions {
         display: flex;
-        justify-content: flex-end;
+        justify-content: space-between;
+        align-self: flex-end;
     }
 
     .stats {
         padding: 1rem 0 2rem 0;
+        flex-grow: 1;
     }
 
     .stats-item {
@@ -220,9 +283,5 @@ onBeforeMount(async () => {
     .el-input {
         height: var(--el-component-size);
     }
-
-    // .el-button {
-    //     width: 100%;
-    // }
 }
 </style>

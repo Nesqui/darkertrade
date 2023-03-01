@@ -1,10 +1,14 @@
-import { Item, Stat, useApi } from "."
+import { Item, Stat, useApi, User } from "."
 
 export interface ExistingItem {
     id?: number
     itemId: number,
     item?: Item,
-    stats: Stat[]
+    stats: Stat[],
+    wantedPrice?: number,
+    published: boolean,
+    user?: User,
+    offerType: 'WTB' | 'WTS'
 }
 
 export interface FilterExistingItemDto {
@@ -22,7 +26,7 @@ export const initExistingItemApi = () => {
         return res.data
     }
 
-    const create = async (item: ExistingItem): Promise<ExistingItem[]> => {
+    const create = async (item: ExistingItem): Promise<ExistingItem> => {
         const res = await axiosClient.post('existing-item', item)
         return res.data
     }

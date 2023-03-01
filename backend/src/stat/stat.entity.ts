@@ -10,17 +10,11 @@ import {
 import { Attribute } from 'src/attribute/attribute.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 
-export type StatSymbol = '>=' | '=';
-
 @Table
 export class Stat extends Model {
   @AllowNull(false)
   @Column
   value: string;
-
-  @AllowNull(false)
-  @Column
-  symbol: StatSymbol;
 
   @BelongsTo(() => Attribute)
   attribute: Attribute;
