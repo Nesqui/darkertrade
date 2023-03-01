@@ -9,23 +9,23 @@ defineProps<{ item: Item }>()
         <div class="wrapper">
             <div class="img"></div>
 
-            <div @click="item.slot = 'Amulet'" class="item-frame item-title amulet">A</div>
-            <div @click="item.slot = 'Ring'" class="item-frame item-title ring">R</div>
-            <div @click="item.slot = 'Head'" class="item-frame item-title head">H</div>
-            <div @click="item.slot = 'Chest'" class="item-frame item-title chest">C</div>
-            <div @click="item.slot = 'Gloves'" class="item-frame item-title gloves">G</div>
-            <div @click="item.slot = 'Legs'" class="item-frame item-title legs">L</div>
-            <div @click="item.slot = 'Boots'" class="item-frame item-title boots">B</div>
-            <div @click="item.slot = 'Weapon'" class="item-frame item-title weapon">W</div>
+            <div @click="item.slot = 'Amulet'" class="item-frame darker-title amulet">A</div>
+            <div @click="item.slot = 'Ring'" class="item-frame darker-title ring">R</div>
+            <div @click="item.slot = 'Head'" class="item-frame darker-title head">H</div>
+            <div @click="item.slot = 'Chest'" class="item-frame darker-title chest">C</div>
+            <div @click="item.slot = 'Gloves'" class="item-frame darker-title gloves">G</div>
+            <div @click="item.slot = 'Legs'" class="item-frame darker-title legs">L</div>
+            <div @click="item.slot = 'Boots'" class="item-frame darker-title boots">B</div>
+            <div @click="item.slot = 'Weapon'" class="item-frame darker-title weapon">W</div>
             <div class="item-frame item-description">
-                <span><label class="item-title">A</label>Amulet</span>
-                <span><label class="item-title">R</label>Ring</span>
-                <span><label class="item-title">H</label>Head</span>
-                <span><label class="item-title">C</label>Chest</span>
-                <span><label class="item-title">G</label>Gloves</span>
-                <span><label class="item-title">L</label>Legs</span>
-                <span><label class="item-title">B</label>Boots</span>
-                <span><label class="item-title">W</label>Weapon</span>
+                <span><label class="darker-title">A</label>Amulet</span>
+                <span><label class="darker-title">R</label>Ring</span>
+                <span><label class="darker-title">H</label>Head</span>
+                <span><label class="darker-title">C</label>Chest</span>
+                <span><label class="darker-title">G</label>Gloves</span>
+                <span><label class="darker-title">L</label>Legs</span>
+                <span><label class="darker-title">B</label>Boots</span>
+                <span><label class="darker-title">W</label>Weapon</span>
             </div>
         </div>
     </div>
@@ -37,8 +37,8 @@ $human-height: 600px;
 $human-width: 500px;
 
 .human {
-    height: 100%;
-    width: 100%;
+    // height: 100%;
+    // width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

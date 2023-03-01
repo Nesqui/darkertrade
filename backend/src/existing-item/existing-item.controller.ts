@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ExistingItemService } from './existing-item.service';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
@@ -14,6 +15,7 @@ import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from 'src/user/user.decorator';
 import { User } from 'src/user/user.entity';
+import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 
 @Controller('existing-item')
 export class ExistingItemController {
@@ -30,8 +32,8 @@ export class ExistingItemController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.existingItemService.findAll();
+  findAll(@Query() filterExistingItemDto: FilterExistingItemDto) {
+    return this.existingItemService.findAll(filterExistingItemDto);
   }
 
   @Get('similar/:id')

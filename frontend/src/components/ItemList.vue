@@ -1,49 +1,73 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
-import { Item, QueryItemDto, useItemApi } from '../hooks'
+import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
+import { ExistingItem, initExistingItemApi, Item, QueryItemDto, useItemApi } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
+import { useAttributesStore } from '../store';
+const attributeStore = useAttributesStore()
+const getAttributeNameById = attributeStore.getAttributeNameById
+const chosenItem = ref<Item>()
 
-const items = ref<Item[]>([])
-const filteredItems = ref<Item[]>([])
-
-const itemApi = useItemApi()
-
-const itemProp = defineProps<{ item: Item }>()
+const props = defineProps({
+  items: { type: Object as PropType<Item[]>, required: true },
+  filterItem: { type: Object as PropType<Item>, required: true }
+})
 
 const searchString = ref<string>("")
 
-const queryItem = ref<QueryItemDto>({
-  slot: itemProp.item.slot
-})
-
-const search = () => {
-  const filteredData = items.value.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
-  filteredItems.value = filteredData
+const clear = () => {
+  searchString.value = ""
+  props.filterItem.name = ""
+  props.filterItem.slot = ""
+  chosenItem.value = undefined
 }
 
-const clearItem = () => {
-  itemProp.item.name = ""
-  itemProp.item.slot = ""
-}
-
-
-onBeforeMount(async () => {
-  const res = await itemApi.findAll(queryItem.value)
-  items.value = res
-  filteredItems.value = res
+const filteredItems = computed(() => {
+  let filteredData = [...props.items]
+  if (props.filterItem.slot)
+    filteredData = props.items.filter(item => item.slot === props.filterItem.slot)
+  if (searchString.value)
+    filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
+  return filteredData
 })
 
+const statFilter = (existingItem: ExistingItem, queryString: string) => {
+  return existingItem.stats.find(stat => getAttributeNameById(stat.attributeId).toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+}
+
+const filteredExistingItems = computed(() => {
+  if (!chosenItem.value)
+    return []
+
+  if (searchString.value && chosenItem.value.existingItems?.length)
+    return chosenItem.value.existingItems.filter((existingItem) => statFilter(existingItem, searchString.value))
+
+  return chosenItem.value.existingItems
+})
+
+const choseItem = async (currentItem: Item) => {
+  props.filterItem.id = currentItem.id
+  props.filterItem.name = currentItem.name;
+  chosenItem.value = currentItem
+}
 </script>
 
 <template>
   <div class="wrapper">
     <div class="actions">
-      <el-input v-model="searchString" @input="search" placeholder="search"></el-input>
-      <el-button size="large" @click="clearItem">Back</el-button>
+      <el-input v-model="searchString" :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
+      <el-button size="large" @click="clear">Clear</el-button>
     </div>
-    <div class="item-list">
+    <div v-if="!chosenItem && !filteredItems?.length">
+      <p>Currently no items here</p>
+    </div>
+    <div v-else-if="!chosenItem" class="item-list">
       <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-        <ItemPreview @click="item.id = currentItem.id; item.name = currentItem.name" :item="currentItem" :stats="[]" />
+        <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+      </div>
+    </div>
+    <div v-else class="item-list">
+      <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
+        <ItemPreview :item="chosenItem" :stats="existingItem.stats" />
       </div>
     </div>
   </div>
@@ -58,7 +82,7 @@ $step: 1rem;
 .wrapper {
   padding: $step;
   overflow: hidden;
-  min-width: 800px;
+  width: 830px;
 }
 
 .actions {
@@ -68,16 +92,12 @@ $step: 1rem;
 }
 
 .item-list {
-  height: 600px;
-  min-width: 800px;
-
-
   overflow-y: auto;
   overflow-x: hidden;
 
   display: grid;
   gap: $step;
-  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
 
 }
 

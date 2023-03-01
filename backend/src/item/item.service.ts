@@ -1,4 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { ExistingItem } from 'src/existing-item/existing-item.entity';
+import { Stat } from 'src/stat/stat.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -8,6 +10,10 @@ import { Item } from './item.entity';
 export class ItemService {
   constructor(
     @Inject('ITEMS_REPOSITORY') private itemsRepository: typeof Item,
+    @Inject('EXISTING_ITEM_REPOSITORY')
+    private existingItemRepository: typeof ExistingItem,
+    @Inject('STATS_REPOSITORY')
+    private statRepository: typeof Stat,
   ) {}
 
   create(createItemDto: CreateItemDto) {
@@ -15,10 +21,25 @@ export class ItemService {
   }
 
   async findAll(itemQuery: QueryItemDto) {
+    const where = {};
+    if (itemQuery.slot) where['slot'] = itemQuery.slot;
     return await this.itemsRepository.findAll({
-      where: {
-        slot: itemQuery.slot,
-      },
+      where,
+    });
+  }
+
+  async getMarket(itemQuery: QueryItemDto) {
+    const where = {};
+    if (itemQuery.slot) where['slot'] = itemQuery.slot;
+    return await this.itemsRepository.findAll({
+      where,
+      include: [
+        {
+          model: this.existingItemRepository,
+          required: true,
+          include: [this.statRepository]
+        },
+      ],
     });
   }
 

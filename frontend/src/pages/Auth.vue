@@ -9,7 +9,7 @@ const mode = ref<'signIn' | 'signUp'>('signIn')
 <template>
     <div class="auth">
         <div class="wrapper">
-            <h2 class="item-title">Authorization | {{mode}}</h2>
+            <h2 class="darker-title">Authorization | {{mode}}</h2>
 
             <div class="wrapper-body">
                 <Registration v-if="mode === 'signUp'"/>

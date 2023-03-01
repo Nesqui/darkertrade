@@ -35,6 +35,15 @@ export class ItemController {
     return this.itemService.findAll(itemQuery);
   }
 
+  @Get('market')
+  @ApiQuery({
+    type: QueryItemDto,
+  })
+  @UseGuards(JwtAuthGuard)
+  getMarket(@Query() itemQuery: QueryItemDto) {
+    return this.itemService.getMarket(itemQuery);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {

@@ -3,6 +3,7 @@ import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
+import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
 
@@ -33,9 +34,25 @@ export class ExistingItemService {
     return await this.findOne(item.id);
   }
 
-  async findAll() {
+  async findAll(filterExistingItemDto: FilterExistingItemDto) {
+    const filter = { ...filterExistingItemDto };
+    const itemWhere = {};
+
+    if (filter.slot) {
+      itemWhere['slot'] = filterExistingItemDto.slot;
+      delete filter.slot;
+    }
+
     const item = await this.existingItemRepository.findAll({
-      include: [this.statRepository, this.itemRepository, this.userRepository],
+      where: { ...filter },
+      include: [
+        this.statRepository,
+        {
+          model: this.itemRepository,
+          where: itemWhere,
+        },
+        this.userRepository,
+      ],
     });
 
     if (!item) return [];
@@ -58,7 +75,7 @@ export class ExistingItemService {
       include: [this.statRepository, this.itemRepository, this.userRepository],
     });
     //logic
-    return item
+    return item;
   }
 
   update(id: number, updateExistingItemDto: UpdateExistingItemDto) {

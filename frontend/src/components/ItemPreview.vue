@@ -1,17 +1,11 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue'
 import { Attribute, Item, QueryItemDto, Stat, truncate, useItemApi } from '../hooks'
-import { useAttributesStore } from '../store/attributes'
+import { useAttributesStore } from '../store'
 const itemApi = useItemApi()
 const attributeStore = useAttributesStore()
-const attributes = attributeStore.attributes
+const getAttributeNameById = attributeStore.getAttributeNameById
 
-const getAttributeNameById = (attributeId: number) => {
-    const currentAttribute = attributes.find(a => a.id === attributeId)
-    if (!currentAttribute)
-        return "Attribute not found!"
-    return currentAttribute.name
-}
 defineProps<{ item: Item, stats: Stat[] }>();
 </script>
 
@@ -19,25 +13,27 @@ defineProps<{ item: Item, stats: Stat[] }>();
     <div class="item-preview">
         <div class="item-frame">
             <div class="item-header">
-                <label class="item-title">{{ item.name }}</label>
+                <label class="darker-title">{{ item.name || 'Empty item' }}</label>
             </div>
-            <div class="item-img"> <img :src="itemApi.getImg(item)" alt=""></div>
+            <div class="item-img">
+                <img v-if="item.id" :src="itemApi.getImg(item)" alt="">
+                <div v-else class="img-avatar"></div>
+            </div>
+            <div class="divider" v-if="stats.length"></div>
             <div class="item-description">
-                <span class="item-description__title">Attributes:</span>
-                <el-tooltip class="box-item" effect="dark" :content="getAttributeNameById(stat.attributeId)" placement="top"
-                    v-for="(stat, index) in stats" :key="index">
-                    <div class="stat">
-                        {{ truncate(getAttributeNameById(stat.attributeId), 23) }}: {{ stat.value > 0 ? `+${stat.value}` : stat.value }}
-                    </div>
-                </el-tooltip>
-                <div class="stat">Slot: {{ item.slot }}</div>
+                <div v-for="(stat, index) in stats" :key="index" class="stat darker-title">
+                    {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
+                        truncate(getAttributeNameById(stat.attributeId), 35) }}
+                </div>
+                <div class="divider"></div>
+                <div class="stat">Slot: {{ item.slot || 'Empty slot' }}</div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-$frameWidth: 188px;
+$frameWidth: 240px;
 $frameHeight: 220px;
 $item-description-padding: .7rem .5rem;
 
@@ -50,6 +46,13 @@ $item-description-padding: .7rem .5rem;
         gap: 15px;
         min-height: $frameHeight;
         width: $frameWidth;
+        padding: 1rem .5rem;
+    }
+
+    .divider {
+        width: 85%;
+        border-bottom: 2px solid var(--el-border-color);
+        margin-bottom: .25rem;
     }
 
     .item-img {
@@ -62,23 +65,26 @@ $item-description-padding: .7rem .5rem;
         }
     }
 
-    .item-title {
+    .darker-title {
         justify-content: center;
-        padding: 0.5rem 1rem;
         display: flex;
     }
 
     .item-description {
-        padding-right: 5px;
+        padding-top: .25rem;
+        padding-left: unset;
+        padding-right: unset;
+        padding-bottom: unset;
         display: flex;
         flex-direction: column;
+        gap: .75rem;
         font-size: 12px;
         width: 100%;
-        line-height: 15px;
+        align-items: center;
 
         .stat {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 800;
         }
 
         &__title {

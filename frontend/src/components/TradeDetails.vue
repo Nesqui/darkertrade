@@ -9,10 +9,9 @@
 
 <style scoped lang="scss">
 .trade-details {
-  height: 100%;
   width: 100%;
+  padding-top: 5rem;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
 </style>

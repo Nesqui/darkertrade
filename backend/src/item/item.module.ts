@@ -4,10 +4,18 @@ import { ItemController } from './item.controller';
 import { itemsProviders } from './item.providers';
 import { PgModule } from 'src/pg/pg.module';
 import { JwtService } from '@nestjs/jwt';
+import { existingItemProviders } from 'src/existing-item/existing-item.providers';
+import { statsProviders } from 'src/stat/stat.proviers';
 
 @Module({
   imports: [PgModule],
   controllers: [ItemController],
-  providers: [ItemService, ...itemsProviders, JwtService],
+  providers: [
+    ItemService,
+    ...itemsProviders,
+    ...existingItemProviders,
+    ...statsProviders,
+    JwtService,
+  ],
 })
 export class ItemModule {}
