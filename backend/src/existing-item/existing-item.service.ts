@@ -9,7 +9,7 @@ import { CreateExistingItemDto } from './dto/create-existing-item.dto';
 import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
-
+const ATTRIBUTE_BASE_WEIGHT = 2;
 @Injectable()
 export class ExistingItemService {
   constructor(
@@ -67,20 +67,27 @@ export class ExistingItemService {
   }
 
   async findOne(id: number) {
-    const item = await this.existingItemRepository.findByPk(id, {
+    const existingItem = await this.existingItemRepository.findByPk(id, {
       include: [this.statRepository, this.itemRepository, this.userRepository],
     });
 
-    if (!item) throw new NotFoundException('Item not found');
-    return item;
+    if (!existingItem) throw new NotFoundException('Item not found');
+    return existingItem;
   }
 
   async findSimilar(id: number) {
     const baseItem = await this.existingItemRepository.findByPk(id, {
-      include: [this.statRepository, this.itemRepository, this.userRepository],
+      include: [
+        {
+          model: this.statRepository,
+          attributes: ['attributeId'],
+        },
+        this.itemRepository,
+        this.userRepository,
+      ],
     });
 
-    function* chooseKCombos(arr, k, start = 0, combo = []) {
+    function* chooseKCombos(arr: number[], k: number, start = 0, combo = []) {
       if (combo.length === k) {
         yield combo;
         return;
@@ -91,73 +98,69 @@ export class ExistingItemService {
       }
     }
 
-
     // separate slots
     // gunдонскuй methoд
-    const itemIdLF = [1, 2, 3, 4, 5].includes(baseItem.item.id) ? [1, 2, 3, 4, 5] : [6, 7, 8, 9].includes(baseItem.item.id) ? [6, 7, 8, 9] : [baseItem.item.id]
-    const whereItemRep = { id: itemIdLF }
+    const itemIdLF = [1, 2, 3, 4, 5].includes(baseItem.item.id)
+      ? [1, 2, 3, 4, 5]
+      : [6, 7, 8, 9].includes(baseItem.item.id)
+        ? [6, 7, 8, 9]
+        : [baseItem.item.id];
 
+    const whereItemRep = { id: itemIdLF };
 
-    const baseItemStatsArr = baseItem.stats.map(a => a.attributeId)
+    const baseItemStatsIds = baseItem.stats.map((a) => a.attributeId);
     const pairedAttributes = await this.attributePairsRepository.findAll({
       where: {
-        attributeId: baseItemStatsArr
-      }
-    })
+        attributeId: baseItemStatsIds,
+      },
+    });
+
     //pv cver appendnut array
-    const similarStats = baseItem.stats.map(a => a.attributeId)
-    for (const pair of pairedAttributes) {
-      similarStats.push(pair.destAttributeId)
-    }
-    // soglasovano na match
-    const amountOfStats = baseItem.stats.length > 2 ? baseItem.stats.length - 1 : baseItem.stats.length;
-    const statsLF = [...chooseKCombos(similarStats, amountOfStats)]
+    const similarAttributeIds = [
+      ...baseItem.stats.map((a) => a.attributeId),
+      ...pairedAttributes.map((a) => a.attributeId),
+    ];
+
+    // What we consider relevant in stats
+    // If item has more stats than 2 count as (n-1) for leniency
+    const amountOfStats =
+      baseItem.stats.length > 2
+        ? baseItem.stats.length - 1
+        : baseItem.stats.length;
 
     const whereStatRep = {
-      [sequelize.Op.or]: statsLF.map(a => ({ attributeId: a }))
-    }
+      [sequelize.Op.or]: [
+        ...chooseKCombos(similarAttributeIds, amountOfStats),
+      ].map((a) => ({
+        attributeId: a,
+      })),
+    };
 
-    const itemList = await this.existingItemRepository.findAll({
-      where: {
-        // id: baseItem.item.id
-      },
+    const existingItems = await this.existingItemRepository.findAll({
       include: [
         {
           model: this.statRepository,
-          where: whereStatRep
-        }
-        ,
+          where: whereStatRep,
+        },
         {
           model: this.itemRepository,
-          where: whereItemRep
+          where: whereItemRep,
         },
-        this.userRepository],
+        this.userRepository,
+      ],
     });
 
-    //logic   
-    const answer = []
-    const shadowArr = []
-    let valueOfStats = 0
-    for (const item of itemList) {
+    //logic
+    existingItems.forEach((existingItem) => {
+      existingItem['weight'] = existingItem.stats.reduce((pv, cv) => {
+        if (baseItemStatsIds.includes(cv.attributeId)) pv += Number(cv.value);
+        pv += Number(cv.value) * ATTRIBUTE_BASE_WEIGHT;
+        return pv;
+      }, 0);
+    });
 
-      valueOfStats = 0
-      for (const stat of item.stats) {
-        if (baseItemStatsArr.includes(stat.attributeId)) valueOfStats += Number(stat.value)
-        valueOfStats += Number(stat.value) * 2
-      }
-      shadowArr.push(valueOfStats)
-    }
-
-    let copy = 0
-    for (let i = 0; i < shadowArr.length; i++) {
-      copy = shadowArr.indexOf(Math.max(...shadowArr))
-      shadowArr[i] = -30
-      answer.push(itemList[copy])
-    }
-
-
-    return answer
-
+    existingItems.sort((a, b) => b['weight'] - a['weight']);
+    return existingItems;
   }
 
   update(id: number, updateExistingItemDto: UpdateExistingItemDto) {
