@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import sequelize from 'sequelize';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
+import { Attribute } from 'src/attribute/attribute.entity';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
@@ -22,6 +23,8 @@ export class ExistingItemService {
     private itemRepository: typeof Item,
     @Inject('ATTRIBUTES_PAIRS_REPOSITORY')
     private attributePairsRepository: typeof AttributePair,
+    @Inject('ATTRIBUTES_REPOSITORY')
+    private attributeRepository: typeof Attribute,
   ) { }
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
@@ -76,38 +79,7 @@ export class ExistingItemService {
     const baseItem = await this.existingItemRepository.findByPk(id, {
       include: [this.statRepository, this.itemRepository, this.userRepository],
     });
-    /*
-        function k_combinations(set, k) {
-    
-          let i, j, combs, head, tailcombs;
-          if (k > set.length || k <= 0) {
-            return [];
-          }
-    
-          // K-sized set has only one K-sized subset.
-          if (k == set.length) {
-            return [set];
-          }
-    
-          // There is N 1-sized subsets in a N-sized set.
-          if (k == 1) {
-            combs = [];
-            for (i = 0; i < set.length; i++) {
-              combs.push([set[i]]);
-            }
-            return combs;
-          }
-          combs = [];
-          for (i = 0; i < set.length - k + 1; i++) {
-            head = set.slice(i, i + 1);
-            tailcombs = k_combinations(set.slice(i + 1), k - 1);
-            for (j = 0; j < tailcombs.length; j++) {
-              combs.push(head.concat(tailcombs[j]));
-            }
-          }
-          return combs
-        }
-    */
+
     function* chooseKCombos(arr, k, start = 0, combo = []) {
       if (combo.length === k) {
         yield combo;
@@ -125,24 +97,21 @@ export class ExistingItemService {
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseItem.item.id) ? [1, 2, 3, 4, 5] : [6, 7, 8, 9].includes(baseItem.item.id) ? [6, 7, 8, 9] : [baseItem.item.id]
     const whereItemRep = { id: itemIdLF }
 
-    //count stats MEDIAN    
-    // 1 1
-    // 2 2
-    // 3 2
-    // 4 3
+
     const baseItemStatsArr = baseItem.stats.map(a => a.attributeId)
-    const statPairs = await this.attributePairsRepository.findAll({
-      include: [this.statRepository, this.itemRepository, this.userRepository],
+    const pairedAttributes = await this.attributePairsRepository.findAll({
       where: {
-        attributeId: [baseItemStatsArr]
+        attributeId: baseItemStatsArr
       }
-    });
-    console.log(statPairs)
-
+    })
+    //pv cver appendnut array
+    const similarStats = baseItem.stats.map(a => a.attributeId)
+    for (const pair of pairedAttributes) {
+      similarStats.push(pair.destAttributeId)
+    }
+    // soglasovano na match
     const amountOfStats = baseItem.stats.length > 2 ? baseItem.stats.length - 1 : baseItem.stats.length;
-    const statsLF = chooseKCombos(baseItem.stats.map(a => a.attributeId), amountOfStats)
-
-
+    const statsLF = [...chooseKCombos(similarStats, amountOfStats)]
 
     const whereStatRep = {
       [sequelize.Op.or]: statsLF.map(a => ({ attributeId: a }))
@@ -164,11 +133,30 @@ export class ExistingItemService {
         },
         this.userRepository],
     });
-    // sequelize.op
+
+    //logic   
+    const answer = []
+    const shadowArr = []
+    let valueOfStats = 0
+    for (const item of itemList) {
+
+      valueOfStats = 0
+      for (const stat of item.stats) {
+        if (baseItemStatsArr.includes(stat.attributeId)) valueOfStats += Number(stat.value)
+        valueOfStats += Number(stat.value) * 2
+      }
+      shadowArr.push(valueOfStats)
+    }
+
+    let copy = 0
+    for (let i = 0; i < shadowArr.length; i++) {
+      copy = shadowArr.indexOf(Math.max(...shadowArr))
+      shadowArr[i] = -30
+      answer.push(itemList[copy])
+    }
 
 
-    //logic
-    return itemList
+    return answer
 
   }
 

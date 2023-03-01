@@ -7,6 +7,7 @@ import { usersProviders } from 'src/user/user.providers';
 import { statsProviders } from 'src/stat/stat.proviers';
 import { itemsProviders } from 'src/item/item.providers';
 import { attributesPairsProviders } from 'src/attribute/attribute-pair.providers';
+import { attributesProviders } from 'src/attribute/attribute.provider';
 
 @Module({
   controllers: [ExistingItemController],
@@ -17,6 +18,7 @@ import { attributesPairsProviders } from 'src/attribute/attribute-pair.providers
     ...statsProviders,
     ...itemsProviders,
     ...attributesPairsProviders,
+    ...attributesProviders,
     JwtService,
   ],
 })
