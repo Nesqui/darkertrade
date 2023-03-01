@@ -7,8 +7,10 @@ import {
   Min,
   Max,
   BelongsTo,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Stat } from 'src/stat/stat.entity';
+import { AttributePair } from './attribute-pair.entity';
 
 @Table
 export class Attribute extends Model {
@@ -24,4 +26,7 @@ export class Attribute extends Model {
   @Max(500)
   @Column
   max: number;
+
+  @BelongsToMany(() => Attribute, () => AttributePair, "destAttributeId")
+  attributePairs: AttributePair[]
 }

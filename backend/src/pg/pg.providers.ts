@@ -1,5 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
+import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
 import { Auction } from 'src/auction/auction.entity';
 import { Bid } from 'src/bid/bid.entity';
@@ -51,6 +52,7 @@ export const pgProviders = [
       sequelize.addModels([
         User,
         Item,
+        AttributePair,
         Attribute,
         Stat,
         ExistingItem,

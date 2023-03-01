@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { usersProviders } from 'src/user/user.providers';
 import { statsProviders } from 'src/stat/stat.proviers';
 import { itemsProviders } from 'src/item/item.providers';
+import { attributesPairsProviders } from 'src/attribute/attribute-pair.providers';
 
 @Module({
   controllers: [ExistingItemController],
@@ -15,7 +16,8 @@ import { itemsProviders } from 'src/item/item.providers';
     ...usersProviders,
     ...statsProviders,
     ...itemsProviders,
+    ...attributesPairsProviders,
     JwtService,
   ],
 })
-export class ExistingItemModule {}
+export class ExistingItemModule { }
