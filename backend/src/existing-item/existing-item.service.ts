@@ -146,7 +146,6 @@ export class ExistingItemService {
           model: this.itemRepository,
           where: whereItemRep,
         },
-        this.userRepository,
       ],
     });
 
