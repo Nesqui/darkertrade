@@ -1,4 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { ExistingItem } from 'src/existing-item/existing-item.entity';
+import { Stat } from 'src/stat/stat.entity';
+import { User } from 'src/user/user.entity';
 import { CreateItemDto } from './dto/create-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
@@ -8,6 +11,11 @@ import { Item } from './item.entity';
 export class ItemService {
   constructor(
     @Inject('ITEMS_REPOSITORY') private itemsRepository: typeof Item,
+    @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
+    @Inject('EXISTING_ITEM_REPOSITORY')
+    private existingItemRepository: typeof ExistingItem,
+    @Inject('STATS_REPOSITORY')
+    private statRepository: typeof Stat,
   ) {}
 
   create(createItemDto: CreateItemDto) {
@@ -15,10 +23,74 @@ export class ItemService {
   }
 
   async findAll(itemQuery: QueryItemDto) {
+    const where = {};
+    if (itemQuery.slot) where['slot'] = itemQuery.slot;
     return await this.itemsRepository.findAll({
-      where: {
-        slot: itemQuery.slot,
-      },
+      where,
+    });
+  }
+
+  async findUserItem(userId: number, existingItemId: number) {
+    return await this.itemsRepository.findOne({
+      where: {},
+      include: [
+        {
+          model: this.existingItemRepository,
+          where: {
+            id: existingItemId,
+          },
+          required: true,
+          include: [
+            {
+              model: this.usersRepository,
+              where: {
+                id: userId,
+              },
+              required: true,
+            },
+            this.statRepository,
+            this.itemsRepository,
+          ],
+        },
+      ],
+    });
+  }
+
+  async findUserItems(userId: number) {
+    return await this.itemsRepository.findAll({
+      where: {},
+      include: [
+        {
+          model: this.existingItemRepository,
+          required: true,
+          include: [
+            {
+              model: this.usersRepository,
+              where: {
+                id: userId,
+              },
+              required: true,
+            },
+            this.statRepository,
+            this.itemsRepository,
+          ],
+        },
+      ],
+    });
+  }
+
+  async getMarket(itemQuery: QueryItemDto) {
+    const where = {};
+    if (itemQuery.slot) where['slot'] = itemQuery.slot;
+    return await this.itemsRepository.findAll({
+      where,
+      include: [
+        {
+          model: this.existingItemRepository,
+          required: true,
+          include: [this.statRepository],
+        },
+      ],
     });
   }
 

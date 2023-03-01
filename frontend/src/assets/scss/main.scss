@@ -69,18 +69,18 @@ button:hover {
 }
 
 .trade {
-    display: grid;
     height: 100%;
-    grid-template-columns: 1fr 4fr 1fr;
+    display: flex;
+    align-items: flex-start;
 }
 
 .wrapper {
     border-radius: 10px;
     position: relative;
     background-color: var(--el-color-danger);
-    -webkit-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
-    -moz-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
-    box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    // -webkit-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2);
+    // -moz-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2);
+    // box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2);
     padding: 1.25rem 1.55rem;
     color: var(--el-color-primary);
     overflow-y: auto;
@@ -92,14 +92,24 @@ button:hover {
 .item-frame {
     border: 5px ridge var(--el-border-color);
     background-color: rgb(0, 0, 0, 0.85);
-    cursor: pointer;
     font-size: 28px;
     border-radius: 5px;
     color: var(--color-text);
 }
 
 .item-frame:hover {
+    cursor: pointer;
     background-color: var(--el-color-primary-dark-2);
+}
+
+.item-frame, .no-hover:hover {
+    cursor: unset;
+    background-color: rgb(0, 0, 0, 0.85);
+}
+
+.sub-title {
+    font-size: 12px;
+    margin-bottom: .25rem;
 }
 
 .item-description {
@@ -111,7 +121,7 @@ button:hover {
     // border-radius: 5px;
 }
 
-.item-title {
+.darker-title {
     font-family: "Solmoe";
     font-size: 16px;
     text-align: center;
@@ -127,6 +137,28 @@ button:hover {
     border: 1px solid var(--el-color-primary);
     background: var(--el-color-primary-light-9);
     right: 0;
+}
+
+.img-avatar {
+    height: 90px;
+    width: 90px;
+    border-radius: 50%;
+    -webkit-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    -moz-box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    box-shadow: 0px 5px 10px 2px rgba(63, 0, 113, 0.2) inset;
+    background: linear-gradient(to right, #7b8f49, #fca478);
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
 }
 
 ::-webkit-scrollbar {

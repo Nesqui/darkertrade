@@ -11,10 +11,10 @@ const isAuth = computed(() => userStore.isAuth)
 <template>
   <div class="top-menu">
     <div v-if="isAuth" class="top-menu__item">
-      <el-button link @click="$router.push('/wtb')">Want to buy</el-button>
+      <el-button link @click="$router.push('/market')">Public Items (Browse)</el-button>
     </div>
     <div v-if="isAuth" class="top-menu__item">
-      <el-button link @click="$router.push('/wts')">Want to sell</el-button>
+      <el-button link @click="$router.push('/creator')">Item creator</el-button>
     </div>
     <div v-if="isAuth" class="top-menu__item">
       <el-button link @click="$router.push(`/user/${userStore.currentUser.nickname}/items`)">My items</el-button>

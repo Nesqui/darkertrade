@@ -35,6 +35,30 @@ export class ItemController {
     return this.itemService.findAll(itemQuery);
   }
 
+  @Get('market')
+  @ApiQuery({
+    type: QueryItemDto,
+  })
+  @UseGuards(JwtAuthGuard)
+  getMarket(@Query() itemQuery: QueryItemDto) {
+    return this.itemService.getMarket(itemQuery);
+  }
+
+  @Get('/user/:userId/:existingItemId')
+  @UseGuards(JwtAuthGuard)
+  findUserItem(
+    @Param('userId') userId: number,
+    @Param('existingItemId') existingItemId: number,
+  ) {
+    return this.itemService.findUserItem(userId, existingItemId);
+  }
+
+  @Get('/user/:userId/')
+  @UseGuards(JwtAuthGuard)
+  findUserItems(@Param('userId') userId: number) {
+    return this.itemService.findUserItems(userId);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOne(@Param('id') id: string) {

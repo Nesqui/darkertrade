@@ -27,4 +27,5 @@
   --el-button-disabled-bg-color: #000000;
   --el-fill-color-light: #282A3A;
   --el-border-color-lighter: #3F0071;
+  --el-transition-duration: 0.15s;
 }

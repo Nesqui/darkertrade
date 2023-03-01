@@ -2,7 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
-import { Auction } from 'src/auction/auction.entity';
 import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
@@ -56,7 +55,6 @@ export const pgProviders = [
         Attribute,
         Stat,
         ExistingItem,
-        Auction,
         Bid,
       ]);
       await sequelize.sync({

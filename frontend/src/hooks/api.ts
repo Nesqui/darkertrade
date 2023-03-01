@@ -37,7 +37,7 @@ export function initApi() {
         },
         async (error) => {
             const { response } = error
-            console.log(response);
+            console.log(error);
             
               if (response.status === 401 || response.data.message === 'TokenExpiredError') {
                 const userStore = useUserStore()
