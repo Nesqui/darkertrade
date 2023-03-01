@@ -3,15 +3,18 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { QueryUserDto } from 'src/user/dto/query-user.dto';
 import { User } from 'src/user/user.entity';
+import { DiscordService } from 'src/discord/discord.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
+    private readonly discordService: DiscordService,
   ) {}
 
   async validateUser(user: QueryUserDto): Promise<any> {
+    this.discordService.zalupa('giga');
     const res = await this.usersService.findOne(user);
     if (res?.password === user.password) return res;
 
@@ -19,7 +22,7 @@ export class AuthService {
   }
 
   async login(user: User) {
-    console.log(user);
+    // console.log(user);
 
     return {
       user,

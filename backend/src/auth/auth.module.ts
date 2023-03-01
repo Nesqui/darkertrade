@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { DiscordService } from 'src/discord/discord.service';
 import { usersProviders } from 'src/user/user.providers';
 import { UserService } from 'src/user/user.service';
 import { AuthController } from './auth.controller';
@@ -16,7 +17,7 @@ import { jwtConstants } from './constants';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, ...usersProviders],
+  providers: [AuthService, UserService, ...usersProviders, DiscordService],
   exports: [AuthService],
 })
 export class AuthModule {}
