@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import sequelize from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
 import { Item } from 'src/item/item.entity';
@@ -25,7 +26,9 @@ export class ExistingItemService {
     private attributePairsRepository: typeof AttributePair,
     @Inject('ATTRIBUTES_REPOSITORY')
     private attributeRepository: typeof Attribute,
-  ) { }
+    @Inject('SEQUELIZE')
+    private db,
+  ) {}
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
     const item = await this.existingItemRepository.create(
@@ -76,7 +79,7 @@ export class ExistingItemService {
   }
 
   async findSimilar(id: number) {
-    const baseItem = await this.existingItemRepository.findByPk(id, {
+    const baseExistingItem = await this.existingItemRepository.findByPk(id, {
       include: [
         {
           model: this.statRepository,
@@ -87,78 +90,65 @@ export class ExistingItemService {
       ],
     });
 
-    function* chooseKCombos(arr: number[], k: number, start = 0, combo = []) {
-      if (combo.length === k) {
-        yield combo;
-        return;
-      }
+    // function* chooseKCombos(arr: number[], k: number, start = 0, combo = []) {
+    //   if (combo.length === k) {
+    //     yield combo;
+    //     return;
+    //   }
 
-      for (let i = start; i < arr.length; i++) {
-        yield* chooseKCombos(arr, k, i + 1, [...combo, arr[i]]);
-      }
-    }
+    //   for (let i = start; i < arr.length; i++) {
+    //     yield* chooseKCombos(arr, k, i + 1, [...combo, arr[i]]);
+    //   }
+    // }
 
-    // separate slots
-    // gunдонскuй methoд
-    const itemIdLF = [1, 2, 3, 4, 5].includes(baseItem.item.id)
+    const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
-      : [6, 7, 8, 9].includes(baseItem.item.id)
-        ? [6, 7, 8, 9]
-        : [baseItem.item.id];
+      : [6, 7, 8, 9].includes(baseExistingItem.item.id)
+      ? [6, 7, 8, 9]
+      : [baseExistingItem.item.id];
 
-    const whereItemRep = { id: itemIdLF };
-
-    const baseItemStatsIds = baseItem.stats.map((a) => a.attributeId);
+    const baseExistingItemAttributeIds = baseExistingItem.stats.map(
+      (a) => a.attributeId,
+    );
     const pairedAttributes = await this.attributePairsRepository.findAll({
       where: {
-        attributeId: baseItemStatsIds,
+        attributeId: baseExistingItemAttributeIds,
       },
     });
 
-    //pv cver appendnut array
     const similarAttributeIds = [
-      ...baseItem.stats.map((a) => a.attributeId),
-      ...pairedAttributes.map((a) => a.attributeId),
+      ...baseExistingItem.stats.map((a) => a.attributeId),
+      ...pairedAttributes.map((a) => a.destAttributeId),
     ];
 
-    // What we consider relevant in stats
-    // If item has more stats than 2 count as (n-1) for leniency
-    const amountOfStats =
-      baseItem.stats.length > 2
-        ? baseItem.stats.length - 1
-        : baseItem.stats.length;
+    const pageSize = 10;
+    const offset = 0;
 
-    const whereStatRep = {
-      [sequelize.Op.or]: [
-        ...chooseKCombos(similarAttributeIds, amountOfStats),
-      ].map((a) => ({
-        attributeId: a,
-      })),
-    };
+    const query = `
+      SELECT "ExistingItem".*, SUM(CAST("Stat"."value" AS INTEGER)) + SUM(CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}) AS weight
+      FROM "ExistingItems" AS "ExistingItem"
+      LEFT JOIN "Stats" AS "Stat" ON "Stat"."existingItemId" = "ExistingItem"."id"
+      WHERE "ExistingItem"."id" != ${id}
+      AND "ExistingItem"."itemId" IN (${itemIdLF.join(', ')})
+      AND "Stat"."attributeId" IN (${similarAttributeIds.join(', ')})
+      GROUP BY "ExistingItem"."id"
+      ORDER BY weight DESC
+      LIMIT ${pageSize}
+      OFFSET ${offset};
+    `;
 
-    const existingItems = await this.existingItemRepository.findAll({
+    const existingItems = await this.db.query(query, {
+      model: this.existingItemRepository,
+      mapToModel: true,
       include: [
         {
           model: this.statRepository,
-          where: whereStatRep,
+          include: [this.attributeRepository],
         },
-        {
-          model: this.itemRepository,
-          where: whereItemRep,
-        },
+        this.itemRepository,
       ],
     });
 
-    //logic
-    existingItems.forEach((existingItem) => {
-      existingItem['weight'] = existingItem.stats.reduce((pv, cv) => {
-        if (baseItemStatsIds.includes(cv.attributeId)) pv += Number(cv.value);
-        pv += Number(cv.value) * ATTRIBUTE_BASE_WEIGHT;
-        return pv;
-      }, 0);
-    });
-
-    existingItems.sort((a, b) => b['weight'] - a['weight']);
     return existingItems;
   }
 

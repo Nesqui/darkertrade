@@ -57,9 +57,7 @@ export const pgProviders = [
         ExistingItem,
         Bid,
       ]);
-      await sequelize.sync({
-        alter: true,
-      });
+      await sequelize.sync();
 
       await initData(sequelize, ConfigService);
       return sequelize;

@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } fr
 import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
 import { useAttributesStore } from '../store';
+import { useRouter } from 'vue-router';
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const chosenItem = ref<Item>()
@@ -11,6 +12,8 @@ const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
   filterItem: { type: Object as PropType<Item>, required: true }
 })
+
+const router = useRouter()
 
 const searchString = ref<string>("")
 
@@ -53,41 +56,48 @@ const choseItem = async (currentItem: Item) => {
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="actions">
-      <el-input v-model="searchString"
-        :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
-      <el-button size="large" @click="clear">Clear</el-button>
-    </div>
-    <div v-if="!chosenItem && !filteredItems?.length">
-      <p>Currently no items here</p>
-    </div>
-    <div class="item-list__wrapper">
-      <div v-if="!chosenItem && filteredItems?.length" class="item-list">
-        <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-          <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
-        </div>
-      </div>
-      <div v-else class="item-list">
-        <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-          <ItemPreview :item="chosenItem" :offerType="existingItem.offerType" :stats="existingItem.stats" />
-        </div>
+  <div>
+    <div class="wrapper wrapper-actions">
+      <div class="actions">
+        <el-input v-model="searchString"
+          :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
+        <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
-
+    <div class="wrapper">
+      <div v-if="!chosenItem && !filteredItems?.length">
+        <p>Currently no items here</p>
+      </div>
+      <div class="item-list__wrapper">
+        <div v-if="!chosenItem && filteredItems?.length" class="item-list">
+          <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
+            <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+          </div>
+        </div>
+        <div v-else class="item-list">
+          <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
+            <h1>{{ existingItem.id }}</h1>
+            <ItemPreview :item="chosenItem" @click="router.push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" :offerType="existingItem.offerType" :stats="existingItem.stats" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped lang="scss">
 $frameWidth: 100px;
 $frameHeight: 100px;
-$item-description-padding: .7rem;
 $step: 1rem;
 
 .wrapper {
   padding: $step;
-  overflow: hidden;
-  width: 830px;
+  width: 860px;
+  max-height: 600px;
+}
+
+.wrapper-actions {
+  margin-bottom: 2rem;
 }
 
 .actions {

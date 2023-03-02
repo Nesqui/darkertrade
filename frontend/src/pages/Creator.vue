@@ -138,9 +138,15 @@ const clear = () => {
 }
 
 onBeforeMount(async () => {
-    items.value = await itemApi.findAll({
-        slot: ''
-    })
+    try {
+        loading.value = true
+        items.value = await itemApi.findAll({
+            slot: ''
+        })
+    } catch (error) {
+    } finally {
+        loading.value = false
+    }
 })
 </script>
 
@@ -191,7 +197,7 @@ onBeforeMount(async () => {
                     </div>
                 </div>
             </div>
-            <ItemPreview :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="stats" />
+            <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="stats" />
         </div>
 
 

@@ -8,6 +8,7 @@ import { statsProviders } from 'src/stat/stat.proviers';
 import { itemsProviders } from 'src/item/item.providers';
 import { attributesPairsProviders } from 'src/attribute/attribute-pair.providers';
 import { attributesProviders } from 'src/attribute/attribute.provider';
+import { pgProviders } from 'src/pg/pg.providers';
 
 @Module({
   controllers: [ExistingItemController],
@@ -19,7 +20,8 @@ import { attributesProviders } from 'src/attribute/attribute.provider';
     ...itemsProviders,
     ...attributesPairsProviders,
     ...attributesProviders,
+    ...pgProviders,
     JwtService,
   ],
 })
-export class ExistingItemModule { }
+export class ExistingItemModule {}

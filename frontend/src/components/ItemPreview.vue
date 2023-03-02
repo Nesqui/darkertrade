@@ -41,14 +41,14 @@ defineProps({
                 <img v-if="item?.id" :src="itemApi.getImg(item)" alt="">
                 <div v-else class="img-avatar"></div>
             </div>
-            <div class="divider" v-if="stats.length"></div>
+            <div class="divider" v-if="stats?.length"></div>
             <div class="item-description">
                 <div v-for="(stat, index) in stats" :key="index" class="stat darker-title">
                     {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
                         truncate(getAttributeNameById(stat.attributeId), 35) }}
                 </div>
                 <div class="divider"></div>
-                <div class="stat">Slot: {{ item.slot || 'Empty slot' }}</div>
+                <div class="stat">Slot: {{ item?.slot || 'Empty slot' }}</div>
                 <div class="stat" v-if="wantedPrice">Wanted price: {{ wantedPrice }} gold</div>
             </div>
         </div>

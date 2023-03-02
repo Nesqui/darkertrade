@@ -32,22 +32,16 @@ export class ItemService {
 
   async findUserItem(userId: number, existingItemId: number) {
     return await this.itemsRepository.findOne({
-      where: {},
       include: [
         {
           model: this.existingItemRepository,
           where: {
             id: existingItemId,
+            userId,
           },
           required: true,
           include: [
-            {
-              model: this.usersRepository,
-              where: {
-                id: userId,
-              },
-              required: true,
-            },
+            this.usersRepository,
             this.statRepository,
             this.itemsRepository,
           ],
@@ -58,19 +52,15 @@ export class ItemService {
 
   async findUserItems(userId: number) {
     return await this.itemsRepository.findAll({
-      where: {},
       include: [
         {
           model: this.existingItemRepository,
           required: true,
+          where: {
+            userId,
+          },
           include: [
-            {
-              model: this.usersRepository,
-              where: {
-                id: userId,
-              },
-              required: true,
-            },
+            this.usersRepository,
             this.statRepository,
             this.itemsRepository,
           ],
@@ -88,7 +78,15 @@ export class ItemService {
         {
           model: this.existingItemRepository,
           required: true,
-          include: [this.statRepository],
+          include: [
+            this.statRepository,
+            {
+              model: this.usersRepository,
+              attributes: {
+                exclude: ['password', 'discord'],
+              },
+            },
+          ],
         },
       ],
     });
