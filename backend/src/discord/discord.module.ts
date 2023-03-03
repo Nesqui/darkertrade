@@ -1,6 +1,7 @@
 import { DiscordModule } from '@discord-nestjs/core';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { GatewayIntentBits } from 'discord.js';
 import { DiscordController } from './discord.controller';
 
@@ -27,7 +28,7 @@ import { DiscordGateway } from './discord.gateway';
     }),
   ],
   controllers: [DiscordController],
-  providers: [DiscordGateway],
+  providers: [DiscordGateway, JwtService],
   exports: [DiscordGateway],
 })
 export class DiscordBotModule {}
