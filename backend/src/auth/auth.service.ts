@@ -3,14 +3,14 @@ import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { QueryUserDto } from 'src/user/dto/query-user.dto';
 import { User } from 'src/user/user.entity';
-import { DiscordService } from 'src/discord/discord.service';
+import { DiscordGateway } from 'src/discord/discord.gateway';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
     private readonly jwtService: JwtService,
-    private readonly discordService: DiscordService,
+    private readonly discordGateway: DiscordGateway,
   ) {}
 
   async validateUser(user: QueryUserDto): Promise<any> {
