@@ -5,12 +5,15 @@ export interface Bid {
   existingItemId: number;
   suggestedItmId?: number;
   userId: number;
+  createdAt: string,
+  updateAt: string,
+  user: User
 }
 
 export interface CreateBidDto {
   price: number;
   existingItemId: number;
-  suggestItemId?: number;
+  suggestedExistingItemId?: number;
 }
 
 export const initBidApi = () => {

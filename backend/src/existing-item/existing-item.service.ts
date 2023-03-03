@@ -65,7 +65,12 @@ export class ExistingItemService {
           model: this.itemRepository,
           where: { ...itemWhere, id: itemId },
         },
-        this.userRepository,
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord'],
+          },
+        },
       ],
     });
 

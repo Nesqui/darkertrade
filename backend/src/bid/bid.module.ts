@@ -4,6 +4,7 @@ import { BidController } from './bid.controller';
 import { bidProviders } from './bid.providers';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
+import { usersProviders } from 'src/user/user.providers';
 
 @Module({
   controllers: [BidController],
@@ -11,6 +12,7 @@ import { JwtService } from '@nestjs/jwt/dist/jwt.service';
     BidService,
     ...bidProviders,
     ...existingItemProviders,
+    ...usersProviders,
     JwtService,
   ],
 })

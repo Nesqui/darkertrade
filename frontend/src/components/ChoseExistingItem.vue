@@ -109,6 +109,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
     align-items: center;
     font-weight: 900;
     color: rgba(0, 0, 0, 0.382);
+    padding-left: 1rem;
   }
 
   .arrow {

@@ -8,10 +8,6 @@ const props = defineProps({
     required: true,
   },
 })
-
-const form = ref({
-  amount: 150,
-});
 </script>
 
 <template>
@@ -23,6 +19,11 @@ const form = ref({
         </div>
         <div class="item-bids__list">
           <p v-if="item?.existingItems[0].bids && !item?.existingItems[0].bids.length">Currently no active bids</p>
+          <div v-for="(bid, index) in item.existingItems[0].bids" :key="index" class="item-bids__list__item">
+            <span>{{ bid.user.nickname }}</span>
+            <span>{{ new Date(bid.createdAt).toLocaleDateString() }}</span>
+            <span>{{ bid.price }} Gold</span>
+          </div>
         </div>
       </div>
     </div>
@@ -51,8 +52,16 @@ h2 {
   .item-bids {
     display: flex;
     flex-direction: column;
-    flex: 1;
+    width: 100%;
+
+    &__list {
+      padding: 1rem 0;
+    }
+
+    &__list__item {
+      display: flex;
+      justify-content: space-between;
+    }
   }
 }
-
 </style>

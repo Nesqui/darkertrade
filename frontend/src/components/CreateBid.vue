@@ -3,13 +3,12 @@
 import ItemPreview from './ItemPreview.vue';
 import { PropType, ref } from 'vue';
 import { ExistingItem, Item } from '../hooks';
-import { initBidApi } from '../hooks/bid';
+import { CreateBidDto, initBidApi } from '../hooks/bid';
 import { ElNotification } from 'element-plus';
 import ChoseExistingItem from './ChoseExistingItem.vue'
 
-const step = ref(1)
 const bidApi = initBidApi()
-const suggestItem = ref<ExistingItem>()
+const suggestedItem = ref<ExistingItem>()
 
 const props = defineProps({
   item: {
@@ -22,16 +21,18 @@ const form = ref({
   amount: 150,
 });
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US');
-};
-
 const submitBid = async () => {
   if (props.item.existingItems) {
-    await bidApi.create({
+    const req:CreateBidDto = {
       existingItemId: props.item.existingItems[0].id!,
-      price: form.value.amount
-    })
+      price: form.value.amount,
+    }
+
+    if (suggestedItem.value?.id) {
+      req.suggestedExistingItemId = suggestedItem.value.id
+    }
+
+    await bidApi.create(req)
 
     return
   }
@@ -42,7 +43,7 @@ const submitBid = async () => {
 };
 
 const onItemChosen = (chosenExistingItem: ExistingItem) => {
-  suggestItem.value = chosenExistingItem
+  suggestedItem.value = chosenExistingItem
 }
 
 </script>
@@ -51,19 +52,19 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
   <div v-if="item?.existingItems?.length" class="bidding">
     <div class="item-details">
       <div class="place-bid wtb" v-if="item.existingItems[0].offerType === 'WTB'">
-        <p v-if="!suggestItem">Make sure you have this item in game stash and chose or create him</p>
+        <p v-if="!suggestedItem">Make sure you have this item in game stash and chose or create him</p>
         <ChoseExistingItem v-if="item.existingItems[0].offerType === 'WTB'" @onItemChosen="onItemChosen" :item="item" />
-        <p>Input a wanted cost for this item what you want to receive. Its fine if item Wanted price is different</p>
+        <p>Please input a wanted cost for this bid what you want to receive. Its fine if item Wanted price or stats a bit different</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">
             <el-input-number v-model="form.amount" :min="0" :step="25" />
           </el-form-item>
+          <p>After creating bid you will able to chat with user.</p>
           <el-form-item>
-            <p>After creating bid You will able to chat with user. Feel free to ask about comfort time for trade</p>
             <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
               :title="`Are you sure to bid this item?`">
               <template #reference>
-                <el-button size="large">Create Bid</el-button>
+                <el-button :disabled="!suggestedItem" size="large">Create Bid</el-button>
               </template>
             </el-popconfirm>
           </el-form-item>

@@ -15,6 +15,8 @@ export class BidService {
   constructor(
     @Inject('BIDS_REPOSITORY')
     private bidRepository: typeof Bid,
+    @Inject('USERS_REPOSITORY')
+    private userRepository: typeof User,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
   ) {}
@@ -44,20 +46,31 @@ export class BidService {
       throw new ForbiddenException('You cant create bid for Your own item');
 
     if (existingItem.offerType === 'WTB') {
-      if (!createBidDto.suggestItemId)
+      if (!createBidDto.suggestedExistingItemId)
         throw new NotAcceptableException('Suggested item not presented');
 
       const suggestItem = await this.existingItemRepository.findByPk(
-        createBidDto.suggestItemId,
+        createBidDto.suggestedExistingItemId,
       );
 
       if (suggestItem.itemId !== existingItem.itemId)
         throw new NotAcceptableException('Suggested item has different type');
     }
 
-    const bid = await this.bidRepository.create({
+    const createdBid = await this.bidRepository.create({
       ...createBidDto,
       userId: user.id,
+    });
+
+    const bid = await this.bidRepository.findByPk(createdBid.id, {
+      include: [
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord'],
+          },
+        },
+      ],
     });
 
     return bid;

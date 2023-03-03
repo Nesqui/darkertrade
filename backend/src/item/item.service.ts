@@ -32,15 +32,18 @@ export class ItemService {
     });
   }
 
-  async findUserItem(userId: number, existingItemId: number) {
+  async findUserItem(userId: number, existingItemId: number, user: User) {
+    const existingItemWhere = {
+      id: existingItemId,
+      userId,
+    };
+    if (user.id !== userId) existingItemWhere['published'] = true;
+
     const res = await this.itemsRepository.findOne({
       include: [
         {
           model: this.existingItemRepository,
-          where: {
-            id: existingItemId,
-            userId,
-          },
+          where: existingItemWhere,
           required: true,
           include: [
             {
@@ -50,7 +53,17 @@ export class ItemService {
               },
             },
             this.statRepository,
-            this.bidsRepository,
+            {
+              model: this.bidsRepository,
+              include: [
+                {
+                  model: this.usersRepository,
+                  attributes: {
+                    exclude: ['password', 'discord'],
+                  },
+                },
+              ],
+            },
             this.itemsRepository,
           ],
         },
@@ -62,15 +75,18 @@ export class ItemService {
     return res;
   }
 
-  async findUserItems(userId: number) {
+  async findUserItems(userId: number, user: User) {
+    const existingItemWhere = {
+      userId,
+    };
+    if (user.id !== userId) existingItemWhere['published'] = true;
+
     return await this.itemsRepository.findAll({
       include: [
         {
           model: this.existingItemRepository,
           required: true,
-          where: {
-            userId,
-          },
+          where: existingItemWhere,
           include: [
             {
               model: this.usersRepository,
@@ -78,7 +94,17 @@ export class ItemService {
                 exclude: ['password', 'discord'],
               },
             },
-            this.statRepository,
+            {
+              model: this.bidsRepository,
+              include: [
+                {
+                  model: this.usersRepository,
+                  attributes: {
+                    exclude: ['password', 'discord'],
+                  },
+                },
+              ],
+            },
             this.itemsRepository,
             this.bidsRepository,
           ],
@@ -87,15 +113,21 @@ export class ItemService {
     });
   }
 
-  async getMarket(itemQuery: QueryItemDto) {
-    const where = {};
-    if (itemQuery.slot) where['slot'] = itemQuery.slot;
+  async getMarket(query: QueryItemDto) {
+    const itemWhere = {};
+    const existingItemWhere = {
+      published: true,
+    };
+    if (query.slot) itemWhere['slot'] = query.slot;
+    if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+
     return await this.itemsRepository.findAll({
-      where,
+      where: itemWhere,
       include: [
         {
           model: this.existingItemRepository,
           required: true,
+          where: existingItemWhere,
           include: [
             this.statRepository,
             {

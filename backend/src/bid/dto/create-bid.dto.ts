@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional } from 'class-validator';
 import { CreateStatDto } from 'src/stat/dto/create-stat.dto';
 import { Type } from 'class-transformer';
+import { ExistingItem } from 'src/existing-item/existing-item.entity';
+import { Column, ForeignKey, PrimaryKey } from 'sequelize-typescript';
 
 export class CreateBidDto {
   @ApiProperty({
@@ -21,5 +23,5 @@ export class CreateBidDto {
   })
   @IsOptional()
   @IsNumber()
-  readonly suggestItemId: number;
+  readonly suggestedExistingItemId: number;
 }
