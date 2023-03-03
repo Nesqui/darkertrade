@@ -6,6 +6,24 @@ import { useUserStore } from '../store'
 
 let axiosClient: AxiosInstance
 
+const handleHumanError = (error) => {
+    ElNotification.error({
+        title: 'Error',
+        message: error.message,
+        duration: 5000,
+    });
+};
+
+const isHumanError = (error) => {
+    return (
+        error.response &&
+        error.response.status >= 400 &&
+        error.response.status < 500 &&
+        error.response.data
+    );
+};
+
+
 export function initApi() {
     axiosClient = axios.create({
         baseURL: import.meta.env.VITE_API_URL,
@@ -13,12 +31,12 @@ export function initApi() {
 
     axiosClient.interceptors.request.use(
         (request) => {
-              const userStore = useUserStore()
-              const token = computed(() => userStore.token)
-              console.log({token: token.value});
-              
-              request.headers = { ...request.headers, Authorization: `Bearer ${token.value}` }
-              debug('Request', request.url, request.data, request.params)
+            const userStore = useUserStore()
+            const token = computed(() => userStore.token)
+            console.log({ token: token.value });
+
+            request.headers = { ...request.headers, Authorization: `Bearer ${token.value}` }
+            debug('Request', request.url, request.data, request.params)
             return request
         })
 
@@ -37,18 +55,18 @@ export function initApi() {
         },
         async (error) => {
             const { response } = error
-            console.log(error);
-            
-              if (response.status === 401 || response.data.message === 'TokenExpiredError') {
+            if (response.status === 401 || response.data.message === 'TokenExpiredError') {
                 const userStore = useUserStore()
                 userStore.logout()
                 ElNotification({
                     message: "Session expired. Please login again"
                 })
                 debug('error 401', response)
-              }
-
+            } if (isHumanError(error)) {
+                handleHumanError(error.response.data);
+            }
             debug('Error', response.data)
+            return Promise.reject(error);
         },
     )
 }

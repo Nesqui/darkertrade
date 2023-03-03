@@ -25,6 +25,7 @@ export class DiscordService {
   }
 
   zalupa(text: string) {
-    console.log(text)
+    console.log(text);
+    return text;
   }
 }

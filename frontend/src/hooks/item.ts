@@ -4,6 +4,13 @@ export interface QueryItemDto {
     slot: Slot;
 }
 
+export interface PrefillItem {
+    id: number
+    name: ItemName
+    slot: Slot
+    offerType: 'WTB' | 'WTS'
+}
+
 export const initItemApi = () => {
     const { axiosClient } = useApi()
 
@@ -26,8 +33,8 @@ export const initItemApi = () => {
         return res.data
     }
 
-    const findUserItem = async (userId: number, itemId: number): Promise<Item> => {
-        const res = await axiosClient(`item/user/${userId}/${itemId}`)
+    const findUserItem = async (userId: number, existingItemId: number): Promise<Item> => {
+        const res = await axiosClient(`item/user/${userId}/${existingItemId}`)
         return res.data
     }
 
@@ -48,5 +55,6 @@ export interface Item {
     id?: number,
     name: ItemName;
     slot: Slot;
-    existingItems?: ExistingItem[]
+    existingItems?: ExistingItem[];
+    createdAt?: string
 }

@@ -10,34 +10,46 @@ import {
   ForeignKey,
   Default,
   IsNumeric,
+  IsDecimal,
+  DataType,
+  Min,
+  Max,
 } from 'sequelize-typescript';
+import { Bid } from 'src/bid/bid.entity';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 
 @Table
 export class ExistingItem extends Model {
+  @ForeignKey(() => User)
+  @Column
+  userId: number;
+
   @BelongsTo(() => User)
   user: User;
-
-  @ForeignKey(() => User)
-  userId: number;
 
   @HasMany(() => Stat)
   stats: Stat[];
 
+  @ForeignKey(() => Item)
+  @Column
+  itemId: number;
+
   @BelongsTo(() => Item)
   item: Item;
 
-  @ForeignKey(() => Item)
-  itemId: number;
+  @HasMany(() => Bid)
+  bids: Bid[];
 
   @Default(false)
   @Column
   published: boolean;
 
-  @IsNumeric
-  @Column
+  @IsDecimal
+  @Min(0)
+  @Max(9999)
+  @Column(DataType.DECIMAL)
   wantedPrice: number;
 
   @Default('WTB')

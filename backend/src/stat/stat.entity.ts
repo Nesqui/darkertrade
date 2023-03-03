@@ -1,3 +1,4 @@
+import { IsNumber } from 'class-validator';
 import {
   Table,
   Column,
@@ -6,6 +7,11 @@ import {
   Unique,
   BelongsTo,
   ForeignKey,
+  Min,
+  Max,
+  IsNumeric,
+  IsDecimal,
+  DataType,
 } from 'sequelize-typescript';
 import { Attribute } from 'src/attribute/attribute.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -13,18 +19,23 @@ import { ExistingItem } from 'src/existing-item/existing-item.entity';
 @Table
 export class Stat extends Model {
   @AllowNull(false)
+  @IsDecimal
+  @Min(-500)
+  @Max(500)
+  @Column(DataType.DECIMAL)
+  value: number;
+
+  @ForeignKey(() => Attribute)
   @Column
-  value: string;
+  attributeId: number;
 
   @BelongsTo(() => Attribute)
   attribute: Attribute;
 
-  @ForeignKey(() => Attribute)
-  attributeId: number;
+  @ForeignKey(() => ExistingItem)
+  @Column
+  existingItemId: number;
 
   @BelongsTo(() => ExistingItem)
   existingItem: ExistingItem;
-
-  @ForeignKey(() => ExistingItem)
-  existingItemId: number;
 }

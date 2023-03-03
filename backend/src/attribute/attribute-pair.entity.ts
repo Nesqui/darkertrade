@@ -8,28 +8,35 @@ import {
   Max,
   BelongsTo,
   ForeignKey,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { Stat } from 'src/stat/stat.entity';
 import { Attribute } from './attribute.entity';
 
 @Table
 export class AttributePair extends Model {
-
   @Column({
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: true,
   })
-  id: number
+  id: number;
+
+  @BelongsTo(() => Attribute, 'attributeId')
+  attribute: Attribute;
 
   @ForeignKey(() => Attribute)
+  @PrimaryKey
   @Column
-  destAttributeId: number
+  attributeId: number;
+
+  @BelongsTo(() => Attribute, 'destAttributeId')
+  destAttribute: Attribute;
 
   @ForeignKey(() => Attribute)
+  @PrimaryKey
   @Column
-  attributeId: number
+  destAttributeId: number;
 
   @Column
-  description: string
-
+  description: string;
 }

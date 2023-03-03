@@ -14,15 +14,16 @@ export class AuthService {
   ) {}
 
   async validateUser(user: QueryUserDto): Promise<any> {
-    this.discordService.zalupa('giga');
+    // this.discordService.zalupa('giga');
     const res = await this.usersService.findOne(user);
+    console.log(res);
     if (res?.password === user.password) return res;
 
     return null;
   }
 
   async login(user: User) {
-    // console.log(user);
+    console.log(user);
 
     return {
       user,

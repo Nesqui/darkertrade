@@ -19,7 +19,7 @@ import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 
 @Controller('existing-item')
 export class ExistingItemController {
-  constructor(private readonly existingItemService: ExistingItemService) { }
+  constructor(private readonly existingItemService: ExistingItemService) {}
 
   @Post()
   @UseGuards(JwtAuthGuard)
@@ -32,8 +32,25 @@ export class ExistingItemController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAll(@Query() filterExistingItemDto: FilterExistingItemDto) {
-    return this.existingItemService.findAll(filterExistingItemDto);
+  findAll(
+    @ReqUser() user: User,
+    @Query() filterExistingItemDto: FilterExistingItemDto,
+  ) {
+    return this.existingItemService.findAll(filterExistingItemDto, user);
+  }
+
+  @Get('/item/:itemId')
+  @UseGuards(JwtAuthGuard)
+  findAllByItemId(
+    @ReqUser() user: User,
+    @Param('itemId') itemId: string,
+    @Query() filterExistingItemDto: FilterExistingItemDto,
+  ) {
+    return this.existingItemService.findAllByItemId(
+      filterExistingItemDto,
+      +itemId,
+      user,
+    );
   }
 
   @Get('similar/:id')
@@ -46,7 +63,6 @@ export class ExistingItemController {
   findOne(@Param('id') id: string) {
     return this.existingItemService.findOne(+id);
   }
-
 
   @Patch(':id')
   update(

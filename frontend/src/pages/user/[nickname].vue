@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ExistingItem, initExistingItemApi, initUserApi, User } from '../../hooks'
 
 const userApi = initUserApi()
 const user = ref<User>()
 const loading = ref(true)
 const route = useRoute()
+const router = useRouter()
 
 onBeforeMount(async () => {
     try {
@@ -41,12 +42,12 @@ onBeforeMount(async () => {
                     </div>
                     <span v-if="user?.name">Name: {{ user.name }}</span>
                     <span v-if="user?.lastName">Name: {{ user.lastName }}</span>
-                    <span>Baned: {{ user?.active ? 'no' : 'yes' }}</span>
+                    <span>Banned: {{ user?.active ? 'no' : 'yes' }}</span>
                     <span>Online: no</span>
                 </div>
                 <div class="profile__links">
                     <div class="profile__links__item">
-                        <el-button link :href="`/user/${user?.nickname}/items`">Items</el-button>
+                        <el-button link @click="router.push(`/user/${user?.nickname}/items`)">Items</el-button>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
 import { statsProviders } from 'src/stat/stat.proviers';
 import { usersProviders } from 'src/user/user.providers';
+import { bidProviders } from 'src/bid/bid.providers';
 
 @Module({
   imports: [PgModule],
@@ -17,6 +18,7 @@ import { usersProviders } from 'src/user/user.providers';
     ...existingItemProviders,
     ...statsProviders,
     ...usersProviders,
+    ...bidProviders,
     JwtService,
   ],
 })

@@ -2,7 +2,7 @@ import { Bid } from './bid.entity';
 
 export const bidProviders = [
   {
-    provide: 'BID_REPOSITORY',
+    provide: 'BIDS_REPOSITORY',
     useValue: Bid,
   },
 ];

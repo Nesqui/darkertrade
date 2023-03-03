@@ -5,6 +5,6 @@ import { DiscordController } from './discord.controller';
 @Module({
   controllers: [DiscordController],
   providers: [DiscordService],
-  exports: [DiscordService]
+  exports: [DiscordService],
 })
-export class DiscordModule { }
+export class DiscordModule {}

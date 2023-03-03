@@ -24,12 +24,6 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  findOne(@Query() user: QueryUserDto) {
-    return this.userService.findOne(user);
-  }
-
   @Get('/nickname/:nickname')
   @UseGuards(JwtAuthGuard)
   findOneByNickname(@Param('nickname') nickname: string) {

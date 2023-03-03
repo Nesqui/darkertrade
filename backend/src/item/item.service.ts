@@ -1,4 +1,5 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
@@ -12,6 +13,7 @@ export class ItemService {
   constructor(
     @Inject('ITEMS_REPOSITORY') private itemsRepository: typeof Item,
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
+    @Inject('BIDS_REPOSITORY') private bidsRepository: typeof Bid,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
     @Inject('STATS_REPOSITORY')
@@ -31,7 +33,7 @@ export class ItemService {
   }
 
   async findUserItem(userId: number, existingItemId: number) {
-    return await this.itemsRepository.findOne({
+    const res = await this.itemsRepository.findOne({
       include: [
         {
           model: this.existingItemRepository,
@@ -41,13 +43,23 @@ export class ItemService {
           },
           required: true,
           include: [
-            this.usersRepository,
+            {
+              model: this.usersRepository,
+              attributes: {
+                exclude: ['password', 'discord'],
+              },
+            },
             this.statRepository,
+            this.bidsRepository,
             this.itemsRepository,
           ],
         },
       ],
     });
+
+    if (!res)
+      throw new NotFoundException('Item not exist or not related this user');
+    return res;
   }
 
   async findUserItems(userId: number) {
@@ -60,9 +72,15 @@ export class ItemService {
             userId,
           },
           include: [
-            this.usersRepository,
+            {
+              model: this.usersRepository,
+              attributes: {
+                exclude: ['password', 'discord'],
+              },
+            },
             this.statRepository,
             this.itemsRepository,
+            this.bidsRepository,
           ],
         },
       ],

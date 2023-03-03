@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { ReqUser } from 'src/user/user.decorator';
+import { User } from 'src/user/user.entity';
 import { BidService } from './bid.service';
 import { CreateBidDto } from './dto/create-bid.dto';
 import { UpdateBidDto } from './dto/update-bid.dto';
@@ -8,8 +20,9 @@ export class BidController {
   constructor(private readonly bidService: BidService) {}
 
   @Post()
-  create(@Body() createBidDto: CreateBidDto) {
-    return this.bidService.create(createBidDto);
+  @UseGuards(JwtAuthGuard)
+  create(@ReqUser() user: User, @Body() createBidDto: CreateBidDto) {
+    return this.bidService.create(createBidDto, user);
   }
 
   @Get()

@@ -8,14 +8,14 @@ import { Stat } from 'src/stat/stat.entity';
 import { Item } from '../item/item.entity';
 import { User } from '../user/user.entity';
 
-const initData = async (sequelize: Sequelize, configServise: ConfigService) => {
+const initData = async (sequelize: Sequelize, configService: ConfigService) => {
   await sequelize.model('User').findOrCreate({
     where: {
-      nickname: 'Nesqui',
+      nickname: 'nesqui',
     },
     defaults: {
-      nickname: 'Nesqui',
-      password: configServise.get('SERVICE_ADMIN_PASSWORD_HASH'),
+      nickname: 'nesqui',
+      password: configService.get('SERVICE_ADMIN_PASSWORD_HASH'),
       discord: 'Nesqui#3933',
       active: true,
     },
@@ -23,11 +23,11 @@ const initData = async (sequelize: Sequelize, configServise: ConfigService) => {
 
   await sequelize.model('User').findOrCreate({
     where: {
-      nickname: 'Xloctis',
+      nickname: 'xloctis',
     },
     defaults: {
-      nickname: 'Xloctis',
-      password: configServise.get('SERVICE_ADMIN_PASSWORD_HASH'),
+      nickname: 'xloctis',
+      password: configService.get('SERVICE_ADMIN_PASSWORD_HASH'),
       discord: 'Xloctis Broodtwine#8421',
       active: true,
     },
@@ -49,18 +49,21 @@ export const pgProviders = [
         operatorsAliases: ConfigService.get('PG_OPERATORSALIASES'),
       });
       sequelize.addModels([
-        User,
         Item,
-        AttributePair,
+        User,
         Attribute,
+        AttributePair,
         Stat,
         ExistingItem,
         Bid,
       ]);
-      await sequelize.sync();
-
-      await initData(sequelize, ConfigService);
-      return sequelize;
+      try {
+        await sequelize.sync({ alter: true });
+        await initData(sequelize, ConfigService);
+        return sequelize;
+      } catch (error) {
+        console.log(error);
+      }
     },
   },
 ];

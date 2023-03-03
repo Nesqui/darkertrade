@@ -6,6 +6,9 @@ import {
   AllowNull,
   ForeignKey,
   BelongsTo,
+  DataType,
+  Min,
+  Max,
 } from 'sequelize-typescript';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
@@ -13,18 +16,29 @@ import { User } from 'src/user/user.entity';
 @Table
 export class Bid extends Model {
   @AllowNull(false)
-  @Column
+  @Min(0)
+  @Max(9999)
+  @Column(DataType.DECIMAL)
   price: number;
+
+  @ForeignKey(() => User)
+  @Column
+  userId: number;
 
   @BelongsTo(() => User)
   user: User;
 
-  @ForeignKey(() => User)
-  userId: User;
+  @ForeignKey(() => ExistingItem)
+  @Column
+  existingItemId: number;
 
   @BelongsTo(() => ExistingItem)
   existingItem: ExistingItem;
 
   @ForeignKey(() => ExistingItem)
-  existingItemId: ExistingItem;
+  @Column
+  suggestedItemId: number;
+
+  @BelongsTo(() => ExistingItem)
+  suggestedItem: ExistingItem;
 }

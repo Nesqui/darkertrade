@@ -10,7 +10,14 @@ const chosenItem = ref<Item>()
 
 const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
-  filterItem: { type: Object as PropType<Item>, required: true }
+  filterItem: { type: Object as PropType<Item>, required: true },
+  noWrapper: {
+    type: Boolean,
+    default: false
+  },
+  doAfterItemSelection: {
+    type: Function,
+  }
 })
 
 const router = useRouter()
@@ -48,6 +55,14 @@ const filteredExistingItems = computed(() => {
   return chosenItem.value.existingItems
 })
 
+const itemClickHandle = (chosenExistingItem: ExistingItem) => {
+  if (props.doAfterItemSelection) {
+    props.doAfterItemSelection(chosenExistingItem)
+    return
+  }
+  router.push(`/user/${chosenExistingItem.user?.nickname}/items/${chosenExistingItem.id}`)
+}
+
 const choseItem = async (currentItem: Item) => {
   props.filterItem.id = currentItem.id
   props.filterItem.name = currentItem.name;
@@ -57,14 +72,14 @@ const choseItem = async (currentItem: Item) => {
 
 <template>
   <div>
-    <div class="wrapper wrapper-actions">
+    <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <div class="actions">
         <el-input v-model="searchString"
           :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
-    <div class="wrapper">
+    <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div v-if="!chosenItem && !filteredItems?.length">
         <p>Currently no items here</p>
       </div>
@@ -76,8 +91,9 @@ const choseItem = async (currentItem: Item) => {
         </div>
         <div v-else class="item-list">
           <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-            <h1>{{ existingItem.id }}</h1>
-            <ItemPreview :item="chosenItem" @click="router.push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" :offerType="existingItem.offerType" :stats="existingItem.stats" />
+            <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
+              @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
+              :stats="existingItem.stats" />
           </div>
         </div>
       </div>
@@ -90,7 +106,7 @@ $frameWidth: 100px;
 $frameHeight: 100px;
 $step: 1rem;
 
-.wrapper {
+.item-list-wrapper {
   padding: $step;
   width: 860px;
   max-height: 600px;

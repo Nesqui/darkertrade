@@ -1,4 +1,5 @@
 import { Item, Stat, useApi, User } from "."
+import { Bid } from "./bid";
 
 export interface ExistingItem {
     id?: number
@@ -8,7 +9,9 @@ export interface ExistingItem {
     wantedPrice?: number,
     published: boolean,
     user?: User,
-    offerType: 'WTB' | 'WTS'
+    userId: number,
+    offerType: 'WTB' | 'WTS',
+    bids?: Bid[]
 }
 
 export interface FilterExistingItemDto {
@@ -26,6 +29,13 @@ export const initExistingItemApi = () => {
         return res.data
     }
 
+    const findAllByItemId = async (filterExistingItemDto: FilterExistingItemDto, itemId: number): Promise<ExistingItem[]> => {
+        const res = await axiosClient(`existing-item/item/${itemId}`, {
+            params: filterExistingItemDto
+        })
+        return res.data
+    }
+
     const create = async (item: ExistingItem): Promise<ExistingItem> => {
         const res = await axiosClient.post('existing-item', item)
         return res.data
@@ -33,6 +43,7 @@ export const initExistingItemApi = () => {
 
     return {
         findAll,
+        findAllByItemId,
         create
     }
 }

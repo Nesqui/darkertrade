@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { DiscordService } from './discord.service';
 import { CreateDiscordDto } from './dto/create-discord.dto';
 import { UpdateDiscordDto } from './dto/update-discord.dto';
@@ -10,6 +18,11 @@ export class DiscordController {
   @Post()
   create(@Body() createDiscordDto: CreateDiscordDto) {
     return this.discordService.create(createDiscordDto);
+  }
+
+  @Get('zalupa')
+  zalupa() {
+    return this.discordService.zalupa('Huy');
   }
 
   @Get()

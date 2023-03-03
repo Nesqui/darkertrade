@@ -93,10 +93,7 @@ $item-description-padding: .7rem .5rem;
     }
 
     .item-description {
-        padding-top: .25rem;
-        padding-left: unset;
-        padding-right: unset;
-        padding-bottom: unset;
+        padding: unset;
         display: flex;
         flex-direction: column;
         gap: .75rem;

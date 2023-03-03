@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { Stats } from 'fs';
-import { computed, onBeforeMount, ref } from 'vue'
-import { Item, QueryItemDto, initAttributesApi, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi } from '../hooks'
+import { computed, onBeforeMount, PropType, ref } from 'vue'
+import { Item, QueryItemDto, initAttributesApi, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, Slot, ItemName, PrefillItem } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
 import { ElNotification } from 'element-plus';
-import router from '../router';
+import { useRouter } from 'vue-router';
+const router = useRouter()
 
-const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
 const attributes = attributeStore.attributes
 const existingItemApi = initExistingItemApi()
 const maxAttributes = 8
-const name = ref('')
+const attributeName = ref('')
 const value = ref(1)
 const wantedPrice = ref(100)
 const offerType = ref<'WTB' | 'WTS'>('WTB')
-
+const itemName = ref('')
 const valueRef = ref()
 const stats = ref<Stat[]>([])
 const published = ref(false)
@@ -25,6 +25,20 @@ const loading = ref(false)
 const itemApi = initItemApi()
 
 const items = ref<Item[]>([])
+
+const props = defineProps({
+    noWrapper: {
+        type: Boolean,
+        default: false
+    },
+    prefillItem: {
+        type: Object as PropType<PrefillItem>,
+        default: null
+    },
+    doAfterCreate: {
+        type: Function,
+    }
+})
 
 const item = ref<Item>({
     id: 0,
@@ -63,11 +77,11 @@ const attributeSearch = (queryString: string, cb: any) => {
 }
 
 const clearForm = () => {
-    name.value = ''
+    attributeName.value = ''
+    itemName.value = ''
     value.value = 1
     attributeId.value = 0
 }
-
 
 const addStatValidator = computed(() => {
     if (stats.value.length >= maxAttributes) {
@@ -95,8 +109,6 @@ const addStat = () => {
 }
 
 const handleSelectItem = (chosenItem: Item) => {
-    console.log(chosenItem);
-
     item.value = chosenItem
 }
 
@@ -112,8 +124,14 @@ const deleteStat = (index: number) => {
 const createExistingItem = async () => {
     loading.value = true
     try {
-        const { user, id } = await existingItemApi.create(existingItem.value)
-        router.push(`/user/${user?.nickname}/items/${id}`)
+        const resExistingItem = await existingItemApi.create(existingItem.value)
+        if (resExistingItem?.user) {
+            if (props.doAfterCreate) {
+                await props.doAfterCreate(resExistingItem)
+                return
+            }
+            router.push(`/user/${resExistingItem.user.nickname}/items/${resExistingItem.id}`)
+        }
     } catch (error) {
         ElNotification({
             message: JSON.stringify(error)
@@ -135,6 +153,16 @@ const clear = () => {
         name: ''
     }
     stats.value = []
+    prefillData()
+}
+
+const prefillData = () => {
+    if (props.prefillItem) {
+        item.value.id = props.prefillItem.id;
+        item.value.name = props.prefillItem.name
+        item.value.slot = props.prefillItem.slot
+        offerType.value = props.prefillItem.offerType
+    }
 }
 
 onBeforeMount(async () => {
@@ -143,6 +171,7 @@ onBeforeMount(async () => {
         items.value = await itemApi.findAll({
             slot: ''
         })
+        prefillData()
     } catch (error) {
     } finally {
         loading.value = false
@@ -151,11 +180,11 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-    <div class="item-creator wrapper">
+    <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
         <h2>Item creator | {{ offerType }}</h2>
         <div class="item-creator__wrapper">
             <div class="item-creator__item">
-                <el-autocomplete value-key="name" v-model="item.name" clearable :fetch-suggestions="itemSearch"
+                <el-autocomplete v-if="!prefillItem?.id" value-key="name" v-model="itemName" clearable :fetch-suggestions="itemSearch"
                     placeholder="Item name" @select="handleSelectItem" />
                 <div class="item-creator__attributes__actions">
                     <div>
@@ -165,8 +194,8 @@ onBeforeMount(async () => {
                         <el-input type="number" placeholder="Wanted Price" maxlength="5"
                             v-model.number="wantedPrice"></el-input>
                     </div>
-                    <el-button size="large" v-if="offerType === 'WTS'" @click="offerType = 'WTB'">Want to buy</el-button>
-                    <el-button size="large" v-if="offerType === 'WTB'" @click="offerType = 'WTS'">
+                    <el-button v-if="!prefillItem?.offerType && offerType === 'WTS'" size="large" @click="offerType = 'WTB'">Want to buy</el-button>
+                    <el-button v-if="!prefillItem?.offerType && offerType === 'WTB'" size="large" @click="offerType = 'WTS'">
                         Want to sell
                     </el-button>
                 </div>
@@ -175,8 +204,8 @@ onBeforeMount(async () => {
                         <div class="sub-title">
                             Stat name
                         </div>
-                        <el-autocomplete value-key="name" v-model="name" :fetch-suggestions="attributeSearch" clearable
-                            placeholder="Stat name" @select="handleSelectAttribute" />
+                        <el-autocomplete value-key="name" v-model="attributeName" :fetch-suggestions="attributeSearch"
+                            clearable placeholder="Stat name" @select="handleSelectAttribute" />
                     </div>
                     <div>
                         <div class="sub-title">
@@ -197,18 +226,16 @@ onBeforeMount(async () => {
                     </div>
                 </div>
             </div>
-            <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="stats" />
+            <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true"
+                :stats="stats" />
         </div>
 
 
         <div class="item-creator__actions">
             <div>
                 <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
-                    size="large">Create
-                    item
-                    and
-                    Publish</el-button>
-                <el-button :disabled="!stats.length || loading || !item.id" @click="createExistingItem" size="large">Create
+                    size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create item and publish' }}</el-button>
+                <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem" size="large">Create
                     item</el-button>
             </div>
             <el-button v-if="item.id || stats.length" @click="clear" size="large">
@@ -220,19 +247,21 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .item-creator {
-    width: 900px;
-
     &__wrapper {
         display: flex;
         gap: 1rem;
         margin-bottom: 2rem;
     }
 
+    .wrapper {
+        width: 900px;
+    }
+
     &__item {
         width: 100%;
         display: flex;
         flex-direction: column;
-        gap: .25rem;
+        gap: .5rem;
     }
 
     &__attributes {

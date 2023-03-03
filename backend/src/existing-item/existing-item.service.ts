@@ -10,7 +10,7 @@ import { CreateExistingItemDto } from './dto/create-existing-item.dto';
 import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
-const ATTRIBUTE_BASE_WEIGHT = 2;
+const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
 @Injectable()
 export class ExistingItemService {
   constructor(
@@ -44,7 +44,11 @@ export class ExistingItemService {
     return await this.findOne(item.id);
   }
 
-  async findAll(filterExistingItemDto: FilterExistingItemDto) {
+  async findAllByItemId(
+    filterExistingItemDto: FilterExistingItemDto,
+    itemId: number,
+    user: User,
+  ) {
     const filter = { ...filterExistingItemDto };
     const itemWhere = {};
 
@@ -54,7 +58,32 @@ export class ExistingItemService {
     }
 
     const item = await this.existingItemRepository.findAll({
-      where: { ...filter },
+      where: { ...filter, userId: user.id },
+      include: [
+        this.statRepository,
+        {
+          model: this.itemRepository,
+          where: { ...itemWhere, id: itemId },
+        },
+        this.userRepository,
+      ],
+    });
+
+    if (!item) return [];
+    return item;
+  }
+
+  async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
+    const filter = { ...filterExistingItemDto };
+    const itemWhere = {};
+
+    if (filter.slot) {
+      itemWhere['slot'] = filterExistingItemDto.slot;
+      delete filter.slot;
+    }
+
+    const item = await this.existingItemRepository.findAll({
+      where: { ...filter, userId: user.id },
       include: [
         this.statRepository,
         {
@@ -121,22 +150,31 @@ export class ExistingItemService {
       ...pairedAttributes.map((a) => a.destAttributeId),
     ];
 
-    const pageSize = 10;
+    const pageSize = 6;
     const offset = 0;
 
     const query = `
-      SELECT "ExistingItem".*, SUM(CAST("Stat"."value" AS INTEGER)) + SUM(CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}) AS weight
-      FROM "ExistingItems" AS "ExistingItem"
-      LEFT JOIN "Stats" AS "Stat" ON "Stat"."existingItemId" = "ExistingItem"."id"
-      WHERE "ExistingItem"."id" != ${id}
-      AND "ExistingItem"."itemId" IN (${itemIdLF.join(', ')})
-      AND "Stat"."attributeId" IN (${similarAttributeIds.join(', ')})
-      GROUP BY "ExistingItem"."id"
-      ORDER BY weight DESC
-      LIMIT ${pageSize}
-      OFFSET ${offset};
-    `;
-
+    SELECT "ExistingItem".*, 
+      SUM(
+        CASE 
+          WHEN "Stat"."attributeId" IN (${baseExistingItem.stats
+            .map((a) => a.attributeId)
+            .join(
+              ', ',
+            )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
+          ELSE CAST("Stat"."value" AS INTEGER) 
+        END
+      ) AS weight
+    FROM "ExistingItems" AS "ExistingItem"
+    LEFT JOIN "Stats" AS "Stat" ON "Stat"."existingItemId" = "ExistingItem"."id"
+    WHERE "ExistingItem"."id" != ${id}
+    AND "ExistingItem"."itemId" IN (${itemIdLF.join(', ')})
+    AND "Stat"."attributeId" IN (${similarAttributeIds.join(', ')})
+    GROUP BY "ExistingItem"."id"
+    ORDER BY weight DESC
+    LIMIT ${pageSize}
+    OFFSET ${offset};
+  `;
     const existingItems = await this.db.query(query, {
       model: this.existingItemRepository,
       mapToModel: true,
