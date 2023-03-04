@@ -56,4 +56,8 @@ export class ExistingItem extends Model {
   @AllowNull(false)
   @Column
   offerType: 'WTB' | 'WTS';
+
+  @Default(false)
+  @Column
+  archived: boolean;
 }

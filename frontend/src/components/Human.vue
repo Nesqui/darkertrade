@@ -1,22 +1,29 @@
 <script setup lang="ts">
-import { Item } from "../hooks";
+import { ref } from "vue";
+import { QueryItemDto, Slot } from "../hooks";
 
-defineProps<{ item: Item }>()
+defineProps<{ filterItem: QueryItemDto }>()
+const slots = ref<Slot[]>(['Amulet',
+    'Ring',
+    'Head',
+    'Chest',
+    'Gloves',
+    'Legs',
+    'Boots',
+    'Weapon',])
 </script>
 
 <template>
     <div class="human">
         <div class="wrapper">
             <div class="img"></div>
+            <div v-for="(slot, index) in slots" :key="index" :class="{
+                'item-frame': true,
+                'darker-title': true,
+                [slot.toLowerCase()]: true,
+                'active': filterItem.slot === slot
+            }" @click="filterItem.slot = slot">{{ slot.substring(0,1) }}</div>
 
-            <div @click="item.slot = 'Amulet'" class="item-frame darker-title amulet">A</div>
-            <div @click="item.slot = 'Ring'" class="item-frame darker-title ring">R</div>
-            <div @click="item.slot = 'Head'" class="item-frame darker-title head">H</div>
-            <div @click="item.slot = 'Chest'" class="item-frame darker-title chest">C</div>
-            <div @click="item.slot = 'Gloves'" class="item-frame darker-title gloves">G</div>
-            <div @click="item.slot = 'Legs'" class="item-frame darker-title legs">L</div>
-            <div @click="item.slot = 'Boots'" class="item-frame darker-title boots">B</div>
-            <div @click="item.slot = 'Weapon'" class="item-frame darker-title weapon">W</div>
             <div class="item-frame no-hover item-description">
                 <span><label class="darker-title">A</label>Amulet</span>
                 <span><label class="darker-title">R</label>Ring</span>
@@ -57,6 +64,11 @@ $human-width: 500px;
         width: $item-size;
         height: $item-size;
         font-size: 25px;
+    }
+
+    .active {
+        background-color: var(--color-text);
+        color: var(--el-bg-color);
     }
 
     .item-description {

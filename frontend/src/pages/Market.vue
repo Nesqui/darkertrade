@@ -2,14 +2,15 @@
 import { onBeforeMount, ref } from 'vue'
 import Human from '../components/Human.vue';
 import ItemList from '../components/ItemList.vue';
-import { Item, initItemApi } from '../hooks';
+import { Item, initItemApi, QueryItemDto } from '../hooks';
 
 const itemApi = initItemApi()
 const items = ref<Item[]>([])
 
-const filterItem = ref<Item>({
+const filterItem = ref<QueryItemDto>({
     slot: "",
-    name: ""
+    name: "",
+    offerType: "WTS"
 })
 
 onBeforeMount(async () => {
@@ -20,7 +21,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="market">
-        <Human :item="filterItem" />
+        <Human :filterItem="filterItem" />
         <ItemList :filterItem="filterItem" :items="items" />
     </div>
 </template>

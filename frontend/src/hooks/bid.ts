@@ -1,6 +1,7 @@
-import { useApi } from "."
+import { useApi, User } from "."
 
 export interface Bid {
+  id: number,
   price: number;
   existingItemId: number;
   suggestedItmId?: number;
@@ -17,14 +18,20 @@ export interface CreateBidDto {
 }
 
 export const initBidApi = () => {
-    const { axiosClient } = useApi()
+  const { axiosClient } = useApi()
 
-    const create = async (createBidDto: CreateBidDto):Promise<Bid> => {
-        const res = await axiosClient.post('bid', createBidDto)
-        return res.data
-    }
+  const create = async (createBidDto: CreateBidDto): Promise<Bid> => {
+    const res = await axiosClient.post('bid', createBidDto)
+    return res.data
+  }
 
-    return {
-      create
-    }
+  const deleteBid = async (id: number): Promise<Boolean> => {
+    const res = await axiosClient.delete(`bid/${id}`)
+    return !!res.data
+  }
+
+  return {
+    create,
+    deleteBid
+  }
 }

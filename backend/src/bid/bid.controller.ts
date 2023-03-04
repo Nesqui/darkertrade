@@ -41,7 +41,8 @@ export class BidController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bidService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  remove(@ReqUser() user: User, @Param('id') id: string) {
+    return this.bidService.remove(+id, user);
   }
 }

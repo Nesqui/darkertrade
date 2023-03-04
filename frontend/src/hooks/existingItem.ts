@@ -14,6 +14,11 @@ export interface ExistingItem {
     bids?: Bid[]
 }
 
+export interface UpdateExistingItemDto {
+  published?: boolean;
+  archived?: boolean;
+}
+
 export interface FilterExistingItemDto {
     userId?: number;
     slot?: string
@@ -41,9 +46,15 @@ export const initExistingItemApi = () => {
         return res.data
     }
 
+    const patch = async (id: number, dto: UpdateExistingItemDto): Promise<ExistingItem> => {
+        const res = await axiosClient.patch(`existing-item/${id}`, dto)
+        return res.data
+    }
+
     return {
         findAll,
         findAllByItemId,
-        create
+        create,
+        patch
     }
 }

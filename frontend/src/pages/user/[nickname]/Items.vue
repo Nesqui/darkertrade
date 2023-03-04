@@ -3,7 +3,7 @@ import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ItemList from '../../../components/ItemList.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, User } from '../../../hooks'
+import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
 
 const itemApi = initItemApi()
 const items = ref<Item[]>()
@@ -11,7 +11,7 @@ const userApi = initUserApi()
 const loading = ref(true)
 const user = ref<User>()
 const route = useRoute()
-const filterItem = ref<Item>({
+const filterItem = ref<QueryItemDto>({
     slot: "",
     name: ""
 })

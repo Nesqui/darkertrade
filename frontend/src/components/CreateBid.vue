@@ -7,6 +7,7 @@ import { CreateBidDto, initBidApi } from '../hooks/bid';
 import { ElNotification } from 'element-plus';
 import ChoseExistingItem from './ChoseExistingItem.vue'
 
+const emit = defineEmits(['bidCreated'])
 const bidApi = initBidApi()
 const suggestedItem = ref<ExistingItem>()
 
@@ -32,8 +33,8 @@ const submitBid = async () => {
       req.suggestedExistingItemId = suggestedItem.value.id
     }
 
-    await bidApi.create(req)
-
+    const bid = await bidApi.create(req)
+    emit('bidCreated', bid)
     return
   }
   ElNotification({
@@ -52,9 +53,9 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
   <div v-if="item?.existingItems?.length" class="bidding">
     <div class="item-details">
       <div class="place-bid wtb" v-if="item.existingItems[0].offerType === 'WTB'">
-        <p v-if="!suggestedItem">Make sure you have this item in game stash and chose or create him</p>
+        <p v-if="!suggestedItem">Make sure item you are creating matches the one you have in game</p>
         <ChoseExistingItem v-if="item.existingItems[0].offerType === 'WTB'" @onItemChosen="onItemChosen" :item="item" />
-        <p>Please input a wanted cost for this bid what you want to receive. Its fine if item Wanted price or stats a bit different</p>
+        <p>What price are you asking for item that you offer</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">
             <el-input-number v-model="form.amount" :min="0" :step="25" />
@@ -65,6 +66,23 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
               :title="`Are you sure to bid this item?`">
               <template #reference>
                 <el-button :disabled="!suggestedItem" size="large">Create Bid</el-button>
+              </template>
+            </el-popconfirm>
+          </el-form-item>
+        </el-form>
+      </div>
+      <div class="place-bid wts">
+        <p>What price are you asking for item that you offer</p>
+        <el-form :model="form" class="place-bid__form">
+          <el-form-item prop="amount">
+            <el-input-number v-model="form.amount" :min="0" :step="25" />
+          </el-form-item>
+          <p>After creating bid you will able to chat with user.</p>
+          <el-form-item>
+            <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
+              :title="`Are you sure to bid this item?`">
+              <template #reference>
+                <el-button size="large">Create Bid</el-button>
               </template>
             </el-popconfirm>
           </el-form-item>

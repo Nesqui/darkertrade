@@ -10,8 +10,8 @@ const isAuth = computed(() => userStore.isAuth)
 
 <template>
   <div class="menu">
-    <div class="logo">
-      <img src="../assets/logo.png" alt="">
+    <div class="logo" @click="$router.push('/')">
+      <img src="../assets/logo.png" alt="" >
     </div>
     <div v-if="isAuth" class="top-menu">
       <div class="top-menu__item">
@@ -47,6 +47,7 @@ $padding: 25px;
 
   .logo {
     padding-left: $padding;
+    cursor: pointer;
 
     >img {
       height: calc($menuHeight - 15px);

@@ -36,6 +36,7 @@ export class ItemService {
     const existingItemWhere = {
       id: existingItemId,
       userId,
+      archived: false,
     };
     if (user.id !== userId) existingItemWhere['published'] = true;
 
@@ -78,6 +79,7 @@ export class ItemService {
   async findUserItems(userId: number, user: User) {
     const existingItemWhere = {
       userId,
+      archived: false,
     };
     if (user.id !== userId) existingItemWhere['published'] = true;
 
@@ -117,6 +119,7 @@ export class ItemService {
     const itemWhere = {};
     const existingItemWhere = {
       published: true,
+      archived: false,
     };
     if (query.slot) itemWhere['slot'] = query.slot;
     if (query.offerType) existingItemWhere['offerType'] = query.offerType;

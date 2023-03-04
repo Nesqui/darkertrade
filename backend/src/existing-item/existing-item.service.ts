@@ -49,7 +49,7 @@ export class ExistingItemService {
     itemId: number,
     user: User,
   ) {
-    const filter = { ...filterExistingItemDto };
+    const filter = { ...filterExistingItemDto, archived: false };
     const itemWhere = {};
 
     if (filter.slot) {
@@ -79,7 +79,7 @@ export class ExistingItemService {
   }
 
   async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
-    const filter = { ...filterExistingItemDto };
+    const filter = { ...filterExistingItemDto, archived: false };
     const itemWhere = {};
 
     if (filter.slot) {
@@ -95,7 +95,12 @@ export class ExistingItemService {
           model: this.itemRepository,
           where: itemWhere,
         },
-        this.userRepository,
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord'],
+          },
+        },
       ],
     });
 
@@ -104,8 +109,21 @@ export class ExistingItemService {
   }
 
   async findOne(id: number) {
-    const existingItem = await this.existingItemRepository.findByPk(id, {
-      include: [this.statRepository, this.itemRepository, this.userRepository],
+    const existingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        archived: false,
+      },
+      include: [
+        this.statRepository,
+        this.itemRepository,
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord'],
+          },
+        },
+      ],
     });
 
     if (!existingItem) throw new NotFoundException('Item not found');
@@ -113,14 +131,23 @@ export class ExistingItemService {
   }
 
   async findSimilar(id: number) {
-    const baseExistingItem = await this.existingItemRepository.findByPk(id, {
+    const baseExistingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        archived: false,
+      },
       include: [
         {
           model: this.statRepository,
           attributes: ['attributeId'],
         },
         this.itemRepository,
-        this.userRepository,
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord'],
+          },
+        },
       ],
     });
 
@@ -173,6 +200,7 @@ export class ExistingItemService {
     FROM "ExistingItems" AS "ExistingItem"
     LEFT JOIN "Stats" AS "Stat" ON "Stat"."existingItemId" = "ExistingItem"."id"
     WHERE "ExistingItem"."id" != ${id}
+    AND "ExistingItem"."archived" = false
     AND "ExistingItem"."itemId" IN (${itemIdLF.join(', ')})
     AND "Stat"."attributeId" IN (${similarAttributeIds.join(', ')})
     GROUP BY "ExistingItem"."id"
@@ -195,8 +223,20 @@ export class ExistingItemService {
     return existingItems;
   }
 
-  update(id: number, updateExistingItemDto: UpdateExistingItemDto) {
-    return `This action updates a #${id} existingItem`;
+  async update(
+    id: number,
+    updateExistingItemDto: UpdateExistingItemDto,
+    user: User,
+  ) {
+    await this.existingItemRepository.update(updateExistingItemDto, {
+      where: {
+        id,
+        userId: user.id,
+        archived: false,
+      },
+    });
+
+    return updateExistingItemDto.archived || (await this.findOne(id));
   }
 
   remove(id: number) {

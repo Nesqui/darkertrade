@@ -1,7 +1,10 @@
 import { ExistingItem, ItemName, Slot, useApi } from "."
 
 export interface QueryItemDto {
-    slot: Slot;
+    id?: number,
+    slot?: Slot,
+    offerType?:'WTB' | 'WTS' | '',
+    name?: ItemName
 }
 
 export interface PrefillItem {

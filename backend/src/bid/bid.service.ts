@@ -22,13 +22,20 @@ export class BidService {
   ) {}
 
   async create(createBidDto: CreateBidDto, user: User) {
-    const existingItem = await this.existingItemRepository.findByPk(
-      createBidDto.existingItemId,
-    );
+    const existingItem = await this.existingItemRepository.findOne({
+      where: {
+        id: createBidDto.existingItemId,
+        archived: false,
+      },
+    });
     if (!existingItem) throw new NotAcceptableException('Item not found');
 
     const alreadyCreatedExistingItem =
-      await this.existingItemRepository.findByPk(createBidDto.existingItemId, {
+      await this.existingItemRepository.findOne({
+        where: {
+          id: createBidDto.existingItemId,
+          archived: false,
+        },
         include: [
           {
             model: this.bidRepository,
@@ -88,7 +95,22 @@ export class BidService {
     return `This action updates a #${id} bid`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bid`;
+  async remove(id: number, user: User) {
+    const userBid = await this.bidRepository.findOne({
+      where: {
+        id,
+        userId: user.id,
+      },
+    });
+
+    if (!userBid) throw new ForbiddenException('You cant delete this bid');
+
+    const bid = await this.bidRepository.destroy({
+      where: {
+        id,
+      },
+    });
+
+    return bid;
   }
 }

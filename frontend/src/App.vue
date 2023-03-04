@@ -29,8 +29,8 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="main" >
-    <TopMenu :tradeMeta="tradeMeta"/>
+  <div class="main">
+    <TopMenu :tradeMeta="tradeMeta" />
     <div class="trade" v-if="isAuth">
       <LeftMenu :trade-meta="tradeMeta" />
       <TradeDetails :trade-meta="tradeMeta" />
@@ -40,4 +40,5 @@ onBeforeMount(async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped lang='scss'>
+</style>

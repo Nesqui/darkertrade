@@ -65,11 +65,13 @@ export class ExistingItemController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   update(
     @Param('id') id: string,
+    @ReqUser() user: User,
     @Body() updateExistingItemDto: UpdateExistingItemDto,
   ) {
-    return this.existingItemService.update(+id, updateExistingItemDto);
+    return this.existingItemService.update(+id, updateExistingItemDto, user);
   }
 
   @Delete(':id')

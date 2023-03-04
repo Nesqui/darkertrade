@@ -42,9 +42,10 @@ const initDialog = async () => {
   }
 }
 
-const filterItem = ref<Item>({
+const filterItem = ref<QueryItemDto>({
   slot: "",
-  name: ""
+  name: "",
+  offerType: "WTS",
 })
 
 
@@ -84,7 +85,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
         <el-button class="show-hide-button" v-if="showCreator" link @click="showCreator = !showCreator">Select exist
           item</el-button>
         <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
-        <ItemList v-else :no-wrapper="true" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
+        <ItemList v-else :no-wrapper="true" :disabledActions="true" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
           :items="[item]">
         </ItemList>
       </div>

@@ -7,15 +7,19 @@ import CreateBid from '../../../../components/CreateBid.vue';
 import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, User } from '../../../../hooks'
 import ItemPreview from "../../../../components/ItemPreview.vue"
 import { useUserStore } from '../../../../store';
+import { Bid } from '../../../../hooks/bid';
 
 const userStore = useUserStore()
 const itemApi = initItemApi()
 const item = ref<Item>()
 const userApi = initUserApi()
 const loading = ref(true)
+const actionsLoading = ref(false)
 const user = ref<User>()
 const route = useRoute()
 const showBidCreator = ref(false)
+
+const existingItemsApi = initExistingItemApi()
 
 const filterItem = ref<Item>({
   slot: "",
@@ -26,22 +30,71 @@ const formatDate = (date: string) => {
   return new Date(date).toLocaleDateString('en-US');
 };
 
+const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.find(bid => bid.userId === userStore.currentUser.id)
 const ownToUser = () => item.value?.existingItems?.length && item.value?.existingItems[0].userId === userStore.currentUser.id
+
+const bidCreatedHandler = (bid: Bid) => {
+  if (item.value?.existingItems)
+    item.value.existingItems[0].bids?.unshift(bid)
+  showBidCreator.value = false
+}
+
+const bidDeletedHandler = (bid: Bid) => {
+  if (item.value?.existingItems) {
+    const index = item.value.existingItems[0].bids?.findIndex(currentBid => currentBid.id === bid.id)
+    if (index !== undefined && index != -1)
+      item.value.existingItems[0].bids?.splice(index, 1)
+  }
+}
+
+const changePublish = async () => {
+  if (!item.value?.existingItems?.length)
+    return
+  actionsLoading.value = true
+  try {
+    await existingItemsApi.patch(item.value.existingItems[0].id!, {
+      published: !item.value.existingItems[0].published
+    })
+    await initPageData()
+  } catch (error) {
+  } finally {
+    actionsLoading.value = false
+  }
+}
+
+const deleteExistingItem = async () => {
+  if (!item.value?.existingItems?.length)
+    return
+  actionsLoading.value = true
+  try {
+    await existingItemsApi.patch(item.value.existingItems[0].id!, {
+      archived: true
+    })
+    await initPageData()
+  } catch (error) {
+  } finally {
+    actionsLoading.value = false
+  }
+}
+
+const initPageData = async () => {
+  const userNickname = route.params.nickname
+  const itemId = route.params.id
+  if (typeof userNickname === 'string' && typeof itemId === 'string') {
+    user.value = await userApi.findByNickname(userNickname)
+    if (!user.value) {
+      ElNotification('User not found')
+      return
+    }
+    const res = await itemApi.findUserItem(user.value.id, +itemId)
+    if (res)
+      item.value = res
+  }
+}
 
 onBeforeMount(async () => {
   try {
-    const userNickname = route.params.nickname
-    const itemId = route.params.id
-    if (typeof userNickname === 'string' && typeof itemId === 'string') {
-      user.value = await userApi.findByNickname(userNickname)
-      if (!user.value) {
-        ElNotification('User not found')
-        return
-      }
-      const res = await itemApi.findUserItem(user.value.id, +itemId)
-      if (res)
-        item.value = res
-    }
+    await initPageData()
   } catch (error) {
   } finally {
     loading.value = false
@@ -53,33 +106,42 @@ onBeforeMount(async () => {
   <div class="wrapper">
     <div class="item">
       <div class="item-actions">
-        <h2>{{showBidCreator ? 'CREATE BID' : 'ITEM'}}</h2>
-        <div class="item-actions__list">
-          <el-button @click="showBidCreator = !showBidCreator" v-if="!ownToUser() && !showBidCreator" size="large">Create
+        <h2>{{ showBidCreator ? 'CREATE BID' : 'ITEM' }}</h2>
+        <div v-if="!loading" class="item-actions__list">
+          <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
+            v-if="!ownToUser() && !hasOwnBid() && !showBidCreator" size="large">Create
             bid +</el-button>
-          <el-button @click="showBidCreator = !showBidCreator" v-if="!ownToUser() && showBidCreator"
-            size="large">Cancel</el-button>
-          <el-button v-if="ownToUser() && item.existingItems && item.existingItems[0].published === true"
+          <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
+            v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>
+          <el-button :loading="actionsLoading" @click="changePublish"
+            v-if="ownToUser() && item.existingItems && item.existingItems[0].published === true"
             size="large">Unpublish</el-button>
-          <el-button v-if="ownToUser() && item.existingItems && item.existingItems[0].published === false"
-            size="large">publish</el-button>
-          <el-button v-if="ownToUser()" size="large">Delete</el-button>
+          <el-button :loading="actionsLoading" @click="changePublish"
+            v-if="ownToUser() && item.existingItems && item.existingItems[0].published === false"
+            size="large">Publish</el-button>
+          <el-popconfirm v-if="ownToUser()" width="350" @confirm="deleteExistingItem" confirm-button-text="OK"
+            cancel-button-text="No, Thanks" :title="`Are you sure to delete this item?`">
+            <template #reference>
+              <el-button :loading="actionsLoading" size="large">Delete</el-button>
+            </template>
+          </el-popconfirm>
         </div>
       </div>
 
       <p v-if="loading">Loading</p>
       <p v-else-if="!item">Item not found or not related to this user</p>
-      <CreateBid v-else-if="showBidCreator" :item="item" />
+      <CreateBid @bidCreated="bidCreatedHandler" v-else-if="showBidCreator" :item="item" />
       <div v-else class="item-details">
         <div class="item-info">
           <h2>Info</h2>
           <p v-if="item.createdAt">Item created: {{ formatDate(item.createdAt) }}</p>
           <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
           <el-divider />
-          <BidList v-if="item" :item="item" />
+          <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" />
         </div>
-        <ItemPreview v-if="item?.existingItems" :item="item" :wantedPrice="item.existingItems[0].wantedPrice"
-          :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" />
+        <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item"
+          :wantedPrice="item.existingItems[0].wantedPrice" :offerType="item.existingItems[0].offerType"
+          :stats="item?.existingItems[0].stats" />
       </div>
     </div>
 
@@ -104,6 +166,7 @@ onBeforeMount(async () => {
     h2 {
       margin: 0;
     }
+
     margin-bottom: 1rem;
 
     display: flex;
