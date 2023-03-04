@@ -9,7 +9,7 @@ export interface ExistingItem {
     wantedPrice?: number,
     published: boolean,
     user?: User,
-    userId: number,
+    userId?: number,
     offerType: 'WTB' | 'WTS',
     bids?: Bid[]
 }

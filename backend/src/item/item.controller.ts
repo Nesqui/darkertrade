@@ -42,8 +42,8 @@ export class ItemController {
     type: QueryItemDto,
   })
   @UseGuards(JwtAuthGuard)
-  getMarket(@Query() itemQuery: QueryItemDto) {
-    return this.itemService.getMarket(itemQuery);
+  getMarket(@Query() itemQuery: QueryItemDto, @ReqUser() user: User) {
+    return this.itemService.getMarket(itemQuery, user);
   }
 
   @Get('/user/:userId/:existingItemId')

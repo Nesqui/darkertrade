@@ -4,7 +4,13 @@ export interface QueryItemDto {
     id?: number,
     slot?: Slot,
     offerType?:'WTB' | 'WTS' | '',
-    name?: ItemName
+    name?: ItemName,
+    hideMine?: boolean,
+    published?: boolean,
+    searchExistingItemString?: string,
+    searchItemString?: string,
+    limit: number,
+    offset: number
 }
 
 export interface PrefillItem {
@@ -12,6 +18,14 @@ export interface PrefillItem {
     name: ItemName
     slot: Slot
     offerType: 'WTB' | 'WTS'
+}
+
+export interface DisabledItemActions {
+    name: boolean
+    slot: boolean
+    offerType: boolean
+    hideMine: boolean
+    published: boolean
 }
 
 export const initItemApi = () => {

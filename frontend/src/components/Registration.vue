@@ -7,6 +7,7 @@ import { ref } from 'vue'
         <el-input placeholder="Login"></el-input>
         <el-input placeholder="Password"></el-input>
         <el-input placeholder="Confirm password"></el-input>
+        <el-input placeholder="Discord"></el-input>
         <el-button>Signup</el-button>
     </div>
 </template>

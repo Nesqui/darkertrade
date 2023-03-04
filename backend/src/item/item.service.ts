@@ -1,4 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import sequelize from 'sequelize';
+import { Includeable } from 'sequelize';
 import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
@@ -115,24 +117,46 @@ export class ItemService {
     });
   }
 
-  async getMarket(query: QueryItemDto) {
-    const itemWhere = {};
-    const existingItemWhere = {
-      published: true,
-      archived: false,
-    };
-    if (query.slot) itemWhere['slot'] = query.slot;
-    if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+  async getMarket(query: QueryItemDto, user: User) {
+    // const itemWhere = {
+    //   '$existingItems.published$': true,
+    //   '$existingItems.archived$': true,
+    // };
+    const limit = query.limit || 10;
+    const offset = query.offset || 0;
+    console.log(limit, offset);
+    // const existingItemWhere = {
+    //   published: true,
+    //   archived: false,
+    // };
+    // if (query.slot) itemWhere['slot'] = query.slot;
+    // if (query.offerType)
+    //   itemWhere['$existingItems.offerType$'] = query.offerType;
+    // if (query.hideMine)
+    //   itemWhere[sequelize.Op.not] = { '$ExistingItems.userId': user.id };
 
     return await this.itemsRepository.findAll({
-      where: itemWhere,
+      // where: itemWhere,
       include: [
         {
           model: this.existingItemRepository,
-          required: true,
-          where: existingItemWhere,
+          // separate: true,
+          // subQuery: true,
+          as: 'existingItems',
+          separate: true,
+          offset: 5, // <--- OFFSET
+          limit: 5, // <--- LIMIT
+          // offset,
+          // limit,
+          // where: {
+          //   published: true,
+          //   archived: false,
+          //   offerType: query.offerType,
+          // },
           include: [
-            this.statRepository,
+            {
+              model: this.statRepository,
+            },
             {
               model: this.usersRepository,
               attributes: {
@@ -141,7 +165,7 @@ export class ItemService {
             },
           ],
         },
-      ],
+      ] as unknown as Includeable[],
     });
   }
 

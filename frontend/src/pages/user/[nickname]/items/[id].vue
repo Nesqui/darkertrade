@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import BidList from '../../../../components/BidList.vue';
 import CreateBid from '../../../../components/CreateBid.vue';
 import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, User } from '../../../../hooks'
@@ -18,6 +18,7 @@ const actionsLoading = ref(false)
 const user = ref<User>()
 const route = useRoute()
 const showBidCreator = ref(false)
+const router = useRouter()
 
 const existingItemsApi = initExistingItemApi()
 
@@ -56,6 +57,9 @@ const changePublish = async () => {
       published: !item.value.existingItems[0].published
     })
     await initPageData()
+    ElNotification({
+      message: item.value.existingItems[0].published ? 'Item published' : 'Item unpublished'
+    })
   } catch (error) {
   } finally {
     actionsLoading.value = false
@@ -70,7 +74,11 @@ const deleteExistingItem = async () => {
     await existingItemsApi.patch(item.value.existingItems[0].id!, {
       archived: true
     })
-    await initPageData()
+    const userNickname = route.params.nickname
+    router.push(`/user/${userNickname}/items`)
+    ElNotification({
+      message: 'Item deleted'
+    })
   } catch (error) {
   } finally {
     actionsLoading.value = false
@@ -109,7 +117,7 @@ onBeforeMount(async () => {
         <h2>{{ showBidCreator ? 'CREATE BID' : 'ITEM' }}</h2>
         <div v-if="!loading" class="item-actions__list">
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
-            v-if="!ownToUser() && !hasOwnBid() && !showBidCreator" size="large">Create
+            v-if="!ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
             bid +</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>

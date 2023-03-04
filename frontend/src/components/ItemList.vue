@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
-import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi } from '../hooks'
+import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, DisabledItemActions } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
-import { useAttributesStore } from '../store';
+import { useAttributesStore, useUserStore } from '../store';
 import { useRouter } from 'vue-router';
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const chosenItem = ref<Item>()
+const userStore = useUserStore()
+
+
 
 const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
@@ -18,10 +21,10 @@ const props = defineProps({
   doAfterItemSelection: {
     type: Function,
   },
-  disabledActions: {
-    type: Boolean,
-    default: false
-  }
+  disabledItemActions: {
+    type: Object as PropType<DisabledItemActions>,
+    required: true
+  },
 })
 
 const router = useRouter()
@@ -30,29 +33,54 @@ const searchString = ref<string>("")
 
 const clear = () => {
   searchString.value = ""
-  if (!props.disabledActions) {
+
+  if (!props.disabledItemActions.name)
     props.filterItem.name = ""
+  if (!props.disabledItemActions.slot)
     props.filterItem.slot = ""
+  if (!props.disabledItemActions.offerType)
     props.filterItem.offerType = ""
-    chosenItem.value = undefined
-  }
+  if (!props.disabledItemActions.offerType)
+    props.filterItem.hideMine = false
+  if (!props.disabledItemActions.published)
+    props.filterItem.published = true
+
+  chosenItem.value = undefined
 }
 
 watch(() => props.filterItem.slot, (cv, pv) => {
-  clear()
   props.filterItem.slot = cv
+  chosenItem.value = undefined
 })
 
 const filteredItems = computed(() => {
   if (!Array.isArray(props.items) || !props.items.length) return []
   let filteredData = [...props.items]
+  console.log(props.filterItem);
 
-  if (props.filterItem.offerType)
-    filteredData = props.items.filter(item => item.existingItems?.find(existingItem => existingItem.offerType === props.filterItem.offerType))
+  if (typeof props.filterItem.published === 'boolean') {
+    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.published === props.filterItem.published))
+    filteredData.forEach(item => {
+      item.existingItems = item.existingItems?.filter(existingItem => existingItem.published === props.filterItem.published)
+    })
+  }
+  if (props.filterItem.hideMine) {
+    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.userId !== userStore.currentUser.id))
+    filteredData.forEach(item => {
+      item.existingItems = item.existingItems?.filter(existingItem => existingItem.userId !== userStore.currentUser.id)
+    })
+  }
+  if (props.filterItem.offerType) {
+    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.offerType === props.filterItem.offerType))
+    filteredData.forEach(item => {
+      item.existingItems = item.existingItems?.filter(existingItem => existingItem.offerType === props.filterItem.offerType)
+    })
+  }
   if (props.filterItem.slot)
-    filteredData = props.items.filter(item => item.slot === props.filterItem.slot)
+    filteredData = filteredData.filter(item => item.slot === props.filterItem.slot)
   if (searchString.value)
     filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
+
   return filteredData
 })
 
@@ -64,10 +92,24 @@ const filteredExistingItems = computed(() => {
   if (!chosenItem.value)
     return []
 
-  if (searchString.value && chosenItem.value.existingItems?.length)
-    return chosenItem.value.existingItems.filter((existingItem) => statFilter(existingItem, searchString.value))
+  if (!chosenItem.value.existingItems)
+    return []
 
-  return chosenItem.value.existingItems
+  let filteredData = [...chosenItem.value.existingItems]
+
+  if (typeof props.filterItem.published === 'boolean')
+    filteredData = filteredData.filter(existingItem => existingItem.published === props.filterItem.published)
+
+  if (props.filterItem.hideMine)
+    filteredData = filteredData.filter(existingItem => existingItem.userId !== userStore.currentUser.id)
+
+  if (props.filterItem.offerType)
+    filteredData = filteredData.filter(existingItem => existingItem.offerType === props.filterItem.offerType)
+
+  if (searchString.value)
+    filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
+
+  return filteredData
 })
 
 const itemClickHandle = (chosenExistingItem: ExistingItem) => {
@@ -85,7 +127,6 @@ const choseItem = async (currentItem: Item) => {
 }
 
 const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
-  clear()
   props.filterItem.offerType = offerType
 }
 </script>
@@ -98,11 +139,17 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
           :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
-      <el-button-group v-if="!disabledActions" class="actions-filter">
-        <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">WTB</el-button>
-        <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">WTS</el-button>
-        <el-button :disabled="filterItem.offerType === ''" @click="changeOfferType('')">ALL</el-button>
-      </el-button-group>
+      <div class="actions-filter">
+        <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
+          active-text="Published" inactive-text="Unpublished" />
+        <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
+          inactive-text="Show all" />
+        <el-button-group v-if="!disabledItemActions.offerType">
+          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">WTB</el-button>
+          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">WTS</el-button>
+          <el-button :disabled="filterItem.offerType === ''" @click="changeOfferType('')">ALL</el-button>
+        </el-button-group>
+      </div>
     </div>
     <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div v-if="!chosenItem && !filteredItems?.length">
@@ -114,8 +161,10 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
             <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
           </div>
         </div>
+        <p v-else-if="chosenItem && !filteredExistingItems.length">No items exist for chosen filter yet</p>
         <div v-else class="item-list">
           <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
+            {{ existingItem.user?.nickname }}
             <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
               @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
               :stats="existingItem.stats" />
@@ -142,6 +191,12 @@ $step: 1rem;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+}
+
+.actions-filter {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 

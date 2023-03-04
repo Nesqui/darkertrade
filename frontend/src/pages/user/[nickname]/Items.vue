@@ -3,7 +3,7 @@ import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ItemList from '../../../components/ItemList.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
+import { DisabledItemActions, ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
 
 const itemApi = initItemApi()
 const items = ref<Item[]>()
@@ -13,7 +13,17 @@ const user = ref<User>()
 const route = useRoute()
 const filterItem = ref<QueryItemDto>({
     slot: "",
-    name: ""
+    name: "",
+    offerType: "",
+    published: true
+})
+
+const disabledItemActions = ref<DisabledItemActions>({
+    slot: false,
+    name: false,
+    offerType: false,
+    hideMine: true,
+    published: false
 })
 
 onBeforeMount(async () => {
@@ -42,7 +52,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="my-items">
-        <ItemList :filter-item="filterItem" :items="items || []"></ItemList>
+        <ItemList :filter-item="filterItem" :items="items || []" :disabled-item-actions="disabledItemActions"></ItemList>
     </div>
 </template>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
-import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem } from '../hooks'
+import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem, DisabledItemActions } from '../hooks'
 import ItemPreview from './ItemPreview.vue';
 import { useAttributesStore, useUserStore } from '../store';
 import { useRouter } from 'vue-router';
@@ -46,8 +46,16 @@ const filterItem = ref<QueryItemDto>({
   slot: "",
   name: "",
   offerType: "WTS",
+  published: true
 })
 
+const disabledItemActions = ref<DisabledItemActions>({
+  name: true,
+  slot: true,
+  offerType: true,
+  hideMine: true,
+  published: true
+})
 
 const prefillItem = computed((): PrefillItem => ({
   id: props.item.id!,
@@ -85,7 +93,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
         <el-button class="show-hide-button" v-if="showCreator" link @click="showCreator = !showCreator">Select exist
           item</el-button>
         <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
-        <ItemList v-else :no-wrapper="true" :disabledActions="true" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
+        <ItemList v-else :no-wrapper="true" :disabledItemActions="disabledItemActions" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
           :items="[item]">
         </ItemList>
       </div>

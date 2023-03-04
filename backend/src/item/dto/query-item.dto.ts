@@ -1,6 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Slot } from '../slot.entity';
-import { IsEnum, IsOptional, IsString } from 'class-validator';
+import {
+  IsBoolean,
+  IsEnum,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { OfferType } from 'src/existing-item/dto/create-existing-item.dto';
 
 export class QueryItemDto {
@@ -14,6 +24,56 @@ export class QueryItemDto {
     type: String,
   })
   @IsOptional()
-  @IsEnum(['WTB', 'WTS'])
+  @IsEnum(['WTB', 'WTS', ''])
   readonly offerType: OfferType;
+
+  @ApiProperty({
+    type: String,
+  })
+  @IsString()
+  @IsOptional()
+  name: string;
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  hideMine: boolean;
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  published: boolean;
+
+  @ApiProperty({
+    type: Number,
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(20)
+  limit: number;
+
+  @ApiProperty({
+    type: Number,
+  })
+  @Min(0)
+  @IsNumber()
+  offset: number;
+
+  @ApiProperty({
+    type: String,
+  })
+  @IsOptional()
+  @MaxLength(25)
+  searchItemString: string;
+
+  @ApiProperty({
+    type: String,
+  })
+  @IsOptional()
+  @MaxLength(25)
+  searchExistingItemString: string;
 }
