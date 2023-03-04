@@ -1,7 +1,9 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@discord-nestjs/common': ^5.2.1
   '@discord-nestjs/core': ^5.3.3
+  '@discordjs/builders': ^1.4.0
   '@nestjs/cli': ^9.0.0
   '@nestjs/common': ^9.0.0
   '@nestjs/config': ^2.3.1
@@ -52,7 +54,9 @@ specifiers:
   typescript: ^4.3.5
 
 dependencies:
+  '@discord-nestjs/common': 5.2.1_wcgwlbk2p3cczcwpcjd4f2dipe
   '@discord-nestjs/core': 5.3.3_q7mcvzk5znv4dv5rosp7wulr4y
+  '@discordjs/builders': 1.4.0
   '@nestjs/common': 9.3.9_welcnyot5bzd5wa2aovbkxpi4i
   '@nestjs/config': 2.3.1_jrq2rdgfp2sx67wmylmrqliwxe
   '@nestjs/core': 9.3.9_q6agyr4hwia55oswpsa7zjxcpm
@@ -554,6 +558,27 @@ packages:
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
     dev: true
+
+  /@discord-nestjs/common/5.2.1_wcgwlbk2p3cczcwpcjd4f2dipe:
+    resolution: {integrity: sha512-6JP53oA6Fysh1Xj3i30zaJTQIZWoPiigqbHjjzPFOMUSjKbaIEX0/75gZm0JBHCPw9oUnVBGq8taV200pyiosg==}
+    peerDependencies:
+      '@discord-nestjs/core': '*'
+      '@nestjs/common': 8.* || 9.*
+      '@nestjs/core': 8.* || 9.*
+      discord.js: 14.*
+      reflect-metadata: ^0.1.13
+      rxjs: ^7.*
+    dependencies:
+      '@discord-nestjs/core': 5.3.3_q7mcvzk5znv4dv5rosp7wulr4y
+      '@nestjs/common': 9.3.9_welcnyot5bzd5wa2aovbkxpi4i
+      '@nestjs/core': 9.3.9_q6agyr4hwia55oswpsa7zjxcpm
+      '@nestjs/mapped-types': 1.2.2_sm5si6oczf3vcbfl6qa276t67m
+      class-transformer: 0.5.1
+      class-validator: 0.14.0
+      discord.js: 14.7.1
+      reflect-metadata: 0.1.13
+      rxjs: 7.8.0
+    dev: false
 
   /@discord-nestjs/core/5.3.3_q7mcvzk5znv4dv5rosp7wulr4y:
     resolution: {integrity: sha512-R3duQIUU9qQiKEIyleG2swdDdGp3FXaXHbgooVieyEJVx8tvIulH5BryE0lnYiUdPEvXbZrBF+w476PATiDWMQ==}
