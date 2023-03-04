@@ -12,4 +12,9 @@ export class DiscordController {
   findAll(@Query() createDiscordDto: CreateDiscordDto) {
     return this.discordGateway.zalupa(createDiscordDto);
   }
+
+  @Get('/interactions')
+  interactions(@Query() createDiscordDto: CreateDiscordDto) {
+    return this.discordGateway.zalupa(createDiscordDto);
+  }
 }

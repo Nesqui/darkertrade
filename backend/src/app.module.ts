@@ -10,7 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { ExistingItemModule } from './existing-item/existing-item.module';
 import { StatModule } from './stat/stat.module';
 import { BidModule } from './bid/bid.module';
-import { DiscordBotModule } from './discord/discord.module';
+// import { DiscordBotModule } from './discord/discord.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { DiscordBotModule } from './discord/discord.module';
     UserModule,
     ItemModule,
     AttributeModule,
-    DiscordBotModule,
+    // DiscordBotModule,
     AuthModule,
     ExistingItemModule,
     StatModule,
