@@ -24,7 +24,7 @@ import { MessagesModule } from './messages/messages.module';
     UserModule,
     ItemModule,
     AttributeModule,
-    // DiscordBotModule,
+    DiscordBotModule,
     AuthModule,
     ExistingItemModule,
     StatModule,

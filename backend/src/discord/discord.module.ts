@@ -8,6 +8,7 @@ import { DiscordController } from './discord.controller';
 import { DiscordGateway } from './discord.gateway';
 import { PlayCommand } from './commands/play.command';
 import { RegisterCommand } from './commands/register.command';
+import { usersProviders } from 'src/user/user.providers';
 
 @Module({
   imports: [
@@ -22,7 +23,7 @@ import { RegisterCommand } from './commands/register.command';
             GatewayIntentBits.GuildMessages,
             // You must allow message content for your application in discord developers
             // https://support-dev.discord.com/hc/en-us/articles/4404772028055
-            //GatewayIntentBits.MessageContent,
+            GatewayIntentBits.MessageContent,
           ],
         },
         registerCommandOptions: [
@@ -36,7 +37,13 @@ import { RegisterCommand } from './commands/register.command';
     }),
   ],
   controllers: [DiscordController],
-  providers: [DiscordGateway, JwtService, PlayCommand, RegisterCommand],
+  providers: [
+    DiscordGateway,
+    JwtService,
+    PlayCommand,
+    RegisterCommand,
+    ...usersProviders,
+  ],
   exports: [DiscordGateway],
 })
 export class DiscordBotModule {}
