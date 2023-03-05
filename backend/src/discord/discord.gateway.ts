@@ -6,6 +6,7 @@ import { CreateDiscordDto } from './dto/create-discord.dto';
 
 import { MessageFromUserGuard } from './guards/message-from-user';
 import { MessageToUpperInterceptor } from './interceptors/message-to-upper';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class DiscordGateway {
@@ -14,6 +15,8 @@ export class DiscordGateway {
   constructor(
     @InjectDiscordClient()
     private readonly client: Client,
+    @Inject('USERS_REPOSITORY')
+    private usersRepository: typeof User,
   ) {}
 
   @Once('ready')
@@ -37,6 +40,10 @@ export class DiscordGateway {
   onBidCreated = async (id: number) => {
     // TODO implement DiscordNotify
     // disc.send({})
+    // const discUser = await this.client.users.fetch(discordInfo.id);
+    // const responseDB = await this.usersRepository.findOne({});
+    // const discordUser = this.client.users.fetch(responseDB.discordID);
+    // discordUser.send('turbo notifa');
   };
 }
 

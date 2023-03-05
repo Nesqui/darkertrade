@@ -8,7 +8,7 @@ import {
   On,
 } from '@discord-nestjs/core';
 import type { ModalActionRowComponentBuilder } from '@discordjs/builders';
-import { Logger, UseGuards } from '@nestjs/common';
+import { Inject, Logger, UseGuards } from '@nestjs/common';
 import {
   ActionRowBuilder,
   Client,
@@ -18,22 +18,28 @@ import {
   TextInputBuilder,
   TextInputStyle,
   codeBlock,
+  PermissionFlagsBits,
 } from 'discord.js';
+import { User } from 'src/user/user.entity';
 
 import { IsModalInteractionGuard } from '../guards/is-modal-interaction.guard';
 import { FormDto } from './dto/form.dto';
 
+const DISCORD_AUTH_ROLE_NAME = 'Authed';
+
 @Command({
   name: 'submit-registration',
   description: 'Apply for registration',
+  defaultMemberPermissions: PermissionFlagsBits.UseApplicationCommands,
 })
 export class RegisterCommand {
   private readonly logger = new Logger(RegisterCommand.name);
   private readonly requestParticipantModalId = 'RequestParticipant';
-  private readonly usernameComponentId = 'username';
   private readonly commentComponentId = 'comment';
 
   constructor(
+    @Inject('USERS_REPOSITORY')
+    private usersRepository: typeof User,
     @InjectDiscordClient()
     private readonly client: Client,
   ) {}
@@ -44,27 +50,25 @@ export class RegisterCommand {
       .setTitle('Request participation')
       .setCustomId(this.requestParticipantModalId);
 
-    const userNameInputComponent = new TextInputBuilder()
-      .setCustomId(this.usernameComponentId)
-      .setLabel('Username on site')
-      .setStyle(TextInputStyle.Short)
-      .setPlaceholder(this.usernameComponentId);
+    // const userNameInputComponent = new TextInputBuilder()
+    // .setCustomId(this.usernameComponentId)
+    // .setLabel('Username on site')
+    // .setStyle(TextInputStyle.Short)
+    // .setPlaceholder(this.usernameComponentId);
 
     const commentInputComponent = new TextInputBuilder()
       .setCustomId(this.commentComponentId)
       .setLabel('Copy-paste from site')
       .setStyle(TextInputStyle.Short)
-      .setPlaceholder(this.commentComponentId);
+      .setPlaceholder('Your discord has to match the one on site');
 
-    const rows = [userNameInputComponent, commentInputComponent].map(
-      (component) =>
-        new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-          component,
-        ),
+    const rows = [commentInputComponent].map((component) =>
+      new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
+        component,
+      ),
     );
 
     modal.addComponents(...rows);
-
     await interaction.showModal(modal);
   }
 
@@ -75,29 +79,45 @@ export class RegisterCommand {
     @EventParams() eventArgs: ClientEvents['interactionCreate'],
   ): Promise<void> {
     const [modal] = eventArgs;
-    // console.log(eventArgs);
-    const discordInfo = modal.user;
-    //navern sanitize
-    const username = modal['fields'].fields.get(this.usernameComponentId).value;
-
-    //sanitize
-    const comment = modal['fields'].fields.get(this.commentComponentId).value;
-
     if (!modal.isModalSubmit()) return;
+    if (modal.customId !== this.requestParticipantModalId) return;
+    const comment = modal['fields'].fields.get(this.commentComponentId).value;
 
     this.logger.log(`Modal ${modal.customId} submit`);
 
-    if (modal.customId !== this.requestParticipantModalId) return;
+    const discUser = await this.client.users.fetch(modal.user.id);
 
-    let response =
-      codeBlock('markdown', comment) + codeBlock('markdown', username);
-
-    if (username == 'test') {
-      if (comment == 'tes3') {
-        response = 'funny buisness';
+    let modalResponse = 'mismatch of discord name';
+    const responseDB = await this.usersRepository.findOne({
+      where: { hash: comment },
+    });
+    if (responseDB) {
+      if (
+        responseDB.discord.toLowerCase() ===
+        discUser.username.toLowerCase() + '#' + discUser.discriminator
+      ) {
+        modalResponse = 'form submit success, ';
+        try {
+          modal.guild.members.cache
+            .get(discUser.id)
+            .roles.add(
+              modal.guild.roles.cache.find(
+                (r) => r.name === DISCORD_AUTH_ROLE_NAME,
+              ),
+            );
+          modalResponse += 'role assigned, ';
+        } catch (error) {
+          this.logger.log(`Modal ${modal.customId} ${error}`);
+        }
+        try {
+          // this.usersRepository.update()
+          modalResponse += 'site access granted';
+        } catch (error) {
+          this.logger.log(`Modal ${modal.customId} DB ${error}`);
+        }
       }
     }
 
-    await modal.reply(response);
+    await modal.reply(modalResponse);
   }
 }
