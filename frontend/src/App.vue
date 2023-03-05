@@ -3,7 +3,7 @@ import { computed, onBeforeMount, onMounted, ref } from 'vue'
 import LeftMenu from './components/LeftMenu.vue'
 import RightMenu from './components/RightMenu.vue'
 import TopMenu from './components/TopMenu.vue'
-import TradeDetails from './components/TradeDetails.vue'
+import Main from './pages/Main.vue'
 import { initAttributesApi } from './hooks'
 import Auth from './pages/Auth.vue'
 import { useUserStore } from './store'
@@ -33,7 +33,7 @@ onBeforeMount(async () => {
     <TopMenu :tradeMeta="tradeMeta" />
     <div class="trade" v-if="isAuth">
       <LeftMenu :trade-meta="tradeMeta" />
-      <TradeDetails :trade-meta="tradeMeta" />
+      <Main :trade-meta="tradeMeta" />
       <RightMenu :trade-meta="tradeMeta" />
     </div>
     <Auth v-else />

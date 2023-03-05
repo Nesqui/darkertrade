@@ -12,6 +12,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { OfferType } from 'src/existing-item/dto/create-existing-item.dto';
+import { Transform } from 'class-transformer';
 
 export class QueryItemDto {
   @ApiProperty({
@@ -38,6 +39,7 @@ export class QueryItemDto {
     type: Boolean,
   })
   @IsBoolean()
+  @Transform(({ obj }) => obj.hideMine === 'true' || obj.hideMine === true)
   @IsOptional()
   hideMine: boolean;
 
@@ -46,6 +48,7 @@ export class QueryItemDto {
   })
   @IsBoolean()
   @IsOptional()
+  @Transform(({ obj }) => obj.published === 'true' || obj.published === true)
   published: boolean;
 
   @ApiProperty({

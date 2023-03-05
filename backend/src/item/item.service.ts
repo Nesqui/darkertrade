@@ -129,6 +129,7 @@ export class ItemService {
 
     if (query.slot) itemWhere['slot'] = query.slot;
     if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 

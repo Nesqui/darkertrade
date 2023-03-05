@@ -189,8 +189,6 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
 <template>
   <div class="item-list-component">
     <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
-      {{ pagination.offset }}
-      {{ maxCount }} | {{ existingItems?.length }}
       <div class="actions">
         <el-input v-model="filterItem.searchItemString"
           :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
@@ -224,7 +222,7 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
           infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in existingItems" :key="index">
-              {{ existingItem.user?.nickname }}
+              <pre>{{ existingItem.user?.nickname }}</pre>
               <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
                 @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
                 :stats="existingItem.stats" />
