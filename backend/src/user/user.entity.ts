@@ -5,7 +5,9 @@ import {
   Unique,
   AllowNull,
   Default,
+  HasMany,
 } from 'sequelize-typescript';
+import { ExistingItem } from 'src/existing-item/existing-item.entity';
 
 @Table
 export class User extends Model {
@@ -27,6 +29,9 @@ export class User extends Model {
 
   @Column
   hash: string;
+
+  @HasMany(() => ExistingItem)
+  existingItems: ExistingItem[];
 
   @AllowNull(false)
   @Default(false)

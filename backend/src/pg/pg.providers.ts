@@ -51,8 +51,8 @@ export const pgProviders = [
       });
       sequelize.addModels([
         ExistingItem,
-        Item,
         User,
+        Item,
         Attribute,
         AttributePair,
         Stat,

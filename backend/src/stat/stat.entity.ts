@@ -26,6 +26,7 @@ export class Stat extends Model {
   value: number;
 
   @ForeignKey(() => Attribute)
+  @AllowNull(false)
   @Column
   attributeId: number;
 

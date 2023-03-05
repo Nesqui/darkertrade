@@ -187,7 +187,7 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
 </script>
 
 <template>
-  <div>
+  <div class="item-list-component">
     <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       {{ pagination.offset }}
       {{ maxCount }} | {{ existingItems?.length }}
@@ -244,10 +244,13 @@ $frameWidth: 100px;
 $frameHeight: 100px;
 $step: 1rem;
 
+.item-list-component {
+  width: 860px;
+}
+
 .item-list-wrapper {
   padding: $step;
   overflow-y: auto;
-  width: 860px;
   max-height: 530px;
   margin-bottom: 2rem;
   width: 100%;
