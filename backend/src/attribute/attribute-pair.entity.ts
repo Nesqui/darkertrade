@@ -26,6 +26,7 @@ export class AttributePair extends Model {
 
   @ForeignKey(() => Attribute)
   @PrimaryKey
+  @AllowNull(false)
   @Column
   attributeId: number;
 
@@ -34,6 +35,7 @@ export class AttributePair extends Model {
 
   @ForeignKey(() => Attribute)
   @PrimaryKey
+  @AllowNull(false)
   @Column
   destAttributeId: number;
 

@@ -34,6 +34,7 @@ export class Stat extends Model {
   attribute: Attribute;
 
   @ForeignKey(() => ExistingItem)
+  @AllowNull(false)
   @Column
   existingItemId: number;
 

@@ -42,6 +42,7 @@ export const pgProviders = [
     useFactory: async (ConfigService: ConfigService) => {
       const sequelize = new Sequelize({
         dialect: ConfigService.get('PG_DIALECT'),
+        logging: false,
         host: ConfigService.get('PG_HOST'),
         port: ConfigService.get('PG_PORT'),
         username: ConfigService.get('PG_USERNAME'),
@@ -50,13 +51,13 @@ export const pgProviders = [
         operatorsAliases: ConfigService.get('PG_OPERATORSALIASES'),
       });
       sequelize.addModels([
-        ExistingItem,
         User,
         Item,
         Attribute,
         AttributePair,
         Stat,
         Bid,
+        ExistingItem,
       ]);
       try {
         await sequelize.sync({ alter: true });

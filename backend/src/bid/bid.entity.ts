@@ -22,6 +22,7 @@ export class Bid extends Model {
   price: number;
 
   @ForeignKey(() => User)
+  @AllowNull(false)
   @Column
   userId: number;
 
@@ -29,6 +30,7 @@ export class Bid extends Model {
   user: User;
 
   @ForeignKey(() => ExistingItem)
+  @AllowNull(false)
   @Column
   existingItemId: number;
 

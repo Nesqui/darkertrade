@@ -24,6 +24,7 @@ import { User } from 'src/user/user.entity';
 @Table
 export class ExistingItem extends Model {
   @ForeignKey(() => User)
+  @AllowNull(false)
   @Column
   userId: number;
 
@@ -34,6 +35,7 @@ export class ExistingItem extends Model {
   stats: Stat[];
 
   @ForeignKey(() => Item)
+  @AllowNull(false)
   @Column
   itemId: number;
 
