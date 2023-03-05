@@ -110,7 +110,20 @@ export class RegisterCommand {
           this.logger.log(`Modal ${modal.customId} ${error}`);
         }
         try {
-          // this.usersRepository.update()
+          //   await this.usersRepository.update(
+          //     {
+          //       discordActive: true,
+          //       hash: '',
+          //       discordId: discUser.id,
+          //     },
+          //     {
+          //       where: { hash: comment },
+          //     },
+          //   );
+          responseDB.discordActive = true;
+          responseDB.hash = '';
+          responseDB.discordId = discUser.id;
+          await responseDB.save();
           modalResponse += 'site access granted';
         } catch (error) {
           this.logger.log(`Modal ${modal.customId} DB ${error}`);

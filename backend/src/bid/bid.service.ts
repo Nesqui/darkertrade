@@ -4,6 +4,7 @@ import {
   Injectable,
   NotAcceptableException,
 } from '@nestjs/common';
+import DiscordGateway from 'src/discord/discord.gateway';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
 import { Bid } from './bid.entity';
@@ -19,6 +20,8 @@ export class BidService {
     private userRepository: typeof User,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
+    // @Inject()
+    private discordGateway: DiscordGateway,
   ) {}
 
   async create(createBidDto: CreateBidDto, user: User) {
@@ -80,6 +83,7 @@ export class BidService {
       ],
     });
 
+    await this.discordGateway.onBidCreated(bid.id);
     return bid;
   }
 

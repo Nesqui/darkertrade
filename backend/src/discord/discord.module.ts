@@ -9,6 +9,8 @@ import { DiscordGateway } from './discord.gateway';
 import { PlayCommand } from './commands/play.command';
 import { RegisterCommand } from './commands/register.command';
 import { usersProviders } from 'src/user/user.providers';
+import { bidProviders } from 'src/bid/bid.providers';
+import { existingItemProviders } from 'src/existing-item/existing-item.providers';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { usersProviders } from 'src/user/user.providers';
     PlayCommand,
     RegisterCommand,
     ...usersProviders,
+    ...bidProviders,
+    ...existingItemProviders,
   ],
   exports: [DiscordGateway],
 })

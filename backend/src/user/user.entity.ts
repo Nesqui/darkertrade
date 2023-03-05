@@ -28,6 +28,9 @@ export class User extends Model {
   discord: string;
 
   @Column
+  discordId: string;
+
+  @Column
   hash: string;
 
   @HasMany(() => ExistingItem)
