@@ -1,8 +1,14 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import sequelize from 'sequelize';
 import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
+import { QueryItemDto } from 'src/item/dto/query-item.dto';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
@@ -44,51 +50,37 @@ export class ExistingItemService {
     return await this.findOne(item.id);
   }
 
-  async findAllByItemId(
-    filterExistingItemDto: FilterExistingItemDto,
-    itemId: number,
-    user: User,
-  ) {
-    const filter = { ...filterExistingItemDto, archived: false };
+  async findAllByItemId(query: QueryItemDto, itemId: number, user: User) {
+    const existingItemWhere = {
+      archived: false,
+      itemId,
+    };
+
+    if (isNaN(query.limit) || isNaN(query.offset))
+      throw new ForbiddenException('You must paginate this query');
+
     const itemWhere = {};
 
-    if (filter.slot) {
-      itemWhere['slot'] = filterExistingItemDto.slot;
-      delete filter.slot;
+    if (query.slot) {
+      itemWhere['slot'] = query.slot;
     }
 
-    const item = await this.existingItemRepository.findAll({
-      where: { ...filter, userId: user.id },
-      include: [
-        this.statRepository,
-        {
-          model: this.itemRepository,
-          where: { ...itemWhere, id: itemId },
-        },
-        {
-          model: this.userRepository,
-          attributes: {
-            exclude: ['password', 'discord'],
-          },
-        },
-      ],
-    });
-
-    if (!item) return [];
-    return item;
-  }
-
-  async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
-    const filter = { ...filterExistingItemDto, archived: false };
-    const itemWhere = {};
-
-    if (filter.slot) {
-      itemWhere['slot'] = filterExistingItemDto.slot;
-      delete filter.slot;
+    if (!query.published && query.hideMine) {
+      throw new ForbiddenException('You cant find not own private items');
     }
 
-    const item = await this.existingItemRepository.findAll({
-      where: { ...filter, userId: user.id },
+    if (query.published) existingItemWhere['published'] = query.published;
+    else {
+      existingItemWhere['published'] = query.published;
+      existingItemWhere['userId'] = user.id;
+    }
+
+    if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+    if (query.hideMine)
+      existingItemWhere[sequelize.Op.not] = { userId: user.id };
+
+    const item = await this.existingItemRepository.findAndCountAll({
+      where: existingItemWhere,
       include: [
         this.statRepository,
         {
@@ -102,11 +94,43 @@ export class ExistingItemService {
           },
         },
       ],
+      limit: query.limit,
+      offset: query.offset,
     });
 
     if (!item) return [];
     return item;
   }
+
+  // async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
+  //   const filter = { ...filterExistingItemDto, archived: false };
+  //   const itemWhere = {};
+
+  //   if (filter.slot) {
+  //     itemWhere['slot'] = filterExistingItemDto.slot;
+  //     delete filter.slot;
+  //   }
+
+  //   const item = await this.existingItemRepository.findAll({
+  //     where: { ...filter, userId: user.id },
+  //     include: [
+  //       this.statRepository,
+  //       {
+  //         model: this.itemRepository,
+  //         where: itemWhere,
+  //       },
+  //       {
+  //         model: this.userRepository,
+  //         attributes: {
+  //           exclude: ['password', 'discord'],
+  //         },
+  //       },
+  //     ],
+  //   });
+
+  //   if (!item) return [];
+  //   return item;
+  // }
 
   async findOne(id: number) {
     const existingItem = await this.existingItemRepository.findOne({

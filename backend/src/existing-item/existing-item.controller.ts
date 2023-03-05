@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from 'src/user/user.decorator';
 import { User } from 'src/user/user.entity';
 import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
+import { QueryItemDto } from 'src/item/dto/query-item.dto';
 
 @Controller('existing-item')
 export class ExistingItemController {
@@ -30,21 +31,18 @@ export class ExistingItemController {
     return await this.existingItemService.create(createExistingItemDto, user);
   }
 
-  @Get()
-  @UseGuards(JwtAuthGuard)
-  findAll(
-    @ReqUser() user: User,
-    @Query() filterExistingItemDto: FilterExistingItemDto,
-  ) {
-    return this.existingItemService.findAll(filterExistingItemDto, user);
-  }
+  // @Get()
+  // @UseGuards(JwtAuthGuard)
+  // findAll(@ReqUser() user: User, @Query() filterExistingItemDto: QueryItemDto) {
+  //   return this.existingItemService.findAll(filterExistingItemDto, user);
+  // }
 
   @Get('/item/:itemId')
   @UseGuards(JwtAuthGuard)
   findAllByItemId(
     @ReqUser() user: User,
     @Param('itemId') itemId: string,
-    @Query() filterExistingItemDto: FilterExistingItemDto,
+    @Query() filterExistingItemDto: QueryItemDto,
   ) {
     return this.existingItemService.findAllByItemId(
       filterExistingItemDto,

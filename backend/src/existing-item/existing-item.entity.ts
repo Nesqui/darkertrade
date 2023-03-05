@@ -1,3 +1,4 @@
+import { MaxLength } from 'class-validator';
 import {
   Table,
   Column,
@@ -49,8 +50,15 @@ export class ExistingItem extends Model {
   @IsDecimal
   @Min(0)
   @Max(9999)
+  @MaxLength(4)
   @Column(DataType.DECIMAL)
-  wantedPrice: number;
+  get wantedPrice(): number {
+    const value = this.getDataValue('wantedPrice');
+    return value === null ? null : parseFloat(value);
+  }
+  set wantedPrice(value: number) {
+    this.setDataValue('wantedPrice', value);
+  }
 
   @Default('WTB')
   @AllowNull(false)

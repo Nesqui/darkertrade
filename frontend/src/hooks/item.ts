@@ -9,8 +9,8 @@ export interface QueryItemDto {
     published?: boolean,
     searchExistingItemString?: string,
     searchItemString?: string,
-    limit: number,
-    offset: number
+    limit?: number,
+    offset?: number
 }
 
 export interface PrefillItem {

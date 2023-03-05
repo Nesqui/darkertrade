@@ -1,4 +1,4 @@
-import { Item, Stat, useApi, User } from "."
+import { Item, QueryItemDto, Stat, useApi, User } from "."
 import { Bid } from "./bid";
 
 export interface ExistingItem {
@@ -24,17 +24,22 @@ export interface FilterExistingItemDto {
     slot?: string
 }
 
+export interface CountedExistingItemsResponse {
+    count: number,
+    rows: ExistingItem[]
+}
+
 export const initExistingItemApi = () => {
     const { axiosClient } = useApi()
 
-    const findAll = async (filterExistingItemDto: FilterExistingItemDto): Promise<ExistingItem[]> => {
-        const res = await axiosClient('existing-item', {
-            params: filterExistingItemDto
-        })
-        return res.data
-    }
+    // const findAll = async (filterExistingItemDto: FilterExistingItemDto): Promise<ExistingItem[]> => {
+    //     const res = await axiosClient('existing-item', {
+    //         params: filterExistingItemDto
+    //     })
+    //     return res.data
+    // }
 
-    const findAllByItemId = async (filterExistingItemDto: FilterExistingItemDto, itemId: number): Promise<ExistingItem[]> => {
+    const findAllByItemId = async (itemId: number, filterExistingItemDto: QueryItemDto): Promise<CountedExistingItemsResponse> => {
         const res = await axiosClient(`existing-item/item/${itemId}`, {
             params: filterExistingItemDto
         })
@@ -52,7 +57,7 @@ export const initExistingItemApi = () => {
     }
 
     return {
-        findAll,
+        // findAll,
         findAllByItemId,
         create,
         patch

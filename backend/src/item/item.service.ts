@@ -1,6 +1,6 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import sequelize from 'sequelize';
-import { Includeable } from 'sequelize';
+import { QueryTypes, Includeable } from 'sequelize';
 import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
@@ -20,6 +20,8 @@ export class ItemService {
     private existingItemRepository: typeof ExistingItem,
     @Inject('STATS_REPOSITORY')
     private statRepository: typeof Stat,
+    @Inject('SEQUELIZE')
+    private db,
   ) {}
 
   create(createItemDto: CreateItemDto) {
@@ -118,55 +120,30 @@ export class ItemService {
   }
 
   async getMarket(query: QueryItemDto, user: User) {
-    // const itemWhere = {
-    //   '$existingItems.published$': true,
-    //   '$existingItems.archived$': true,
-    // };
-    const limit = query.limit || 10;
-    const offset = query.offset || 0;
-    console.log(limit, offset);
-    // const existingItemWhere = {
-    //   published: true,
-    //   archived: false,
-    // };
-    // if (query.slot) itemWhere['slot'] = query.slot;
-    // if (query.offerType)
-    //   itemWhere['$existingItems.offerType$'] = query.offerType;
-    // if (query.hideMine)
-    //   itemWhere[sequelize.Op.not] = { '$ExistingItems.userId': user.id };
+    const itemWhere = {};
 
-    return await this.itemsRepository.findAll({
-      // where: itemWhere,
+    const existingItemWhere = {
+      published: true,
+      archived: false,
+    };
+
+    if (query.slot) itemWhere['slot'] = query.slot;
+    if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+    if (query.hideMine)
+      existingItemWhere[sequelize.Op.not] = { userId: user.id };
+
+    const res = await this.itemsRepository.findAll({
+      where: itemWhere,
       include: [
         {
           model: this.existingItemRepository,
-          // separate: true,
-          // subQuery: true,
-          as: 'existingItems',
-          separate: true,
-          offset: 5, // <--- OFFSET
-          limit: 5, // <--- LIMIT
-          // offset,
-          // limit,
-          // where: {
-          //   published: true,
-          //   archived: false,
-          //   offerType: query.offerType,
-          // },
-          include: [
-            {
-              model: this.statRepository,
-            },
-            {
-              model: this.usersRepository,
-              attributes: {
-                exclude: ['password', 'discord'],
-              },
-            },
-          ],
+          where: existingItemWhere,
+          limit: 1,
         },
-      ] as unknown as Includeable[],
+      ],
     });
+
+    return res;
   }
 
   findOne(id: number) {

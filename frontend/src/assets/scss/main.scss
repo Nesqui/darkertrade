@@ -91,6 +91,18 @@ button:hover {
     align-items: flex-start;
 }
 
+
+.el-loading-spinner .el-loading-text {
+    color: white;
+    font-weight: 600;
+    font-size: 20px;
+}
+
+.el-loading-spinner .circular {
+    -webkit-animation: unset;
+    animation: unset;
+}
+
 .wrapper {
     border-radius: 5px;
     scrollbar-gutter: stable both-edges;

@@ -54,6 +54,7 @@ export class QueryItemDto {
   @IsNumber()
   @Min(0)
   @Max(20)
+  @IsOptional()
   limit: number;
 
   @ApiProperty({
@@ -61,6 +62,7 @@ export class QueryItemDto {
   })
   @Min(0)
   @IsNumber()
+  @IsOptional()
   offset: number;
 
   @ApiProperty({

@@ -14,8 +14,7 @@ const filterItem = ref<QueryItemDto>({
     hideMine: true,
     searchItemString: "",
     searchExistingItemString: "",
-    limit: 2,
-    offset: 0,
+    published: true
 })
 
 watch(filterItem,  async () => {

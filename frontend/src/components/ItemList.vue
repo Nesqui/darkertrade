@@ -4,12 +4,20 @@ import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, Dis
 import ItemPreview from '../components/ItemPreview.vue';
 import { useAttributesStore, useUserStore } from '../store';
 import { useRouter } from 'vue-router';
+import { filter } from 'lodash';
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const chosenItem = ref<Item>()
 const userStore = useUserStore()
+const maxCount = ref(6)
+const pageLoading = ref(false)
+const existingItemsApi = initExistingItemApi()
+const existingItems = ref<ExistingItem[]>()
 
-
+const pagination = ref({
+  limit: 6,
+  offset: 0
+})
 
 const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
@@ -45,12 +53,24 @@ const clear = () => {
   if (!props.disabledItemActions.published)
     props.filterItem.published = true
 
+  props.filterItem.offset = 0
+
   chosenItem.value = undefined
+  existingItems.value = undefined
 }
 
-watch(() => props.filterItem.slot, (cv, pv) => {
-  props.filterItem.slot = cv
-  chosenItem.value = undefined
+watch(props.filterItem, async (cv, pv) => {
+  if (!chosenItem.value?.id)
+    return
+
+  pagination.value.offset = 0
+
+  const { rows, count } = await findExistingItemsById(chosenItem.value.id)
+  maxCount.value = count
+  existingItems.value = rows
+}, {
+  deep: true,
+  immediate: false
 })
 
 const filteredItems = computed(() => {
@@ -84,33 +104,33 @@ const filteredItems = computed(() => {
   return filteredData
 })
 
-const statFilter = (existingItem: ExistingItem, queryString: string) => {
-  return existingItem.stats.find(stat => getAttributeNameById(stat.attributeId).toLowerCase().indexOf(queryString.toLowerCase()) != -1)
-}
+// const statFilter = (existingItem: ExistingItem, queryString: string) => {
+//   return existingItem.stats.find(stat => getAttributeNameById(stat.attributeId).toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+// }
 
-const filteredExistingItems = computed(() => {
-  if (!chosenItem.value)
-    return []
+// const filteredExistingItems = computed(() => {
+//   if (!chosenItem.value)
+//     return []
 
-  if (!chosenItem.value.existingItems)
-    return []
+//   if (!chosenItem.value.existingItems)
+//     return []
 
-  let filteredData = [...chosenItem.value.existingItems]
+//   let filteredData = [...chosenItem.value.existingItems]
 
-  if (typeof props.filterItem.published === 'boolean')
-    filteredData = filteredData.filter(existingItem => existingItem.published === props.filterItem.published)
+//   if (typeof props.filterItem.published === 'boolean')
+//     filteredData = filteredData.filter(existingItem => existingItem.published === props.filterItem.published)
 
-  if (props.filterItem.hideMine)
-    filteredData = filteredData.filter(existingItem => existingItem.userId !== userStore.currentUser.id)
+//   if (props.filterItem.hideMine)
+//     filteredData = filteredData.filter(existingItem => existingItem.userId !== userStore.currentUser.id)
 
-  if (props.filterItem.offerType)
-    filteredData = filteredData.filter(existingItem => existingItem.offerType === props.filterItem.offerType)
+//   if (props.filterItem.offerType)
+//     filteredData = filteredData.filter(existingItem => existingItem.offerType === props.filterItem.offerType)
 
-  if (searchString.value)
-    filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
+//   if (searchString.value)
+//     filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
 
-  return filteredData
-})
+//   return filteredData
+// })
 
 const itemClickHandle = (chosenExistingItem: ExistingItem) => {
   if (props.doAfterItemSelection) {
@@ -121,9 +141,48 @@ const itemClickHandle = (chosenExistingItem: ExistingItem) => {
 }
 
 const choseItem = async (currentItem: Item) => {
-  props.filterItem.id = currentItem.id
-  props.filterItem.name = currentItem.name;
+  // props.filterItem.id = currentItem.id
+  // props.filterItem.name = currentItem.name;
+  if (!currentItem.id)
+    return
   chosenItem.value = currentItem
+  const { rows, count } = await findExistingItemsById(currentItem.id)
+  maxCount.value = count
+  existingItems.value = rows
+}
+
+const findExistingItemsById = async (itemId: number) => {
+  return await existingItemsApi.findAllByItemId(itemId, {
+    ...props.filterItem,
+    ...pagination.value
+  })
+}
+
+const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38" stroke="#fff">
+    <g fill="none" fill-rule="evenodd">
+        <g transform="translate(1 1)" stroke-width="2">
+            <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>
+            <path d="M36 18c0-9.94-8.06-18-18-18">
+                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"/>
+            </path>
+        </g>
+    </g>
+</svg>
+      `
+
+const loadMoreExistingItems = async () => {
+  pageLoading.value = true
+  if (!chosenItem.value?.id)
+    return
+  if (pagination.value.offset < maxCount.value) {
+    pagination.value.offset = pagination.value.limit + pagination.value.offset
+    const { rows, count } = await findExistingItemsById(chosenItem.value.id)
+    // await new Promise(resolve => setTimeout(() => resolve(1), 500))
+    if (existingItems.value?.length)
+      existingItems.value = [...existingItems.value, ...rows]
+  }
+  pageLoading.value = false
 }
 
 const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
@@ -134,8 +193,10 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
 <template>
   <div>
     <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
+      {{ pagination.offset }}
+      {{ maxCount }}
       <div class="actions">
-        <el-input v-model="searchString"
+        <el-input v-model="filterItem.searchItemString"
           :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
@@ -151,23 +212,29 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
         </el-button-group>
       </div>
     </div>
-    <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
-      <div v-if="!chosenItem && !filteredItems?.length">
-        <p>No items exist for chosen filter yet</p>
-      </div>
-      <div class="item-list__wrapper">
-        <div v-if="!chosenItem && filteredItems?.length" class="item-list">
-          <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-            <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
-          </div>
+    <div v-loading="pageLoading" element-loading-text="Loading..." :element-loading-spinner="svg"
+       element-loading-background="rgb(0 0 0 / 40%);">
+      <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
+        <div v-if="!chosenItem && !filteredItems?.length">
+          <p>No items exist for chosen filter yet</p>
         </div>
-        <p v-else-if="chosenItem && !filteredExistingItems.length">No items exist for chosen filter yet</p>
-        <div v-else class="item-list">
-          <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-            {{ existingItem.user?.nickname }}
-            <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
-              @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
-              :stats="existingItem.stats" />
+        <div class="item-list__wrapper">
+          <div v-if="!chosenItem && filteredItems?.length" class="item-list">
+            <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
+              <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+            </div>
+          </div>
+          <p v-else-if="chosenItem && !existingItems?.length">No items exist for chosen filter yet</p>
+          <div v-if="existingItems?.length" class="infinite-scroll" v-infinite-scroll="loadMoreExistingItems"
+            infinite-scroll-delay="1000">
+            <div class="item-list">
+              <div class="wrapper-item" v-for="(existingItem, index) in existingItems" :key="index">
+                {{ existingItem.user?.nickname }}
+                <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
+                  @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
+                  :stats="existingItem.stats" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -207,10 +274,15 @@ $step: 1rem;
   width: 100%;
 }
 
+.infinite-scroll {
+  height: 700px;
+}
+
 .item-list {
   overflow-y: auto;
   overflow-x: hidden;
   display: grid;
+  padding-bottom: 2rem;
 
   gap: $step;
   grid-template-columns: 1fr 1fr 1fr;

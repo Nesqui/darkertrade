@@ -28,7 +28,7 @@ const existingItems = ref<ExistingItem[]>()
 const initDialog = async () => {
   try {
     loading.value = true
-    const res = await existingItemApi.findAllByItemId({}, props.item.id!)
+    const res = await existingItemApi.findAllByItemId(props.item.id!, {})
     if (!res) {
       return
     }

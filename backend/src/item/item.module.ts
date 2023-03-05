@@ -8,6 +8,7 @@ import { existingItemProviders } from 'src/existing-item/existing-item.providers
 import { statsProviders } from 'src/stat/stat.proviers';
 import { usersProviders } from 'src/user/user.providers';
 import { bidProviders } from 'src/bid/bid.providers';
+import { pgProviders } from 'src/pg/pg.providers';
 
 @Module({
   imports: [PgModule],
@@ -19,6 +20,7 @@ import { bidProviders } from 'src/bid/bid.providers';
     ...statsProviders,
     ...usersProviders,
     ...bidProviders,
+    ...pgProviders,
     JwtService,
   ],
 })
