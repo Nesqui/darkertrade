@@ -53,11 +53,11 @@ export const pgProviders = [
       sequelize.addModels([
         User,
         Item,
-        Attribute,
-        AttributePair,
-        Stat,
-        Bid,
         ExistingItem,
+        Attribute,
+        Stat,
+        AttributePair,
+        Bid,
       ]);
       try {
         await sequelize.sync({ alter: true });
