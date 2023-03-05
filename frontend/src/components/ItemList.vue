@@ -19,6 +19,8 @@ const pagination = ref({
   offset: 0
 })
 
+const itemsRef = ref()
+
 const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
   filterItem: { type: Object as PropType<QueryItemDto>, required: true },
@@ -61,10 +63,17 @@ const clear = () => {
 watch(props.filterItem, async (cv, pv) => {
   if (!chosenItem.value?.id)
     return
-
+    
   pagination.value.offset = 0
 
   const { rows, count } = await findExistingItemsById(chosenItem.value.id)
+  
+  itemsRef.value.scroll({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  })
+
   maxCount.value = count
   existingItems.value = rows
 }, {
@@ -157,18 +166,6 @@ const findExistingItemsById = async (itemId: number) => {
   })
 }
 
-const svg = `
-<svg xmlns="http://www.w3.org/2000/svg" width="38" height="38" viewBox="0 0 38 38" stroke="#fff">
-    <g fill="none" fill-rule="evenodd">
-        <g transform="translate(1 1)" stroke-width="2">
-            <circle stroke-opacity=".5" cx="18" cy="18" r="18"/>
-            <path d="M36 18c0-9.94-8.06-18-18-18">
-                <animateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"/>
-            </path>
-        </g>
-    </g>
-</svg>
-      `
 
 const loadMoreExistingItems = async () => {
   pageLoading.value = true
@@ -212,7 +209,7 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
       </div>
     </div>
 
-    <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
+    <div ref="itemsRef" class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div v-if="!chosenItem && !filteredItems?.length">
         <p>No items exist for chosen filter yet</p>
       </div>
@@ -223,7 +220,7 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
           </div>
         </div>
         <p v-else-if="chosenItem && !existingItems?.length">No items exist for chosen filter yet</p>
-        <div v-if="existingItems?.length" class="infinite-scroll" v-infinite-scroll="loadMoreExistingItems"
+        <div v-if="existingItems?.length" infinite-scroll-distance="300" class="infinite-scroll" v-infinite-scroll="loadMoreExistingItems"
           infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in existingItems" :key="index">

@@ -1,6 +1,7 @@
 import { InjectDiscordClient, On, Once } from '@discord-nestjs/core';
 import { Injectable, Logger, UseGuards, UseInterceptors } from '@nestjs/common';
-import { Client, Message } from 'discord.js';
+import { Client, discordSort, Message } from 'discord.js';
+import DiscordNotifyType from './discord.interface';
 import { CreateDiscordDto } from './dto/create-discord.dto';
 
 import { MessageFromUserGuard } from './guards/message-from-user';
@@ -31,6 +32,11 @@ export class DiscordGateway {
 
   zalupa = (createDiscordDto: CreateDiscordDto) => {
     return createDiscordDto;
+  };
+
+  onBidCreated = async (id: number) => {
+    // TODO implement DiscordNotify
+    // disc.send({})
   };
 }
 

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { DiscordGateway } from 'src/discord/discord.gateway';
-import { DiscordBotModule } from 'src/discord/discord.module';
+// import { DiscordGateway } from 'src/discord/discord.gateway';
+// import { DiscordBotModule } from 'src/discord/discord.module';
 import { usersProviders } from 'src/user/user.providers';
 import { UserService } from 'src/user/user.service';
 import { AuthController } from './auth.controller';
@@ -16,7 +16,7 @@ import { jwtConstants } from './constants';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: jwtConstants.expiresIn },
     }),
-    DiscordBotModule,
+    // DiscordBotModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService, ...usersProviders],
