@@ -53,8 +53,8 @@ export const pgProviders = [
       sequelize.addModels([
         User,
         Item,
-        ExistingItem,
         Attribute,
+        ExistingItem,
         Stat,
         AttributePair,
         Bid,
@@ -64,7 +64,7 @@ export const pgProviders = [
         await initData(sequelize, ConfigService);
         return sequelize;
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     },
   },

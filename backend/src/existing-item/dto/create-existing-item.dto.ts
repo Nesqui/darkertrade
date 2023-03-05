@@ -10,7 +10,7 @@ import {
   IsEnum,
 } from 'class-validator';
 import { CreateStatDto } from 'src/stat/dto/create-stat.dto';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export type OfferType = 'WTB' | 'WTS';
 export class CreateExistingItemDto {
@@ -24,6 +24,7 @@ export class CreateExistingItemDto {
     type: Boolean,
   })
   @IsBoolean()
+  @Transform(({ obj }) => obj.published === 'true' || obj.published === true)
   readonly published: boolean = false;
 
   @ApiProperty({

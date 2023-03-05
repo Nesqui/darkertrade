@@ -1,14 +1,6 @@
 import { Type } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsNumber,
-  IsString,
-  MaxLength,
-  Min,
-  Max,
-  ValidateNested,
-} from 'class-validator';
+import { IsNumber, MaxLength, Min, Max } from 'class-validator';
 
 export class CreateStatDto {
   @ApiProperty({
