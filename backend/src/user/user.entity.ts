@@ -1,4 +1,11 @@
-import { Table, Column, Model, Unique, AllowNull } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  Unique,
+  AllowNull,
+  Default,
+} from 'sequelize-typescript';
 
 @Table
 export class User extends Model {
@@ -17,6 +24,14 @@ export class User extends Model {
 
   @Column
   discord: string;
+
+  @Column
+  hash: string;
+
+  @AllowNull(false)
+  @Default(false)
+  @Column
+  discordActive: boolean;
 
   @AllowNull(false)
   @Column

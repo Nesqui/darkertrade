@@ -53,8 +53,7 @@ const clear = () => {
   if (!props.disabledItemActions.published)
     props.filterItem.published = true
 
-  props.filterItem.offset = 0
-
+  pagination.value.offset = 0
   chosenItem.value = undefined
   existingItems.value = undefined
 }
@@ -175,7 +174,7 @@ const loadMoreExistingItems = async () => {
   pageLoading.value = true
   if (!chosenItem.value?.id)
     return
-  if (pagination.value.offset < maxCount.value) {
+  if (pagination.value.offset + pagination.value.limit < maxCount.value) {
     pagination.value.offset = pagination.value.limit + pagination.value.offset
     const { rows, count } = await findExistingItemsById(chosenItem.value.id)
     // await new Promise(resolve => setTimeout(() => resolve(1), 500))
@@ -194,7 +193,7 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
   <div>
     <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       {{ pagination.offset }}
-      {{ maxCount }}
+      {{ maxCount }} | {{ existingItems?.length }}
       <div class="actions">
         <el-input v-model="filterItem.searchItemString"
           :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
@@ -212,33 +211,34 @@ const changeOfferType = (offerType: "WTS" | "WTB" | "") => {
         </el-button-group>
       </div>
     </div>
-    <div v-loading="pageLoading" element-loading-text="Loading..." :element-loading-spinner="svg"
-       element-loading-background="rgb(0 0 0 / 40%);">
-      <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
-        <div v-if="!chosenItem && !filteredItems?.length">
-          <p>No items exist for chosen filter yet</p>
-        </div>
-        <div class="item-list__wrapper">
-          <div v-if="!chosenItem && filteredItems?.length" class="item-list">
-            <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-              <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
-            </div>
+
+    <div class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
+      <div v-if="!chosenItem && !filteredItems?.length">
+        <p>No items exist for chosen filter yet</p>
+      </div>
+      <div class="item-list__wrapper">
+        <div v-if="!chosenItem && filteredItems?.length" class="item-list">
+          <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
+            <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
           </div>
-          <p v-else-if="chosenItem && !existingItems?.length">No items exist for chosen filter yet</p>
-          <div v-if="existingItems?.length" class="infinite-scroll" v-infinite-scroll="loadMoreExistingItems"
-            infinite-scroll-delay="1000">
-            <div class="item-list">
-              <div class="wrapper-item" v-for="(existingItem, index) in existingItems" :key="index">
-                {{ existingItem.user?.nickname }}
-                <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
-                  @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
-                  :stats="existingItem.stats" />
-              </div>
+        </div>
+        <p v-else-if="chosenItem && !existingItems?.length">No items exist for chosen filter yet</p>
+        <div v-if="existingItems?.length" class="infinite-scroll" v-infinite-scroll="loadMoreExistingItems"
+          infinite-scroll-delay="200">
+          <div class="item-list">
+            <div class="wrapper-item" v-for="(existingItem, index) in existingItems" :key="index">
+              {{ existingItem.user?.nickname }}
+              <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
+                @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
+                :stats="existingItem.stats" />
             </div>
           </div>
         </div>
       </div>
     </div>
+    <transition name="fade">
+      <p v-if="pageLoading">LOADING MORE ITEMS...</p>
+    </transition>
   </div>
 </template>
 
@@ -249,8 +249,19 @@ $step: 1rem;
 
 .item-list-wrapper {
   padding: $step;
+  overflow-y: auto;
   width: 860px;
-  max-height: 600px;
+  max-height: 530px;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+
+.page-loading {
+  background-color: var(--el-color-danger);
+  border: 1px solid var(--el-border-color);
+  font-weight: 900;
+  padding: 1rem;
 }
 
 .wrapper-actions {
@@ -275,14 +286,18 @@ $step: 1rem;
 }
 
 .infinite-scroll {
-  height: 700px;
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: space-between;
+  // overflow: hidden;
+  // width: 100%;
 }
 
 .item-list {
   overflow-y: auto;
   overflow-x: hidden;
   display: grid;
-  padding-bottom: 2rem;
+  overflow-y: auto;
 
   gap: $step;
   grid-template-columns: 1fr 1fr 1fr;
