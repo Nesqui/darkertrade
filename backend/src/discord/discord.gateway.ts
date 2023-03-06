@@ -6,7 +6,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { Client, discordSort, Message } from 'discord.js';
+import { Client, discordSort, GuildMember, Message } from 'discord.js';
 import DiscordNotifyType from './discord.interface';
 import { CreateDiscordDto } from './dto/create-discord.dto';
 
@@ -16,6 +16,7 @@ import { User } from 'src/user/user.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Bid } from 'src/bid/bid.entity';
 
+// const DISCORD_JOIN_ROLE_NAME = 'fresh';
 @Injectable()
 export class DiscordGateway {
   private readonly logger = new Logger(DiscordGateway.name);
@@ -29,21 +30,23 @@ export class DiscordGateway {
     private bidsRepository: typeof Bid,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
-  ) { }
+  ) {}
 
-  @Once('ready')
-  onReady() {
-    this.logger.log(`Bot ${this.client.user.tag} was started!`);
-  }
+  // @On('guildMemberAdd')
+  // async onguildMemberAdd(member: GuildMember): Promise<void> {
+  //   member.roles.add(DISCORD_JOIN_ROLE_NAME);
+  //   console.log(member);
+  //   await member;
+  // }
 
-  @On('messageCreate')
-  @UseGuards(MessageFromUserGuard)
-  @UseInterceptors(MessageToUpperInterceptor)
-  async onMessage(message: Message): Promise<void> {
-    this.logger.log(`Incoming message: ${message.content}`);
+  // @On('messageCreate')
+  // @UseGuards(MessageFromUserGuard)
+  // @UseInterceptors(MessageToUpperInterceptor)
+  // async onMessage(message: Message): Promise<void> {
+  //   this.logger.log(`Incoming message: ${message.content}`);
 
-    await message.reply('Message processed successfully');
-  }
+  //   await message.reply('Message processed successfully');
+  // }
 
   onBidAccepted = async (bid: Bid) => {
     // TODO implement DiscordNotify
@@ -63,7 +66,7 @@ export class DiscordGateway {
     // TODO implement DiscordNotify
     const discordId = bid.existingItem.user.discordId;
     const discordUser = await this.client.users.fetch(discordId);
-    discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
+    discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}
     Bid was created messaga`);
 
     // disc.send({})
