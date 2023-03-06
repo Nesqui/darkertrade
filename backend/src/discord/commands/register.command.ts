@@ -26,6 +26,7 @@ import { IsModalInteractionGuard } from '../guards/is-modal-interaction.guard';
 import { FormDto } from './dto/form.dto';
 
 const DISCORD_AUTH_ROLE_NAME = 'Authed';
+const DISCORD_AUTH_CHANNEL_NAME = 'authentication';
 
 @Command({
   name: 'submit-registration',
@@ -81,6 +82,8 @@ export class RegisterCommand {
     const [modal] = eventArgs;
     if (!modal.isModalSubmit()) return;
     if (modal.customId !== this.requestParticipantModalId) return;
+    if (modal.channel.name !== DISCORD_AUTH_CHANNEL_NAME) return;
+
     const comment = modal['fields'].fields.get(this.commentComponentId).value;
 
     this.logger.log(`Modal ${modal.customId} submit`);
