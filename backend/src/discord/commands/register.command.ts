@@ -19,6 +19,7 @@ import {
   TextInputStyle,
   codeBlock,
   PermissionFlagsBits,
+  InteractionReplyOptions,
 } from 'discord.js';
 import { User } from 'src/user/user.entity';
 
@@ -134,6 +135,6 @@ export class RegisterCommand {
       }
     }
 
-    await modal.reply(modalResponse);
+    await modal.reply({ content: modalResponse, ephemeral: true });
   }
 }
