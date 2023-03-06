@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import ItemList from '../../../components/ItemList.vue';
 import { DisabledItemActions, ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
 
@@ -12,6 +12,7 @@ const userApi = initUserApi()
 const loading = ref(true)
 const user = ref<User>()
 const route = useRoute()
+const router = useRouter()
 
 const filterItem = ref<QueryItemDto>({
     slot: "",
@@ -28,6 +29,11 @@ const disabledItemActions = ref<DisabledItemActions>({
     published: false
 })
 
+const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => {
+    if (user.value?.id)
+        return await existingItemApi.findAllByItemIdAndUserId(itemId, user.value.id, query)
+}
+
 onBeforeMount(async () => {
     try {
         const userNickname = route.params.nickname
@@ -35,6 +41,7 @@ onBeforeMount(async () => {
             user.value = await userApi.findByNickname(userNickname)
             if (!user.value) {
                 ElNotification('User not found')
+                router.push('/market')
                 return
             }
             const res = await itemApi.findUserItems(user.value.id)
@@ -48,13 +55,13 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false
     }
-
 })
 </script>
 
 <template>
     <div class="my-items">
-        <ItemList :filter-item="filterItem" :items="items || []" :disabled-item-actions="disabledItemActions" :existing-items-source="existingItemApi.findAllByItemId"></ItemList>
+        <ItemList v-if="!loading" :filter-item="filterItem" :items="items || []"
+            :disabled-item-actions="disabledItemActions" :existing-items-source="findAllByItemIdAndUserId"></ItemList>
     </div>
 </template>
 

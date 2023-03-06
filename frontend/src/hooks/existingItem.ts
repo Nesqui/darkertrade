@@ -46,6 +46,13 @@ export const initExistingItemApi = () => {
         return res.data
     }
 
+    const findAllByItemIdAndUserId = async (itemId: number, userId: number, filterExistingItemDto: QueryItemDto): Promise<CountedExistingItemsResponse> => {
+        const res = await axiosClient(`existing-item/item/${itemId}/user/${userId}`, {
+            params: filterExistingItemDto
+        })
+        return res.data
+    }
+
     const create = async (item: ExistingItem): Promise<ExistingItem> => {
         const res = await axiosClient.post('existing-item', item)
         return res.data
@@ -60,6 +67,7 @@ export const initExistingItemApi = () => {
         // findAll,
         findAllByItemId,
         create,
-        patch
+        patch,
+        findAllByItemIdAndUserId
     }
 }

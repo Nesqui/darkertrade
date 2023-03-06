@@ -34,7 +34,7 @@ export class ExistingItemService {
     private attributeRepository: typeof Attribute,
     @Inject('SEQUELIZE')
     private db,
-  ) {}
+  ) { }
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
     const item = await this.existingItemRepository.create(
@@ -50,11 +50,15 @@ export class ExistingItemService {
     return await this.findOne(item.id);
   }
 
-  async findAllByItemId(query: QueryItemDto, itemId: number, user: User) {
+  async findAllByItemIdAndUserId(query: QueryItemDto, itemId: number, userId: number | null = null, user: User) {
     const existingItemWhere = {
       archived: false,
       itemId,
+      userId
     };
+
+    if (userId)
+      existingItemWhere['userId'] = userId
 
     if (isNaN(query.limit) || isNaN(query.offset))
       throw new ForbiddenException('You must paginate this query');
@@ -101,6 +105,58 @@ export class ExistingItemService {
     if (!item) return [];
     return item;
   }
+
+  // async findAllByItemId(query: QueryItemDto, itemId: number, user: User) {
+  //   const existingItemWhere = {
+  //     archived: false,
+  //     itemId,
+  //   };
+
+  //   if (isNaN(query.limit) || isNaN(query.offset))
+  //     throw new ForbiddenException('You must paginate this query');
+
+  //   const itemWhere = {};
+
+  //   if (query.slot) {
+  //     itemWhere['slot'] = query.slot;
+  //   }
+
+  //   if (!query.published && query.hideMine) {
+  //     throw new ForbiddenException('You cant find not own private items');
+  //   }
+
+  //   if (query.published) existingItemWhere['published'] = query.published;
+  //   else {
+  //     existingItemWhere['published'] = query.published;
+  //     existingItemWhere['userId'] = user.id;
+  //   }
+
+  //   if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+  //   if (query.hideMine)
+  //     existingItemWhere[sequelize.Op.not] = { userId: user.id };
+
+  //   const item = await this.existingItemRepository.findAndCountAll({
+  //     where: existingItemWhere,
+  //     include: [
+  //       this.statRepository,
+  //       {
+  //         model: this.itemRepository,
+  //         where: itemWhere,
+  //       },
+  //       {
+  //         model: this.userRepository,
+  //         attributes: {
+  //           exclude: ['password', 'discord'],
+  //         },
+  //       },
+  //     ],
+  //     limit: query.limit,
+  //     offset: query.offset,
+  //   });
+
+  //   if (!item) return [];
+  //   return item;
+  // }
 
   // async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
   //   const filter = { ...filterExistingItemDto, archived: false };
@@ -189,8 +245,8 @@ export class ExistingItemService {
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
       : [6, 7, 8, 9].includes(baseExistingItem.item.id)
-      ? [6, 7, 8, 9]
-      : [baseExistingItem.item.id];
+        ? [6, 7, 8, 9]
+        : [baseExistingItem.item.id];
 
     const baseExistingItemAttributeIds = baseExistingItem.stats.map(
       (a) => a.attributeId,
@@ -214,10 +270,10 @@ export class ExistingItemService {
       SUM(
         CASE 
           WHEN "Stat"."attributeId" IN (${baseExistingItem.stats
-            .map((a) => a.attributeId)
-            .join(
-              ', ',
-            )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
+        .map((a) => a.attributeId)
+        .join(
+          ', ',
+        )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
           ELSE CAST("Stat"."value" AS INTEGER) 
         END
       ) AS weight

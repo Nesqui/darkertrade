@@ -37,21 +37,21 @@ export class ExistingItemController {
   //   return this.existingItemService.findAll(filterExistingItemDto, user);
   // }
 
-  // @Get('/item/:itemId/user/:userId')
-  // @UseGuards(JwtAuthGuard)
-  // findAllByItemIdAndUserId(
-  //   @ReqUser() user: User,
-  //   @Param('itemId') itemId: string,
-  //   @Param('userId') userId: string,
-  //   @Query() filterExistingItemDto: QueryItemDto,
-  // ) {
-  //   return this.existingItemService.findAllByItemId(
-  //     filterExistingItemDto,
-  //     +itemId,
-  //     userId,
-  //     user,
-  //   );
-  // }
+  @Get('/item/:itemId/user/:userId')
+  @UseGuards(JwtAuthGuard)
+  findAllByItemIdAndUserId(
+    @ReqUser() user: User,
+    @Param('itemId') itemId: string,
+    @Param('userId') userId: string,
+    @Query() filterExistingItemDto: QueryItemDto,
+  ) {
+    return this.existingItemService.findAllByItemIdAndUserId(
+      filterExistingItemDto,
+      +itemId,
+      +userId,
+      user,
+    );
+  }
 
   @Get('/item/:itemId')
   @UseGuards(JwtAuthGuard)
@@ -60,9 +60,10 @@ export class ExistingItemController {
     @Param('itemId') itemId: string,
     @Query() filterExistingItemDto: QueryItemDto,
   ) {
-    return this.existingItemService.findAllByItemId(
+    return this.existingItemService.findAllByItemIdAndUserId(
       filterExistingItemDto,
       +itemId,
+      null,
       user,
     );
   }

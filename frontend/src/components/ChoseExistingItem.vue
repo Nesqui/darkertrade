@@ -11,7 +11,7 @@ const loading = ref(false)
 const showDialog = ref(false)
 const showCreator = ref(false)
 const emit = defineEmits(['onItemChosen'])
-
+const userStore = useUserStore()
 const props = defineProps({
   item: {
     type: Object as PropType<Item>,
@@ -74,6 +74,10 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
   showDialog.value = false
   emit('onItemChosen', currentExistingItem)
 }
+
+const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => {
+    return await existingItemApi.findAllByItemIdAndUserId(itemId, userStore.currentUser.id, query)
+}
 </script>
 
 <template>
@@ -98,7 +102,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
           item</el-button>
         <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
         <ItemList v-else :no-wrapper="true" :disabledItemActions="disabledItemActions" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
-          :items="[tempItem]" :existing-items-source="existingItemApi.findAllByItemId">
+          :items="[tempItem]" :existing-items-source="findAllByItemIdAndUserId">
         </ItemList>
       </div>
     </el-dialog>
