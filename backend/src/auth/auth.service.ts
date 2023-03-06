@@ -13,8 +13,7 @@ export class AuthService {
   ) {}
 
   async validateUser(user: QueryUserDto): Promise<any> {
-    const res = await this.usersService.findOne(user);
-    console.log(res);
+    const res = await this.usersService.validateUser(user);
     if (res?.password === user.password) return res;
 
     return null;

@@ -11,9 +11,8 @@ import { jwtConstants } from '../constants';
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(private readonly jwtService: JwtService) {}
-
   canActivate(
-    context: ExecutionContext,
+    context: ExecutionContext | any,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
     try {

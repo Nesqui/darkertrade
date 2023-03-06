@@ -5,12 +5,14 @@ import { useRoute } from 'vue-router'
 import ItemList from '../../../components/ItemList.vue';
 import { DisabledItemActions, ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
 
+const existingItemApi = initExistingItemApi()
 const itemApi = initItemApi()
 const items = ref<Item[]>()
 const userApi = initUserApi()
 const loading = ref(true)
 const user = ref<User>()
 const route = useRoute()
+
 const filterItem = ref<QueryItemDto>({
     slot: "",
     name: "",
@@ -52,7 +54,7 @@ onBeforeMount(async () => {
 
 <template>
     <div class="my-items">
-        <ItemList :filter-item="filterItem" :items="items || []" :disabled-item-actions="disabledItemActions"></ItemList>
+        <ItemList :filter-item="filterItem" :items="items || []" :disabled-item-actions="disabledItemActions" :existing-items-source="existingItemApi.findAllByItemId"></ItemList>
     </div>
 </template>
 

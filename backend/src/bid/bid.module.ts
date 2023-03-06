@@ -5,12 +5,13 @@ import { bidProviders } from './bid.providers';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
 import { JwtService } from '@nestjs/jwt/dist/jwt.service';
 import { usersProviders } from 'src/user/user.providers';
-import DiscordGateway from 'src/discord/discord.gateway';
 import { DiscordBotModule } from 'src/discord/discord.module';
+import { ChatGateway } from 'src/chat/chat.gateway';
+import { ChatModule } from 'src/chat/chat.module';
 
 @Module({
   controllers: [BidController],
-  imports: [DiscordBotModule],
+  imports: [DiscordBotModule, ChatModule],
   providers: [
     BidService,
     ...bidProviders,

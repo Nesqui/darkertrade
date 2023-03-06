@@ -7,14 +7,8 @@ import { CreateDiscordDto } from './dto/create-discord.dto';
 export class DiscordController {
   constructor(private readonly discordGateway: DiscordGateway) {}
 
-  @Post()
-  @UseGuards(JwtAuthGuard)
-  findAll(@Query() createDiscordDto: CreateDiscordDto) {
-    return this.discordGateway.zalupa(createDiscordDto);
-  }
-
-  @Get('/interactions')
-  interactions(@Query() createDiscordDto: CreateDiscordDto) {
-    return this.discordGateway.zalupa(createDiscordDto);
-  }
+  // @Get('/interactions')
+  // interactions(@Query() createDiscordDto: CreateDiscordDto) {
+  //   return this.discordGateway.zalupa(createDiscordDto);
+  // }
 }

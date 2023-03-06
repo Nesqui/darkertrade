@@ -3,14 +3,10 @@ import {
   Column,
   Model,
   AllowNull,
-  Unique,
-  Min,
-  Max,
   BelongsTo,
   ForeignKey,
   PrimaryKey,
 } from 'sequelize-typescript';
-import { Stat } from 'src/stat/stat.entity';
 import { Attribute } from './attribute.entity';
 
 @Table

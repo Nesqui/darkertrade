@@ -71,7 +71,7 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
           </el-form-item>
         </el-form>
       </div>
-      <div class="place-bid wts">
+      <div v-else class="place-bid wts">
         <p>What price are you asking for item that you offer</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">

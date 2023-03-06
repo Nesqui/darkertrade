@@ -29,11 +29,20 @@ export class UserService {
   async findOne(user: QueryUserDto): Promise<User> | null {
     return await this.usersRepository.findOne({
       attributes: {
-        exclude: ['discord'],
+        exclude: ['discord', 'password'],
       },
       where: { ...user, active: true },
     });
   }
+
+  async validateUser(user: QueryUserDto): Promise<User> | null {
+    return await this.usersRepository.findOne({
+      attributes: {
+        exclude: ['discord',],
+      },
+      where: { ...user, active: true },
+    });
+  } 
 
   async findByNickname(nickname: string) {
     return await this.usersRepository.findOne({

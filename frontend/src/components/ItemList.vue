@@ -31,6 +31,10 @@ const props = defineProps({
   doAfterItemSelection: {
     type: Function,
   },
+  existingItemsSource: {
+    type: Function,
+    required: true
+  },
   disabledItemActions: {
     type: Object as PropType<DisabledItemActions>,
     required: true
@@ -84,31 +88,8 @@ watch(props.filterItem, async (cv, pv) => {
 const filteredItems = computed(() => {
   if (!Array.isArray(props.items) || !props.items.length) return []
   let filteredData = [...props.items]
-  console.log(props.filterItem);
 
-  if (typeof props.filterItem.published === 'boolean') {
-    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.published === props.filterItem.published))
-    filteredData.forEach(item => {
-      item.existingItems = item.existingItems?.filter(existingItem => existingItem.published === props.filterItem.published)
-    })
-  }
-  if (props.filterItem.hideMine) {
-    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.userId !== userStore.currentUser.id))
-    filteredData.forEach(item => {
-      item.existingItems = item.existingItems?.filter(existingItem => existingItem.userId !== userStore.currentUser.id)
-    })
-  }
-  if (props.filterItem.offerType) {
-    filteredData = filteredData.filter(item => item.existingItems?.find(existingItem => existingItem.offerType === props.filterItem.offerType))
-    filteredData.forEach(item => {
-      item.existingItems = item.existingItems?.filter(existingItem => existingItem.offerType === props.filterItem.offerType)
-    })
-  }
-  if (props.filterItem.slot)
-    filteredData = filteredData.filter(item => item.slot === props.filterItem.slot)
-  if (searchString.value)
-    filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
-
+  filteredData = filteredData.filter(item => item.existingItems?.length)
   return filteredData
 })
 
@@ -160,12 +141,15 @@ const choseItem = async (currentItem: Item) => {
 }
 
 const findExistingItemsById = async (itemId: number) => {
-  return await existingItemsApi.findAllByItemId(itemId, {
+  return await props.existingItemsSource(itemId, {
     ...props.filterItem,
     ...pagination.value
   })
+  // return await existingItemsApi.findAllByItemId(itemId, {
+  //   ...props.filterItem,
+  //   ...pagination.value
+  // })
 }
-
 
 const loadMoreExistingItems = async () => {
   pageLoading.value = true

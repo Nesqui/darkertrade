@@ -9,6 +9,7 @@ import {
   DataType,
   Min,
   Max,
+  Default,
 } from 'sequelize-typescript';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
@@ -43,4 +44,8 @@ export class Bid extends Model {
 
   @BelongsTo(() => ExistingItem)
   suggestedItem: ExistingItem;
+
+  @Default('created')
+  @Column
+  status: 'created' | 'accepted' | 'declined';
 }

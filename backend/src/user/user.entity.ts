@@ -6,7 +6,10 @@ import {
   AllowNull,
   Default,
   HasMany,
+  BelongsToMany,
 } from 'sequelize-typescript';
+import { CommunityUser } from 'src/community/community-user.entity';
+import { Community } from 'src/community/community.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 
 @Table
@@ -44,4 +47,7 @@ export class User extends Model {
   @AllowNull(false)
   @Column
   active: boolean;
+
+  @BelongsToMany(() => Community, () => CommunityUser)
+  communities: Community[];
 }

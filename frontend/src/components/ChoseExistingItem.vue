@@ -3,13 +3,9 @@ import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } fr
 import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem, DisabledItemActions } from '../hooks'
 import ItemPreview from './ItemPreview.vue';
 import { useAttributesStore, useUserStore } from '../store';
-import { useRouter } from 'vue-router';
 import Creator from '../pages/Creator.vue';
 import ItemList from '../components/ItemList.vue';
-const attributeStore = useAttributesStore()
-const getAttributeNameById = attributeStore.getAttributeNameById
 const chosenExistingItem = ref<ExistingItem>()
-const userStore = useUserStore()
 const existingItemApi = initExistingItemApi()
 const loading = ref(false)
 const showDialog = ref(false)
@@ -23,17 +19,24 @@ const props = defineProps({
   }
 })
 
-const existingItems = ref<ExistingItem[]>()
+const tempItem = ref<Item>({
+  ...props.item,
+  existingItems: []
+})
 
 const initDialog = async () => {
   try {
     loading.value = true
-    const res = await existingItemApi.findAllByItemId(props.item.id!, {})
-    if (!res) {
-      return
-    }
-
-    existingItems.value = res
+    // const res = await existingItemApi.findAllByItemId(props.item.id!, {
+    //   slot: '',
+    //   limit: 6,
+    //   offset: 0,
+    //   published: true
+    // })
+    // if (!res) {
+    //   return
+    // }
+    // tempItem.value.existingItems = res.rows
     showDialog.value = true
 
   } catch (error) {
@@ -46,6 +49,7 @@ const filterItem = ref<QueryItemDto>({
   slot: "",
   name: "",
   offerType: "WTS",
+  hideMine: false,
   published: true
 })
 
@@ -94,7 +98,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
           item</el-button>
         <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
         <ItemList v-else :no-wrapper="true" :disabledItemActions="disabledItemActions" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
-          :items="[item]">
+          :items="[tempItem]" :existing-items-source="existingItemApi.findAllByItemId">
         </ItemList>
       </div>
     </el-dialog>

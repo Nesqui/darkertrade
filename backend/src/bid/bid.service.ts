@@ -1,15 +1,16 @@
 import {
+  ConflictException,
   ForbiddenException,
   Inject,
   Injectable,
   NotAcceptableException,
 } from '@nestjs/common';
+import { ChatGateway } from 'src/chat/chat.gateway';
 import DiscordGateway from 'src/discord/discord.gateway';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
 import { Bid } from './bid.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
-import { UpdateBidDto } from './dto/update-bid.dto';
 
 @Injectable()
 export class BidService {
@@ -20,9 +21,9 @@ export class BidService {
     private userRepository: typeof User,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
-    // @Inject()
+    private chatGateway: ChatGateway,
     private discordGateway: DiscordGateway,
-  ) {}
+  ) { }
 
   async create(createBidDto: CreateBidDto, user: User) {
     const existingItem = await this.existingItemRepository.findOne({
@@ -80,10 +81,23 @@ export class BidService {
             exclude: ['password', 'discord'],
           },
         },
+        {
+          as: 'existingItem',
+          model: this.existingItemRepository,
+          include: [
+            {
+              model: this.userRepository,
+              attributes: {
+                exclude: ['password', 'discord'],
+              },
+            },
+          ]
+        }
       ],
     });
 
-    await this.discordGateway.onBidCreated(bid.id);
+    await this.discordGateway.onBidCreated(bid);
+
     return bid;
   }
 
@@ -95,8 +109,30 @@ export class BidService {
     return `This action returns a #${id} bid`;
   }
 
-  update(id: number, updateBidDto: UpdateBidDto) {
-    return `This action updates a #${id} bid`;
+  async accept(id: number, user: User) {
+    const bid = await this.bidRepository.findByPk(id, {
+      include: [
+        {
+          model: this.existingItemRepository,
+          as: "existingItem",
+          include: [{
+            model: this.userRepository
+          }]
+        },
+        this.userRepository
+      ]
+    })
+
+    if (user.id !== bid.existingItemId || bid.status !== 'created')
+      throw new ConflictException('You cant accept this bid')
+
+    bid.status = 'accepted'
+
+    await bid.save()
+    await this.discordGateway.onBidAccepted(bid);
+    await this.chatGateway.onBidAccepted(bid);
+
+    return 'accepted'
   }
 
   async remove(id: number, user: User) {

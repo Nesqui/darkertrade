@@ -8,6 +8,10 @@ import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { Item } from '../item/item.entity';
 import { User } from '../user/user.entity';
+import { Community } from 'src/community/community.entity';
+import { Chat } from 'src/chat/chat.entity';
+import { Message } from 'src/messages/messages.entity';
+import { CommunityUser } from 'src/community/community-user.entity';
 
 const initData = async (sequelize: Sequelize, configService: ConfigService) => {
   await sequelize.model('User').findOrCreate({
@@ -58,6 +62,10 @@ export const pgProviders = [
         Stat,
         AttributePair,
         Bid,
+        Community,
+        Chat,
+        Message,
+        CommunityUser
       ]);
       try {
         await sequelize.sync({ alter: true });

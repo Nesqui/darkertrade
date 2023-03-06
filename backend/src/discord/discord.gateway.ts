@@ -29,7 +29,7 @@ export class DiscordGateway {
     private bidsRepository: typeof Bid,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
-  ) {}
+  ) { }
 
   @Once('ready')
   onReady() {
@@ -45,23 +45,26 @@ export class DiscordGateway {
     await message.reply('Message processed successfully');
   }
 
-  zalupa = (createDiscordDto: CreateDiscordDto) => {
-    return createDiscordDto;
+  onBidAccepted = async (bid: Bid) => {
+    // TODO implement DiscordNotify
+    const discordId = bid.user.discordId;
+    const discordUser = await this.client.users.fetch(discordId);
+    discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
+    Your bid was accepted`);
+
+    // disc.send({})
+    // const discUser = await this.client.users.fetch(discordInfo.id);
+    // const responseDB = await this.usersRepository.findOne({});
+    // const discordUser = this.client.users.fetch(responseDB.discordID);
+    // discordUser.send('turbo notifa');
   };
 
-  onBidCreated = async (id: number) => {
+  onBidCreated = async (bid: Bid) => {
     // TODO implement DiscordNotify
-    const bid = await this.bidsRepository.findByPk(id, {
-      include: [
-        {
-          model: this.existingItemRepository,
-          include: [this.usersRepository],
-        },
-      ],
-    });
     const discordId = bid.existingItem.user.discordId;
     const discordUser = await this.client.users.fetch(discordId);
-    discordUser.send('turbo notifa');
+    discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
+    Bid was created messaga`);
 
     // disc.send({})
     // const discUser = await this.client.users.fetch(discordInfo.id);

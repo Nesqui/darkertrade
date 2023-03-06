@@ -2,10 +2,11 @@
 import { onBeforeMount, ref, watch } from 'vue'
 import Human from '../components/Human.vue';
 import ItemList from '../components/ItemList.vue';
-import { Item, initItemApi, QueryItemDto, DisabledItemActions } from '../hooks';
+import { Item, initItemApi, QueryItemDto, DisabledItemActions, initExistingItemApi } from '../hooks';
 
 const itemApi = initItemApi()
 const items = ref<Item[]>([])
+const existingItemsApi = initExistingItemApi()
 
 const filterItem = ref<QueryItemDto>({
     slot: "",
@@ -44,7 +45,7 @@ onBeforeMount(async () => {
 <template>
     <div class="market">
         <Human :filterItem="filterItem" />
-        <ItemList :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions" />
+        <ItemList :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions" :existing-items-source="existingItemsApi.findAllByItemId" />
     </div>
 </template>
 
