@@ -60,7 +60,8 @@ export function initApi() {
                     message: "Session expired. Please login again"
                 })
                 debug('error 401', response)
-            } if (isHumanError(error)) {
+            }
+            if (isHumanError(error)) {
                 handleHumanError(error.response.data);
             }
             debug('Error', response.data)

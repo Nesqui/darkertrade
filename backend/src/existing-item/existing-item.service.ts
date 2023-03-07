@@ -17,6 +17,10 @@ import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
 const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
+const LIMITS = {
+  WTB: 10,
+  WTS: 20
+}
 @Injectable()
 export class ExistingItemService {
   constructor(
@@ -37,6 +41,16 @@ export class ExistingItemService {
   ) { }
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
+    const quantityOfExistingItems = await this.existingItemRepository.count({
+      where: {
+        userId: user.id,
+        offerType: createExistingItemDto.offerType
+      },
+    })
+
+    if (quantityOfExistingItems >= LIMITS[createExistingItemDto.offerType])
+      throw new ForbiddenException(`You cant have more than ${LIMITS.WTB} ${createExistingItemDto.offerType} items`)
+
     const item = await this.existingItemRepository.create(
       {
         ...createExistingItemDto,
@@ -48,6 +62,22 @@ export class ExistingItemService {
     );
     if (!item) throw new NotFoundException('Item not found');
     return await this.findOne(item.id);
+  }
+
+  async count(user: User) {
+    const quantityOfExistingItems = await this.existingItemRepository.findAll({
+      where: {
+        userId: user.id,
+        archived: false,
+      },
+      attributes: [
+        'offerType',
+        [sequelize.fn('COUNT', sequelize.col('offerType')), 'offerTypeCount']
+      ],
+      group: ['offerType']
+    })
+
+    return { quantity: quantityOfExistingItems, limits: LIMITS }
   }
 
   async findAllByItemIdAndUserId(query: QueryItemDto, itemId: number, userId: number | null = null, user: User) {

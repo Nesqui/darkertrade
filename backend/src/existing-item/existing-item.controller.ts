@@ -53,6 +53,12 @@ export class ExistingItemController {
     );
   }
 
+  @Get('/count/')
+  @UseGuards(JwtAuthGuard)
+  count(@ReqUser() user: User) {
+    return this.existingItemService.count(user);
+  }
+
   @Get('/item/:itemId')
   @UseGuards(JwtAuthGuard)
   findAllByItemId(

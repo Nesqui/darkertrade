@@ -18,13 +18,13 @@ const slots = ref<Slot[]>(['Amulet',
         <div class="wrapper">
             <div class="img"></div>
             <div v-for="(slot, index) in slots" :key="index" :class="{
-                'item-frame': true,
+                'tat-frame': true,
                 'darker-title': true,
                 [slot.toLowerCase()]: true,
                 'active': filterItem.slot === slot
             }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0, 1) }}</div>
 
-            <div class="item-frame no-hover item-description">
+            <div class="tat-frame no-hover item-description">
                 <span><label class="darker-title">A</label>Amulet</span>
                 <span><label class="darker-title">R</label>Ring</span>
                 <span><label class="darker-title">H</label>Head</span>
@@ -57,7 +57,7 @@ $human-width: 500px;
         overflow: hidden;
     }
 
-    .item-frame {
+    .tat-frame {
         position: absolute;
         display: flex;
         justify-content: center;

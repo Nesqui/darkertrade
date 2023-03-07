@@ -170,6 +170,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
 
 <template>
   <div class="item-list-component">
+    <!-- SEARCH FILTERS  -->
     <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <div class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
@@ -187,7 +188,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
-
+    <!-- LIST  -->
     <div ref="itemsRef" class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div class="back">
         <el-button v-if="chosenItem" @click="() => chosenItem = undefined">Back</el-button>
@@ -196,18 +197,22 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <p>No items exist for chosen filter yet</p>
       </div>
       <div class="item-list__wrapper">
+        <!-- CATEGORIES -->
         <div v-if="!chosenItem && filteredItems?.length" class="item-list">
           <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
             <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
           </div>
         </div>
+        <!-- NO EXISTING ITEMS IN CATEGORY  -->
         <p v-else-if="chosenItem && !filteredExistingItems?.length">No items exist for chosen filter yet</p>
+        
+        <!-- EXISTING ITEMS IN CATEGORIES  -->
         <div v-if="filteredExistingItems?.length" infinite-scroll-distance="300" class="infinite-scroll"
           v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-              <pre>{{ existingItem.user?.nickname }}</pre>
-              <ItemPreview :wantedPrice="existingItem.wantedPrice" :item="chosenItem"
+              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator-nickname="existingItem.user?.nickname" :item="chosenItem"
+              :updated-at="existingItem.updatedAt"
                 @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
                 :stats="existingItem.stats" />
             </div>
@@ -241,6 +246,7 @@ $step: 1rem;
 .back {
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 1rem;
 }
 
 

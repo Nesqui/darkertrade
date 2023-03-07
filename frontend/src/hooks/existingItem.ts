@@ -11,7 +11,9 @@ export interface ExistingItem {
     user?: User,
     userId?: number,
     offerType: 'WTB' | 'WTS',
-    bids?: Bid[]
+    bids?: Bid[],
+    updatedAt?: string,
+    createdAt?: string
 }
 
 export interface UpdateExistingItemDto {
@@ -22,6 +24,19 @@ export interface UpdateExistingItemDto {
 export interface FilterExistingItemDto {
     userId?: number;
     slot?: string
+}
+
+export interface QuantityOfferTypeLimits {
+    offerType: "WTS" | "WTB",
+    offerTypeCount: number
+}
+
+export interface QuantityExistingItemsLimits {
+    limits: {
+        WTB: number,
+        WTS: number
+    },
+    quantity: QuantityOfferTypeLimits[]
 }
 
 export interface CountedExistingItemsResponse {
@@ -46,6 +61,11 @@ export const initExistingItemApi = () => {
         return res.data
     }
 
+    const count = async (): Promise<QuantityExistingItemsLimits> => {
+        const res = await axiosClient(`existing-item/count/`)
+        return res.data
+    }
+
     const findAllByItemIdAndUserId = async (itemId: number, userId: number, filterExistingItemDto: QueryItemDto): Promise<CountedExistingItemsResponse> => {
         const res = await axiosClient(`existing-item/item/${itemId}/user/${userId}`, {
             params: filterExistingItemDto
@@ -65,6 +85,7 @@ export const initExistingItemApi = () => {
 
     return {
         // findAll,
+        count,
         findAllByItemId,
         create,
         patch,

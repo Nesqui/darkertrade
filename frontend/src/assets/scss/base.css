@@ -34,6 +34,6 @@
   --wrapper-box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
   --el-input-focus-border-color: #282A3A;
   --el-mask-color: rgb(0 0 0 / 15%);
-  --item-frame-width: 240px;
-  --item-frame-padding: 1rem .5rem;
+  --tat-frame-width: 240px;
+  --tat-frame-padding: 1rem .5rem;
 }

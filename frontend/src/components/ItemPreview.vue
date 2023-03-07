@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { onBeforeMount, PropType, ref } from 'vue'
-import { Attribute, Item, QueryItemDto, Stat, truncate, initItemApi } from '../hooks'
+import { Attribute, Item, QueryItemDto, Stat, truncate, initItemApi, useMoment } from '../hooks'
 import { useAttributesStore } from '../store'
 const itemApi = initItemApi()
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
+const moment = useMoment()
 
 defineProps({
     item: {
@@ -23,17 +24,33 @@ defineProps({
     wantedPrice: {
         required: false,
         type: Number
+    },
+    updatedAt: {
+        required: false,
+        type: String
+    },
+    creatorNickname: {
+        required: false,
+        type: String
     }
 });
 </script>
 
 <template>
     <div class="item-preview">
-        <div class="item-frame" :class="{ 'no-hover': noHover }">
+        <div class="tat-frame" :class="{ 'no-hover': noHover }">
             <div class="offer-header" v-if="offerType">
                 <label class="darker-title">{{ offerType }}</label>
+                <div v-if="updatedAt" class="offer-header__item">
+                    <span>Updated:</span>
+                    <p class="offer-header__small"> {{ moment.fromNow(updatedAt) }}</p>
+                </div>
+                <div v-if="creatorNickname" class="offer-header__item">
+                    <span>{{ offerType === 'WTS' ? 'Seller:' : 'Buyer:' }}</span>
+                    <span class="offer-header__small">{{ creatorNickname }}</span>
+                </div>
             </div>
-            <div class="divider" v-if="offerType"/>
+            <div class="divider" v-if="offerType" />
             <div class="item-header">
                 <label class="darker-title">{{ item?.name || 'Empty item' }}</label>
             </div>
@@ -60,14 +77,14 @@ $frameHeight: 220px;
 $item-description-padding: .7rem .5rem;
 
 .item-preview {
-    .item-frame {
+    .tat-frame {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 15px;
         min-height: $frameHeight;
-        width: var(--item-frame-width);
-        padding: var(--item-frame-padding);
+        width: var(--tat-frame-width);
+        padding: var(--tat-frame-padding);
     }
 
     .divider {
@@ -90,6 +107,21 @@ $item-description-padding: .7rem .5rem;
         justify-content: center;
         display: flex;
     }
+
+    .offer-header {
+        width: 100%;
+        text-align: center;
+
+
+        &__item {
+            font-size: 12px;
+            align-items: center;
+            display: flex;
+            width: 100%;
+            justify-content: space-between;
+        }
+    }
+
 
     .item-description {
         padding: unset;

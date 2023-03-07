@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, PropType, ref } from 'vue'
-import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem } from '../hooks'
+import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
 import { ElNotification } from 'element-plus';
+import CountExistingItem from '../components/CountExistingItems.vue'
 import { useRouter } from 'vue-router';
 const router = useRouter()
 
@@ -22,7 +23,7 @@ const published = ref(false)
 const attributeId = ref<number>(0)
 const loading = ref(false)
 const itemApi = initItemApi()
-
+const limits = initLimits()
 const items = ref<Item[]>([])
 
 const props = defineProps({
@@ -64,7 +65,7 @@ const itemSearch = (queryString: string, cb: any) => {
 const attributeSearch = (queryString: string, cb: any) => {
     let results = attributes
     console.log(queryString.toLowerCase());
-    
+
     if (stats.value.length) {
         results = results.filter(attribute => !stats.value.find(stat => stat.attributeId === attribute.id))
     }
@@ -133,9 +134,6 @@ const createExistingItem = async () => {
             router.push(`/user/${resExistingItem.user.nickname}/items/${resExistingItem.id}`)
         }
     } catch (error) {
-        ElNotification({
-            message: JSON.stringify(error)
-        })
     } finally {
         loading.value = false
     }
@@ -182,6 +180,11 @@ onBeforeMount(async () => {
 <template>
     <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
         <h2>Item creator | {{ offerType }}</h2>
+        <div class="restrictions">
+            <p v-if="!limits.canCreateWtb()">You cant create more WTB items!</p>
+            <p v-if="!limits.canCreateWts()">You cant create more WTS items!</p>
+            <CountExistingItem />
+        </div>
         <div class="item-creator__wrapper">
             <div class="item-creator__item">
                 <el-autocomplete v-if="!prefillItem?.id" value-key="name" v-model="itemName" clearable
@@ -195,7 +198,8 @@ onBeforeMount(async () => {
                             placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
                     </div>
                     <el-button-group v-if="!prefillItem?.offerType">
-                        <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
+                        <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
+                            buy</el-button>
                         <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
                             Want to sell
                         </el-button>
