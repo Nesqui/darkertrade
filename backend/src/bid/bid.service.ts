@@ -94,7 +94,7 @@ export class BidService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord'],
           },
         },
         {
@@ -104,7 +104,7 @@ export class BidService {
             {
               model: this.usersRepository,
               attributes: {
-                exclude: ['password', 'discord', 'discordId'],
+                exclude: ['password', 'discord'],
               },
             },
           ],
@@ -115,16 +115,16 @@ export class BidService {
           include: [this.statRepository,  {
             model: this.usersRepository,
             attributes: {
-              exclude: ['password', 'discord', 'discordId'],
+              exclude: ['password', 'discord'],
             },
           }]
         }
       ],
     });
-    console.log(bid);
-    
     await this.discordGateway.onBidCreated(bid);
-
+    delete bid.user.dataValues.discordId
+    delete bid.existingItem.user.dataValues.discordId
+    delete bid.suggestedExistingItem.user.dataValues.discordId
     return bid;
   }
 
