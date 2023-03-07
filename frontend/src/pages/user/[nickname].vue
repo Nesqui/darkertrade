@@ -58,7 +58,15 @@ onBeforeMount(async () => {
     <div class="profile">
         <div class="wrapper">
             <div @click="push(`/user/${user?.nickname}/items`)" class="tat-frame">
-                <div class="profile__info">
+                <div v-if="!user" class="loader">
+                    <el-skeleton :rows="1" style="margin-bottom: 1rem;" animated></el-skeleton>
+                    <el-skeleton animated style="--el-skeleton-circle-size: 100px">
+                        <template #template>
+                            <el-skeleton-item variant="circle" />
+                        </template>
+                    </el-skeleton>
+                </div>
+                <div v-else class="profile__info">
                     <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
                     <div class="avatar-wrapper">
                         <div class="img-avatar"></div>
@@ -69,9 +77,9 @@ onBeforeMount(async () => {
                     <span>Online: no</span>
                 </div>
                 <!-- <div class="profile__links">
-                            <div class="profile__links__item">
-                            </div>
-                        </div> -->
+                                            <div class="profile__links__item">
+                                            </div>
+                                        </div> -->
 
             </div>
             <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
@@ -90,6 +98,11 @@ onBeforeMount(async () => {
     align-items: flex-start;
     gap: 2rem;
 
+    .loader {
+        text-align: center;
+        padding: 1rem 0 2rem 0;
+    }
+
     .user-nickname {
         font-size: 24px;
         text-transform: uppercase;
@@ -102,6 +115,10 @@ onBeforeMount(async () => {
     .wrapper {
         gap: 2rem;
         padding: 1rem .5rem;
+        width: var(--wrapper-small-width);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
     .avatar-wrapper {

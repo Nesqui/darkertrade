@@ -205,16 +205,15 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         </div>
         <!-- NO EXISTING ITEMS IN CATEGORY  -->
         <p v-else-if="chosenItem && !filteredExistingItems?.length">No items exist for chosen filter yet</p>
-        
+
         <!-- EXISTING ITEMS IN CATEGORIES  -->
         <div v-if="filteredExistingItems?.length" infinite-scroll-distance="300" class="infinite-scroll"
           v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator-nickname="existingItem.user?.nickname" :item="chosenItem"
-              :updated-at="existingItem.updatedAt"
-                @click="() => itemClickHandle(existingItem)" :offerType="existingItem.offerType"
-                :stats="existingItem.stats" />
+              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator-nickname="existingItem.user?.nickname"
+                :item="chosenItem" :updated-at="existingItem.updatedAt" @click="() => itemClickHandle(existingItem)"
+                :offerType="existingItem.offerType" :stats="existingItem.stats" />
             </div>
           </div>
         </div>
@@ -231,16 +230,17 @@ $frameWidth: 100px;
 $frameHeight: 100px;
 $step: 1rem;
 
+
 .item-list-component {
-  width: 860px;
+  .wrapper {
+    width: var(--wrapper-large-width);
+  }
 }
 
 .item-list-wrapper {
-  padding: $step;
   overflow-y: auto;
   max-height: 530px;
   margin-bottom: 2rem;
-  width: 100%;
 }
 
 .back {

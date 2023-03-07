@@ -84,11 +84,18 @@ onBeforeMount(async () => {
 
 <template>
     <div class="my-items">
-        <ItemList v-if="!loading" :filter-item="filterItem" :items="items || []"
-            :disabled-item-actions="disabledItemActions" :existing-items-source="findAllByItemIdAndUserId"></ItemList>
+        <div v-if="loading" class="wrapper">
+            <el-skeleton :rows="4" animated></el-skeleton>
+        </div>
+        <ItemList v-else :filter-item="filterItem" :items="items || []" :disabled-item-actions="disabledItemActions"
+            :existing-items-source="findAllByItemIdAndUserId"></ItemList>
     </div>
 </template>
 
 <style scoped lang="scss">
-// .my-items {}
+.my-items {
+    .wrapper {
+        width: var(--wrapper-large-width);
+    }
+}
 </style>

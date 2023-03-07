@@ -263,7 +263,7 @@ onBeforeMount(async () => {
     }
 
     .wrapper {
-        width: 900px;
+        width: var(--wrapper-large-width);
     }
 
     &__item {

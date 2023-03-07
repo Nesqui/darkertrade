@@ -9,11 +9,11 @@ const mode = ref<'signIn' | 'signUp'>('signIn')
 <template>
     <div class="auth">
         <div class="wrapper">
-            <h2 class="darker-title">Authorization | {{mode}}</h2>
+            <h2 class="darker-title">Authorization | {{ mode }}</h2>
 
             <div class="wrapper-body">
-                <Registration v-if="mode === 'signUp'"/>
-                <Login v-else/>
+                <Registration v-if="mode === 'signUp'" />
+                <Login v-else />
                 <img src="../assets/images/Artworks/c_m_rogue.png" alt="">
             </div>
 
@@ -44,7 +44,7 @@ const mode = ref<'signIn' | 'signUp'>('signIn')
     }
 
     .wrapper {
-        min-width: 700px;
+        width: var(--wrapper-regular-width);
         min-height: 400px;
         text-align: center;
 

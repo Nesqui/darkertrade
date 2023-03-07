@@ -102,7 +102,7 @@ const initPageData = async () => {
 }
 
 watch(() => route.params.nickname, async () => {
-    await initPageData()
+  await initPageData()
 })
 
 onBeforeMount(async () => {
@@ -116,12 +116,13 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="wrapper">
-    <div class="item">
+  <div class="item">
+    <div class="wrapper">
       <div class="item-actions">
         <h2>{{ showBidCreator ? 'CREATE BID' : 'ITEM' }}</h2>
         <div v-if="!loading" class="item-actions__list">
-          <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All items</el-button>
+          <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All
+            items</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
             bid +</el-button>
@@ -140,9 +141,14 @@ onBeforeMount(async () => {
             </template>
           </el-popconfirm>
         </div>
+        <div v-if="loading">
+            <el-skeleton :rows="4" animated></el-skeleton>
+        </div>
       </div>
 
-      <p v-if="loading">Loading</p>
+      <div v-if="loading">
+        <el-skeleton :rows="4" animated></el-skeleton>
+      </div>
       <p v-else-if="!item">Item not found or not related to this user</p>
       <CreateBid @bidCreated="bidCreatedHandler" v-else-if="showBidCreator" :item="item" />
       <div v-else class="item-details">
@@ -187,12 +193,12 @@ onBeforeMount(async () => {
     align-items: center;
     justify-content: space-between;
   }
-}
 
-.wrapper {
-  width: 860px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  .wrapper {
+    width: var(--wrapper-large-width);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
 }
 </style>

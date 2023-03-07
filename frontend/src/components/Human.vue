@@ -41,7 +41,6 @@ const slots = ref<Slot[]>(['Amulet',
 <style scoped lang="scss">
 $item-size: 50px;
 $human-height: 600px;
-$human-width: 500px;
 
 .human {
     // height: 100%;
@@ -51,7 +50,7 @@ $human-width: 500px;
     justify-content: center;
 
     .wrapper {
-        width: $human-width;
+        width: var(--wrapper-medium-width);
         height: $human-height;
         padding: 0;
         overflow: hidden;
@@ -134,7 +133,7 @@ $human-width: 500px;
     .img {
         background: url("../assets/human.png") no-repeat;
         filter: brightness(0) invert(15%);
-        width: $human-width;
+        width: var(--wrapper-medium-width);
         height: $human-height;
         background-position-x: center;
         background-position-y: center;
