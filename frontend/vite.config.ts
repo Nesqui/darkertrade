@@ -6,11 +6,13 @@ import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(),
+  plugins: [vue({
+    include: [/\.vue$/, /\.md$/],
+  }),
   Layouts(),
   Pages({
-    extensions: ["vue"],
-  }),],
+    extensions: ['vue', 'md'],
+  })],
   build: {
     chunkSizeWarningLimit: 1600,
   },

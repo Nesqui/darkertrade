@@ -8,6 +8,7 @@ import { usersProviders } from 'src/user/user.providers';
 import { DiscordBotModule } from 'src/discord/discord.module';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { ChatModule } from 'src/chat/chat.module';
+import { statsProviders } from 'src/stat/stat.proviers';
 
 @Module({
   controllers: [BidController],
@@ -17,6 +18,7 @@ import { ChatModule } from 'src/chat/chat.module';
     ...bidProviders,
     ...existingItemProviders,
     ...usersProviders,
+    ...statsProviders,
     JwtService,
   ],
 })

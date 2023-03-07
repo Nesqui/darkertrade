@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import ItemList from '../../../components/ItemList.vue';
 import { DisabledItemActions, ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, QueryItemDto, User } from '../../../hooks'
+import { useUserStore } from '../../../store';
 
 const existingItemApi = initExistingItemApi()
 const itemApi = initItemApi()
@@ -13,11 +14,12 @@ const loading = ref(true)
 const user = ref<User>()
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const filterItem = ref<QueryItemDto>({
     slot: "",
     name: "",
-    offerType: "",
+    offerType: "WTS",
     published: true
 })
 
@@ -26,7 +28,21 @@ const disabledItemActions = ref<DisabledItemActions>({
     name: false,
     offerType: false,
     hideMine: true,
-    published: false
+    published: true
+})
+
+const initItems = async () => {
+    if (!user.value) {
+        return
+    }
+    const res = await itemApi.findUserItems(user.value.id, filterItem.value)
+    if (res)
+        items.value = res
+
+}
+
+watch(filterItem.value, async () => {
+    await initItems()
 })
 
 const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => {
@@ -34,20 +50,28 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
         return await existingItemApi.findAllByItemIdAndUserId(itemId, user.value.id, query)
 }
 
+watch(() => route.params.nickname, async () => {
+    await initData()
+})
+
+const initData = async () => {
+    const userNickname = route.params.nickname
+    if (typeof userNickname === 'string') {
+        user.value = await userApi.findByNickname(userNickname)
+        if (!user.value) {
+            ElNotification('User not found')
+            router.push('/market')
+            return
+        }
+        if (user.value.id === userStore.currentUser.id)
+            disabledItemActions.value.published = false
+        await initItems()
+    }
+}
+
 onBeforeMount(async () => {
     try {
-        const userNickname = route.params.nickname
-        if (typeof userNickname === 'string') {
-            user.value = await userApi.findByNickname(userNickname)
-            if (!user.value) {
-                ElNotification('User not found')
-                router.push('/market')
-                return
-            }
-            const res = await itemApi.findUserItems(user.value.id)
-            if (res)
-                items.value = res
-        }
+        await initData()
     } catch (error) {
         ElNotification({
             message: JSON.stringify(error)
@@ -66,5 +90,5 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.my-items {}
+// .my-items {}
 </style>

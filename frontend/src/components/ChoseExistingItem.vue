@@ -19,11 +19,6 @@ const props = defineProps({
   }
 })
 
-const tempItem = ref<Item>({
-  ...props.item,
-  existingItems: []
-})
-
 const initDialog = async () => {
   try {
     loading.value = true
@@ -76,7 +71,7 @@ const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
 }
 
 const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => {
-    return await existingItemApi.findAllByItemIdAndUserId(itemId, userStore.currentUser.id, query)
+  return await existingItemApi.findAllByItemIdAndUserId(itemId, userStore.currentUser.id, query)
 }
 </script>
 
@@ -94,16 +89,25 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
       </div>
     </div>
 
-    <el-dialog draggable align-center v-model="showDialog" title="Chose your item">
-      <div class="create-item">
-        <el-button class="show-hide-button" v-if="!showCreator" link @click="showCreator = !showCreator">Create new
-          item</el-button>
-        <el-button class="show-hide-button" v-if="showCreator" link @click="showCreator = !showCreator">Select exist
-          item</el-button>
+    <el-dialog class="chose-existing-item-dialog" draggable align-center v-model="showDialog" title="Chose your item">
+      <div>
+        <div class="chose-item__actions">
+          <el-button-group>
+            <el-button class="show-hide-button" :disabled="showCreator" @click="showCreator = !showCreator">Create new
+              item</el-button>
+            <el-button class="show-hide-button" :disabled="!showCreator" @click="showCreator = !showCreator">Select exist
+              item</el-button>
+          </el-button-group>
+        </div>
+
         <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
-        <ItemList v-else :no-wrapper="true" :disabledItemActions="disabledItemActions" :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem"
-          :items="[tempItem]" :existing-items-source="findAllByItemIdAndUserId">
-        </ItemList>
+        <div v-else>
+          <h2>Select created item | WTS</h2>
+          <ItemList :no-wrapper="true" :disabledItemActions="disabledItemActions"
+            :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="[props.item]"
+            :existing-items-source="findAllByItemIdAndUserId">
+          </ItemList>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -118,6 +122,11 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   .chosen-item {
     display: flex;
     align-items: center;
+  }
+
+  .chose-item__actions {
+    display: flex;
+    justify-content: center;
   }
 
   .arrow-data {

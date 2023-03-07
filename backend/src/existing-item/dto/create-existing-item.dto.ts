@@ -8,6 +8,7 @@ import {
   Min,
   Max,
   IsEnum,
+  IsInt,
 } from 'class-validator';
 import { CreateStatDto } from 'src/stat/dto/create-stat.dto';
 import { Transform, Type } from 'class-transformer';
@@ -32,8 +33,9 @@ export class CreateExistingItemDto {
   })
   @IsOptional()
   @Max(9999)
-  @Min(-9999)
-  @IsNumber()
+  @Min(1)
+  @IsInt()
+  @Transform(({ value }) => Number.parseInt(value))
   readonly wantedPrice: number;
 
   @ApiProperty({

@@ -1,15 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional } from 'class-validator';
-import { CreateStatDto } from 'src/stat/dto/create-stat.dto';
-import { Type } from 'class-transformer';
-import { ExistingItem } from 'src/existing-item/existing-item.entity';
-import { Column, ForeignKey, PrimaryKey } from 'sequelize-typescript';
+import { IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateBidDto {
   @ApiProperty({
     type: Number,
   })
-  @IsNumber()
+  @Max(9999)
+  @Min(1)
+  @IsInt()
+  @Transform(({ value }) => Number.parseInt(value))
   readonly price: number;
 
   @ApiProperty({

@@ -22,7 +22,7 @@ export class ItemService {
     private statRepository: typeof Stat,
     @Inject('SEQUELIZE')
     private db,
-  ) {}
+  ) { }
 
   create(createItemDto: CreateItemDto) {
     return 'This action adds a new item';
@@ -54,19 +54,30 @@ export class ItemService {
             {
               model: this.usersRepository,
               attributes: {
-                exclude: ['password', 'discord'],
+                exclude: ['password', 'discord', 'discordId'],
               },
             },
             this.statRepository,
             {
               model: this.bidsRepository,
+              required: false,
+              where: {
+                [sequelize.Op.not]: {
+                  status: 'deleted'
+                }
+              },
               include: [
                 {
                   model: this.usersRepository,
                   attributes: {
-                    exclude: ['password', 'discord'],
+                    exclude: ['password', 'discord', 'discordId'],
                   },
                 },
+                {
+                  model: this.existingItemRepository,
+                  as: 'suggestedExistingItem',
+                  include: [this.statRepository]
+                }
               ],
             },
             this.itemsRepository,
@@ -80,11 +91,19 @@ export class ItemService {
     return res;
   }
 
-  async findUserItems(userId: number, user: User) {
+  async findUserItems(userId: number, query: QueryItemDto, user: User) {
     const existingItemWhere = {
       userId,
       archived: false,
     };
+
+    const itemWhere = {}
+
+    if (query.slot)
+      itemWhere['slot'] = query.slot
+
+    existingItemWhere['published'] = query.published
+    existingItemWhere['offerType'] = query.offerType
     if (user.id !== userId) existingItemWhere['published'] = true;
 
     return await this.itemsRepository.findAll({
@@ -93,27 +112,7 @@ export class ItemService {
           model: this.existingItemRepository,
           required: true,
           where: existingItemWhere,
-          include: [
-            {
-              model: this.usersRepository,
-              attributes: {
-                exclude: ['password', 'discord'],
-              },
-            },
-            {
-              model: this.bidsRepository,
-              include: [
-                {
-                  model: this.usersRepository,
-                  attributes: {
-                    exclude: ['password', 'discord'],
-                  },
-                },
-              ],
-            },
-            this.itemsRepository,
-            this.bidsRepository,
-          ],
+          limit: 1,
         },
       ],
     });

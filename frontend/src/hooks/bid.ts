@@ -1,10 +1,11 @@
-import { useApi, User } from "."
+import { ExistingItem, useApi, User } from "."
 
 export interface Bid {
   id: number,
   price: number;
   existingItemId: number;
-  suggestedItmId?: number;
+  suggestedExistingItemId?: number;
+  suggestedExistingItem?: ExistingItem;
   userId: number;
   createdAt: string,
   updateAt: string,

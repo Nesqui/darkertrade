@@ -57,9 +57,12 @@ export class ItemController {
   }
 
   @Get('/user/:userId/')
+  @ApiQuery({
+    type: QueryItemDto,
+  })
   @UseGuards(JwtAuthGuard)
-  findUserItems(@Param('userId') userId: number, @ReqUser() user: User) {
-    return this.itemService.findUserItems(userId, user);
+  findUserItems(@Query() itemQuery: QueryItemDto, @Param('userId') userId: number, @ReqUser() user: User) {
+    return this.itemService.findUserItems(userId,itemQuery, user);
   }
 
   @Get(':id')

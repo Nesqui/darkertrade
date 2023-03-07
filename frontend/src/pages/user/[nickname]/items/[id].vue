@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BidList from '../../../../components/BidList.vue';
 import CreateBid from '../../../../components/CreateBid.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, User } from '../../../../hooks'
+import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, useMoment, User } from '../../../../hooks'
 import ItemPreview from "../../../../components/ItemPreview.vue"
 import { useUserStore } from '../../../../store';
 import { Bid } from '../../../../hooks/bid';
@@ -21,6 +21,7 @@ const showBidCreator = ref(false)
 const router = useRouter()
 
 const existingItemsApi = initExistingItemApi()
+const moment = useMoment()
 
 const filterItem = ref<Item>({
   slot: "",
@@ -100,6 +101,10 @@ const initPageData = async () => {
   }
 }
 
+watch(() => route.params.nickname, async () => {
+    await initPageData()
+})
+
 onBeforeMount(async () => {
   try {
     await initPageData()
@@ -116,16 +121,17 @@ onBeforeMount(async () => {
       <div class="item-actions">
         <h2>{{ showBidCreator ? 'CREATE BID' : 'ITEM' }}</h2>
         <div v-if="!loading" class="item-actions__list">
+          <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All items</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
             bid +</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
-            v-if="ownToUser() && item.existingItems && item.existingItems[0].published === true"
+            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true"
             size="large">Unpublish</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
-            v-if="ownToUser() && item.existingItems && item.existingItems[0].published === false"
+            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === false"
             size="large">Publish</el-button>
           <el-popconfirm v-if="ownToUser()" width="350" @confirm="deleteExistingItem" confirm-button-text="OK"
             cancel-button-text="No, Thanks" :title="`Are you sure to delete this item?`">
@@ -142,7 +148,7 @@ onBeforeMount(async () => {
       <div v-else class="item-details">
         <div class="item-info">
           <h2>Info</h2>
-          <p v-if="item.createdAt">Item created: {{ formatDate(item.createdAt) }}</p>
+          <p v-if="item.createdAt">Item created: {{ moment.fromNow(item.createdAt) }}</p>
           <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
           <el-divider />
           <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" />

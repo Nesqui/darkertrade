@@ -15,8 +15,8 @@ export interface ExistingItem {
 }
 
 export interface UpdateExistingItemDto {
-  published?: boolean;
-  archived?: boolean;
+    published?: boolean;
+    archived?: boolean;
 }
 
 export interface FilterExistingItemDto {

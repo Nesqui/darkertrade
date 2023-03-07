@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Stats } from 'fs';
 import { computed, onBeforeMount, PropType, ref } from 'vue'
-import { Item, QueryItemDto, initAttributesApi, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, Slot, ItemName, PrefillItem } from '../hooks'
+import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
 import { ElNotification } from 'element-plus';
@@ -15,7 +14,7 @@ const maxAttributes = 8
 const attributeName = ref('')
 const value = ref(1)
 const wantedPrice = ref(100)
-const offerType = ref<'WTB' | 'WTS'>('WTB')
+const offerType = ref<'WTB' | 'WTS'>('WTS')
 const itemName = ref('')
 const valueRef = ref()
 const stats = ref<Stat[]>([])
@@ -64,13 +63,14 @@ const itemSearch = (queryString: string, cb: any) => {
 
 const attributeSearch = (queryString: string, cb: any) => {
     let results = attributes
-
+    console.log(queryString.toLowerCase());
+    
     if (stats.value.length) {
         results = results.filter(attribute => !stats.value.find(stat => stat.attributeId === attribute.id))
     }
 
-    queryString
-        ? results.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+    results = queryString
+        ? results.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) !== -1)
         : results
     // call callback function to return suggestions
     cb(results)
@@ -184,20 +184,23 @@ onBeforeMount(async () => {
         <h2>Item creator | {{ offerType }}</h2>
         <div class="item-creator__wrapper">
             <div class="item-creator__item">
-                <el-autocomplete v-if="!prefillItem?.id" value-key="name" v-model="itemName" clearable :fetch-suggestions="itemSearch"
-                    placeholder="Item name" @select="handleSelectItem" />
+                <el-autocomplete v-if="!prefillItem?.id" value-key="name" v-model="itemName" clearable
+                    :fetch-suggestions="itemSearch" placeholder="Item name" @select="handleSelectItem" />
                 <div class="item-creator__attributes__actions">
                     <div>
                         <div class="sub-title">
                             Wanted price (Optional)
                         </div>
-                        <el-input type="number" placeholder="Wanted Price" maxlength="5"
-                            v-model.number="wantedPrice"></el-input>
+                        <el-input-number :step-strictly="true" :precision="0" :step="25" :min="1" :max="9999" type="number"
+                            placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
                     </div>
-                    <el-button v-if="!prefillItem?.offerType && offerType === 'WTS'" size="large" @click="offerType = 'WTB'">Want to buy</el-button>
-                    <el-button v-if="!prefillItem?.offerType && offerType === 'WTB'" size="large" @click="offerType = 'WTS'">
-                        Want to sell
-                    </el-button>
+                    <el-button-group v-if="!prefillItem?.offerType">
+                        <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
+                        <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
+                            Want to sell
+                        </el-button>
+                    </el-button-group>
+
                 </div>
                 <div class="item-creator__attributes__actions">
                     <div>
@@ -211,7 +214,8 @@ onBeforeMount(async () => {
                         <div class="sub-title">
                             Stat value
                         </div>
-                        <el-input placeholder="Value" maxlength="3" ref="valueRef" v-model="value" />
+                        <el-input-number :step-strictly="true" :precision="1" :step="0.1" :min="-200" :max="200"
+                            placeholder="Value" maxlength="3" ref="valueRef" v-model="value" />
                     </div>
                     <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
                 </div>
@@ -235,7 +239,8 @@ onBeforeMount(async () => {
             <div>
                 <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
                     size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create item and publish' }}</el-button>
-                <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem" size="large">Create
+                <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
+                    size="large">Create
                     item</el-button>
             </div>
             <el-button v-if="item.id || stats.length" @click="clear" size="large">

@@ -43,9 +43,9 @@ export class Bid extends Model {
   suggestedExistingItemId: number;
 
   @BelongsTo(() => ExistingItem)
-  suggestedItem: ExistingItem;
+  suggestedExistingItem: ExistingItem;
 
   @Default('created')
   @Column
-  status: 'created' | 'accepted' | 'declined';
+  status: 'created' | 'accepted' | 'declined' | 'deleted';
 }

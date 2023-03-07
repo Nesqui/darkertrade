@@ -22,7 +22,7 @@ const slots = ref<Slot[]>(['Amulet',
                 'darker-title': true,
                 [slot.toLowerCase()]: true,
                 'active': filterItem.slot === slot
-            }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0,1) }}</div>
+            }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0, 1) }}</div>
 
             <div class="item-frame no-hover item-description">
                 <span><label class="darker-title">A</label>Amulet</span>
@@ -54,6 +54,7 @@ $human-width: 500px;
         width: $human-width;
         height: $human-height;
         padding: 0;
+        overflow: hidden;
     }
 
     .item-frame {

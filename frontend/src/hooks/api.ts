@@ -6,7 +6,7 @@ import { useUserStore } from '../store'
 
 let axiosClient: AxiosInstance
 
-const handleHumanError = (error) => {
+const handleHumanError = (error: any) => {
     ElNotification.error({
         title: 'Error',
         message: error.message,
@@ -14,7 +14,7 @@ const handleHumanError = (error) => {
     });
 };
 
-const isHumanError = (error) => {
+const isHumanError = (error: any) => {
     return (
         error.response &&
         error.response.status >= 400 &&
@@ -33,9 +33,7 @@ export function initApi() {
         (request) => {
             const userStore = useUserStore()
             const token = computed(() => userStore.token)
-            console.log({ token: token.value });
-
-            request.headers = { ...request.headers, Authorization: `Bearer ${token.value}` }
+            request.headers['Authorization'] = `Bearer ${token.value}`
             debug('Request', request.url, request.data, request.params)
             return request
         })
@@ -78,6 +76,6 @@ export function useApi() {
     return { axiosClient }
 }
 
-function debug(...args) {
+function debug(...args: any[]) {
     import.meta.env.DEV && console.log('[API]', args)
 }

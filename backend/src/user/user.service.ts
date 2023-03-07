@@ -21,7 +21,7 @@ export class UserService {
   async findByPk(id: number) {
     return await this.usersRepository.findByPk(id, {
       attributes: {
-        exclude: ['password', 'discord'],
+        exclude: ['password', 'discord', 'discordId'],
       },
     });
   }
@@ -29,7 +29,7 @@ export class UserService {
   async findOne(user: QueryUserDto): Promise<User> | null {
     return await this.usersRepository.findOne({
       attributes: {
-        exclude: ['discord', 'password'],
+        exclude: ['discord', 'password', 'discordId'],
       },
       where: { ...user, active: true },
     });
@@ -48,7 +48,7 @@ export class UserService {
     return await this.usersRepository.findOne({
       where: { nickname, active: true },
       attributes: {
-        exclude: ['password', 'discord'],
+        exclude: ['password', 'discord', 'discordId'],
       },
     });
   }

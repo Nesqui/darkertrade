@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
-import { onBeforeMount, ref } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ExistingItem, initExistingItemApi, initUserApi, User } from '../../hooks'
+import { ExistingItem, initExistingItemApi, initUserApi, User } from '~/hooks'
 
 const userApi = initUserApi()
 const user = ref<User>()
@@ -10,9 +10,24 @@ const loading = ref(true)
 const route = useRoute()
 const router = useRouter()
 
-onBeforeMount(async () => {
-    try {
-        const userNickname = route.params.nickname
+const push = async (url: string) => {
+  let redirect = false
+  if (route.path === url) {
+    redirect = true
+  }
+  await router.push({
+    path: url,
+  })
+  if (redirect)
+    router.go(0)
+}
+
+watch(() => route.params.nickname, async () => {
+    await initUserData()
+})
+
+const initUserData = async () => {
+    const userNickname = route.params.nickname
         if (typeof userNickname === 'string') {
             user.value = await userApi.findByNickname(userNickname)
             if (!user.value) {
@@ -20,6 +35,11 @@ onBeforeMount(async () => {
                 return
             }
         }
+}
+
+onBeforeMount(async () => {
+    try {
+       await initUserData()
     } catch (error) {
         ElNotification({
             message: JSON.stringify(error)
@@ -27,14 +47,13 @@ onBeforeMount(async () => {
     } finally {
         loading.value = false
     }
-
 })
 </script>
 
 <template>
     <div class="profile">
         <div class="wrapper">
-            <div class="item-frame no-hover">
+            <div @click="push(`/user/${user?.nickname}/items`)" class="item-frame">
                 <div class="profile__info">
                     <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
                     <div class="avatar-wrapper">
@@ -45,11 +64,11 @@ onBeforeMount(async () => {
                     <span>Banned: {{ user?.active ? 'no' : 'yes' }}</span>
                     <span>Online: no</span>
                 </div>
-                <div class="profile__links">
+                <!-- <div class="profile__links">
                     <div class="profile__links__item">
-                        <el-button link @click="router.push(`/user/${user?.nickname}/items`)">Items</el-button>
+                        <el-button link >Items</el-button>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
         <router-view />

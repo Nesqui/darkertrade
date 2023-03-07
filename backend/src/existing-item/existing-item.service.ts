@@ -54,7 +54,6 @@ export class ExistingItemService {
     const existingItemWhere = {
       archived: false,
       itemId,
-      userId
     };
 
     if (userId)
@@ -73,13 +72,15 @@ export class ExistingItemService {
       throw new ForbiddenException('You cant find not own private items');
     }
 
-    if (query.published) existingItemWhere['published'] = query.published;
-    else {
-      existingItemWhere['published'] = query.published;
-      existingItemWhere['userId'] = user.id;
-    }
+    existingItemWhere['published'] = query.published;
 
-    if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+    if (!query.published)
+      existingItemWhere['userId'] = user.id;
+
+    // ALL FILTER 
+    // if (query.offerType) existingItemWhere['offerType'] = query.offerType;
+
+    existingItemWhere['offerType'] = query.offerType;
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
@@ -94,7 +95,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord'],
+            exclude: ['password', 'discord', 'discordId'],
           },
         },
       ],
@@ -146,7 +147,7 @@ export class ExistingItemService {
   //       {
   //         model: this.userRepository,
   //         attributes: {
-  //           exclude: ['password', 'discord'],
+  //           exclude: ['password', 'discord', 'discordId'],
   //         },
   //       },
   //     ],
@@ -178,7 +179,7 @@ export class ExistingItemService {
   //       {
   //         model: this.userRepository,
   //         attributes: {
-  //           exclude: ['password', 'discord'],
+  //           exclude: ['password', 'discord', 'discordId'],
   //         },
   //       },
   //     ],
@@ -200,7 +201,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord'],
+            exclude: ['password', 'discord', 'discordId'],
           },
         },
       ],
@@ -225,7 +226,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord'],
+            exclude: ['password', 'discord', 'discordId'],
           },
         },
       ],

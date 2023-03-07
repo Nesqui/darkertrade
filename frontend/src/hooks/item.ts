@@ -3,7 +3,7 @@ import { ExistingItem, ItemName, Slot, useApi } from "."
 export interface QueryItemDto {
     id?: number,
     slot?: Slot,
-    offerType?:'WTB' | 'WTS' | '',
+    offerType?:'WTB' | 'WTS',
     name?: ItemName,
     hideMine?: boolean,
     published?: boolean,
@@ -45,8 +45,10 @@ export const initItemApi = () => {
         return res.data
     }
 
-    const findUserItems = async (userId: number): Promise<Item[]> => {
-        const res = await axiosClient(`item/user/${userId}`)
+    const findUserItems = async (userId: number, params: QueryItemDto): Promise<Item[]> => {
+        const res = await axiosClient(`item/user/${userId}`, {
+            params
+        })
         return res.data
     }
 

@@ -56,7 +56,6 @@ defineProps({
 </template>
 
 <style scoped lang="scss">
-$frameWidth: 240px;
 $frameHeight: 220px;
 $item-description-padding: .7rem .5rem;
 
@@ -67,8 +66,8 @@ $item-description-padding: .7rem .5rem;
         align-items: center;
         gap: 15px;
         min-height: $frameHeight;
-        width: $frameWidth;
-        padding: 1rem .5rem;
+        width: var(--item-frame-width);
+        padding: var(--item-frame-padding);
     }
 
     .divider {

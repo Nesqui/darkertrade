@@ -75,7 +75,7 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
         <p>What price are you asking for item that you offer</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">
-            <el-input-number v-model="form.amount" :min="0" :step="25" />
+            <el-input-number v-model="form.amount" :min="1" :step="25" :step-strictly="true" :precision="0" :max="9999" />
           </el-form-item>
           <p>After creating bid you will able to chat with user.</p>
           <el-form-item>
