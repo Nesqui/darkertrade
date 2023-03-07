@@ -8,11 +8,12 @@ import {
 import { ChatGateway } from 'src/chat/chat.gateway';
 import DiscordGateway from 'src/discord/discord.gateway';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
+import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { Bid } from './bid.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
-const DELAY_TIME_CREATE_BIT = 60 * 1000 * 5
+const DELAY_TIME_CREATE_BIT = 60 * 1000 * 5;
 
 @Injectable()
 export class BidService {
@@ -28,7 +29,9 @@ export class BidService {
     @Inject('STATS_REPOSITORY')
     private statRepository: typeof Stat,
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
-  ) { }
+    @Inject('ITEMS_REPOSITORY')
+    private itemRepository: typeof Item,
+  ) {}
 
   async create(createBidDto: CreateBidDto, user: User) {
     const existingItem = await this.existingItemRepository.findOne({
@@ -45,10 +48,16 @@ export class BidService {
           id: createBidDto.existingItemId,
           archived: false,
         },
-        order: [[{
-          model: this.bidRepository,
-          as: 'bids'
-        }, 'updatedAt', 'desc']],
+        order: [
+          [
+            {
+              model: this.bidRepository,
+              as: 'bids',
+            },
+            'updatedAt',
+            'desc',
+          ],
+        ],
         include: [
           {
             model: this.bidRepository,
@@ -60,13 +69,26 @@ export class BidService {
       });
 
     if (alreadyCreatedExistingItem?.bids.length) {
-      if (alreadyCreatedExistingItem?.bids.find(bid => !(bid.status === 'deleted' || bid.status === 'declined')))
-        throw new ForbiddenException('You cant create another bid for this item');
+      if (
+        alreadyCreatedExistingItem?.bids.find(
+          (bid) => !(bid.status === 'deleted' || bid.status === 'declined'),
+        )
+      )
+        throw new ForbiddenException(
+          'You cant create another bid for this item',
+        );
 
-      const timeDiff = new Date().getTime() - new Date(alreadyCreatedExistingItem.bids[0].updatedAt!).getTime()
+      const timeDiff =
+        new Date().getTime() -
+        new Date(alreadyCreatedExistingItem.bids[0].updatedAt!).getTime();
 
       if (timeDiff < DELAY_TIME_CREATE_BIT)
-        throw new ForbiddenException(`You cant create bid for this item ~${((DELAY_TIME_CREATE_BIT - timeDiff) / (1000 * 60)).toFixed(0)} minutes`);
+        throw new ForbiddenException(
+          `You cant create bid for this item ~${(
+            (DELAY_TIME_CREATE_BIT - timeDiff) /
+            (1000 * 60)
+          ).toFixed(0)} minutes`,
+        );
     }
 
     if (existingItem.userId === user.id)
@@ -107,24 +129,30 @@ export class BidService {
                 exclude: ['password', 'discord'],
               },
             },
+            {
+              model: this.itemRepository,
+            },
           ],
         },
         {
           model: this.existingItemRepository,
           as: 'suggestedExistingItem',
-          include: [this.statRepository,  {
-            model: this.usersRepository,
-            attributes: {
-              exclude: ['password', 'discord'],
+          include: [
+            this.statRepository,
+            {
+              model: this.usersRepository,
+              attributes: {
+                exclude: ['password', 'discord'],
+              },
             },
-          }]
-        }
+          ],
+        },
       ],
     });
     await this.discordGateway.onBidCreated(bid);
-    delete bid.user.dataValues.discordId
-    delete bid.existingItem.user.dataValues.discordId
-    delete bid.suggestedExistingItem.user.dataValues.discordId
+    delete bid.user.dataValues.discordId;
+    delete bid.existingItem.user.dataValues.discordId;
+    delete bid.suggestedExistingItem.user.dataValues.discordId;
     return bid;
   }
 
@@ -141,25 +169,27 @@ export class BidService {
       include: [
         {
           model: this.existingItemRepository,
-          as: "existingItem",
-          include: [{
-            model: this.userRepository
-          }]
+          as: 'existingItem',
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
         },
-        this.userRepository
-      ]
-    })
+        this.userRepository,
+      ],
+    });
 
     if (user.id !== bid.existingItemId || bid.status !== 'created')
-      throw new ConflictException('You cant accept this bid')
+      throw new ConflictException('You cant accept this bid');
 
-    bid.status = 'accepted'
+    bid.status = 'accepted';
 
-    await bid.save()
+    await bid.save();
     await this.discordGateway.onBidAccepted(bid);
     await this.chatGateway.onBidAccepted(bid);
 
-    return 'accepted'
+    return 'accepted';
   }
 
   async remove(id: number, user: User) {
@@ -167,13 +197,13 @@ export class BidService {
       where: {
         id,
         userId: user.id,
-      }
+      },
     });
 
     if (!userBid) throw new ForbiddenException('You cant delete this bid');
 
-    userBid.status = 'deleted'
-    userBid.save()
+    userBid.status = 'deleted';
+    userBid.save();
     return userBid;
   }
 }

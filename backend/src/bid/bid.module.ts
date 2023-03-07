@@ -9,6 +9,7 @@ import { DiscordBotModule } from 'src/discord/discord.module';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { ChatModule } from 'src/chat/chat.module';
 import { statsProviders } from 'src/stat/stat.proviers';
+import { itemsProviders } from 'src/item/item.providers';
 
 @Module({
   controllers: [BidController],
@@ -19,6 +20,7 @@ import { statsProviders } from 'src/stat/stat.proviers';
     ...existingItemProviders,
     ...usersProviders,
     ...statsProviders,
+    ...itemsProviders,
     JwtService,
   ],
 })
