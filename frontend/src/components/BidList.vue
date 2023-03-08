@@ -61,7 +61,7 @@ const deleteBid = async (bid: Bid) => {
             <span>{{ moment.fromNow(bid.createdAt) }}</span>
             <span>{{ bid.price }} Gold</span>
             <div class="actions">
-              <el-popover placement="top-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
+              <el-popover v-if="bid.suggestedExistingItemId" placement="top-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
                 <template #reference>
                   <el-button class="m-2">Item</el-button>
                 </template>

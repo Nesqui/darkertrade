@@ -38,6 +38,7 @@ export class BidService {
       where: {
         id: createBidDto.existingItemId,
         archived: false,
+        published: true
       },
     });
     if (!existingItem) throw new NotAcceptableException('Item not found');

@@ -89,7 +89,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
       </div>
     </div>
 
-    <el-dialog class="chose-existing-item-dialog" draggable align-center v-model="showDialog" title="Chose your item">
+    <el-dialog class="chose-existing-item-dialog wrapper" draggable align-center v-model="showDialog">
       <div>
         <div class="chose-item__actions">
           <el-button-group>
@@ -127,6 +127,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   .chose-item__actions {
     display: flex;
     justify-content: center;
+    margin-bottom: 1rem;
   }
 
   .arrow-data {

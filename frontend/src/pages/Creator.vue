@@ -218,7 +218,7 @@ onBeforeMount(async () => {
                         <div class="sub-title">
                             Stat value
                         </div>
-                        <el-input-number :step-strictly="true" :precision="1" :step="0.1" :min="-200" :max="200"
+                        <el-input-number :precision="1" :step="1" :min="-200" :max="200"
                             placeholder="Value" maxlength="3" ref="valueRef" v-model="value" />
                     </div>
                     <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>

@@ -87,6 +87,11 @@ $item-description-padding: .7rem .5rem;
         padding: var(--tat-frame-padding);
     }
 
+    .item-header {
+        padding-top: .45rem;
+        margin-bottom: 1rem;
+    }
+
     .divider {
         width: 85%;
         border-bottom: 2px solid var(--el-border-color);
@@ -111,7 +116,7 @@ $item-description-padding: .7rem .5rem;
     .offer-header {
         width: 100%;
         text-align: center;
-
+        padding-top: .25rem;
 
         &__item {
             font-size: 12px;

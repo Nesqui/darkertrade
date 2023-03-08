@@ -2,6 +2,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700');
 
 :root {
+  --fontSize: calc((1vw + 1vh) * .75);
   --color-text: #C69749;
   --el-bg-color: #000000;
   --el-color-primary: #000000;
@@ -35,7 +36,7 @@
   --el-input-focus-border-color: #282A3A;
   --el-mask-color: rgb(0 0 0 / 15%);
   --tat-frame-width: 240px;
-  --tat-frame-padding: 1rem .5rem;
+  --tat-frame-padding: 1rem .8rem;
   --wrapper-large-width: 870px;
   --wrapper-medium-width: 500px;
   --wrapper-regular-width: 720px;
