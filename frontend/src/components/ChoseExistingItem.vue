@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
 import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem, DisabledItemActions } from '../hooks'
 import ItemPreview from './ItemPreview.vue';
-import { useAttributesStore, useUserStore } from '../store';
+import { useUserStore } from '../store';
 import Creator from '../pages/Creator.vue';
 import ItemList from '../components/ItemList.vue';
 const chosenExistingItem = ref<ExistingItem>()
@@ -105,7 +105,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
           <h2>Select created item | WTS</h2>
           <ItemList :no-wrapper="true" :disabledItemActions="disabledItemActions"
             :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="[props.item]"
-            :existing-items-source="findAllByItemIdAndUserId">
+            :existing-items-source="findAllByItemIdAndUserId" :loading="false">
           </ItemList>
         </div>
       </div>

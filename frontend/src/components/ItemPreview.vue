@@ -73,7 +73,7 @@ defineProps({
 </template>
 
 <style scoped lang="scss">
-$frameHeight: 220px;
+$frameHeight: 240px;
 $item-description-padding: .7rem .5rem;
 
 .item-preview {

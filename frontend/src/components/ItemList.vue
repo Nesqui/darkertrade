@@ -1,17 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
-import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, DisabledItemActions } from '../hooks'
+import { computed, PropType, ref, watch } from 'vue'
+import { ExistingItem, Item, QueryItemDto, DisabledItemActions } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
 import { useAttributesStore, useUserStore } from '../store';
 import { useRouter } from 'vue-router';
-import { filter } from 'lodash';
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const chosenItem = ref<Item>()
-const userStore = useUserStore()
 const maxCount = ref(6)
 const pageLoading = ref(false)
-const existingItemsApi = initExistingItemApi()
 const existingItems = ref<ExistingItem[]>()
 
 const pagination = ref({
@@ -24,6 +21,10 @@ const itemsRef = ref()
 const props = defineProps({
   items: { type: Object as PropType<Item[]>, required: true },
   filterItem: { type: Object as PropType<QueryItemDto>, required: true },
+  loading: {
+    type: Boolean,
+    required: true
+  },
   noWrapper: {
     type: Boolean,
     default: false
@@ -132,6 +133,7 @@ const choseItem = async (currentItem: Item) => {
   // props.filterItem.name = currentItem.name;
   if (!currentItem.id)
     return
+  searchString.value = ""
   chosenItem.value = currentItem
   const { rows, count } = await findExistingItemsById(currentItem.id)
   maxCount.value = count
@@ -171,7 +173,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
 <template>
   <div class="item-list-component">
     <!-- SEARCH FILTERS  -->
-    <div class="item-list-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
+    <div class="search-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <div class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
           active-text="Published" inactive-text="Unpublished" />
@@ -188,8 +190,12 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
+    <!-- LOADING SKELETON CATEGORIES -->
+    <div v-if="loading" class="wrapper loading item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
+      <el-skeleton :rows="4" v-for="(v, index) of new Array(9)" :key="index" animated></el-skeleton>
+    </div>
     <!-- LIST  -->
-    <div ref="itemsRef" class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
+    <div v-else ref="itemsRef" class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div class="back">
         <el-button v-if="chosenItem" @click="() => chosenItem = undefined">Back</el-button>
       </div>
@@ -237,10 +243,23 @@ $step: 1rem;
   }
 }
 
+.loading {
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: grid;
+  overflow-y: auto;
+  text-align: center;
+  gap: calc($step * 3);
+  grid-template-columns: 1fr 1fr 1fr;
+  .el-skeleton {
+    margin-bottom: 1rem;
+  }
+}
+
 .item-list-wrapper {
   overflow-y: auto;
-  max-height: 530px;
   margin-bottom: 2rem;
+  height: 580px;
 }
 
 .back {
@@ -269,6 +288,7 @@ $step: 1rem;
   align-items: center;
   gap: 1rem;
   margin-bottom: 1rem;
+  height: 45px;
 }
 
 

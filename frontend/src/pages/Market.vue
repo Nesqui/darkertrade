@@ -3,7 +3,7 @@ import { onBeforeMount, ref, watch } from 'vue'
 import Human from '../components/Human.vue';
 import ItemList from '../components/ItemList.vue';
 import { Item, initItemApi, QueryItemDto, DisabledItemActions, initExistingItemApi } from '../hooks';
-
+const loading = ref(true)
 const itemApi = initItemApi()
 const items = ref<Item[]>([])
 const existingItemsApi = initExistingItemApi()
@@ -18,7 +18,7 @@ const filterItem = ref<QueryItemDto>({
     published: true
 })
 
-watch(filterItem,  async () => {
+watch(filterItem, async () => {
     await init()
 }, {
     deep: true
@@ -33,8 +33,14 @@ const disabledItemActions = ref<DisabledItemActions>({
 })
 
 const init = async () => {
-    const res = await itemApi.getMarket(filterItem.value)
-    items.value = res
+    loading.value = true
+    try {
+        const res = await itemApi.getMarket(filterItem.value)
+        items.value = res
+    } catch (error) {
+    } finally {
+        loading.value = false
+    }
 }
 
 onBeforeMount(async () => {
@@ -45,7 +51,8 @@ onBeforeMount(async () => {
 <template>
     <div class="market">
         <Human :filterItem="filterItem" />
-        <ItemList :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions" :existing-items-source="existingItemsApi.findAllByItemId" />
+        <ItemList :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions"
+            :existing-items-source="existingItemsApi.findAllByItemId" :loading="loading" />
     </div>
 </template>
 

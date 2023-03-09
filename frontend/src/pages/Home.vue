@@ -47,7 +47,7 @@ onMounted(() => {
   <div class="main">
     <TopMenu />
     <div class="main-wrapper">
-      <div class="ws">connected: {{ connected }}</div>
+      <!-- <div class="ws">connected: {{ connected }}</div> -->
       <router-view/>
     </div>
     <Chat />
@@ -64,7 +64,7 @@ onMounted(() => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding-top: 5rem;
+    padding-top: 4rem;
     justify-content: flex-start;
     align-items: center;
   }

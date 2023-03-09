@@ -54,8 +54,8 @@ const login = async () => {
     <div class="login">
         <el-input readonly onfocus="this.removeAttribute('readonly');" @keyup.enter="login" v-model="formData.nickname"
             placeholder="Login"></el-input>
-        <el-input readonly onfocus="this.removeAttribute('readonly');" show-password type="password" v-model="formData.password"
-            @keyup.enter="login" placeholder="Password"></el-input>
+        <el-input readonly onfocus="this.removeAttribute('readonly');" show-password type="password"
+            v-model="formData.password" @keyup.enter="login" placeholder="Password"></el-input>
         <el-button :disabled="!valid" @click="login">Signin</el-button>
     </div>
 </template>
@@ -66,5 +66,9 @@ const login = async () => {
     display: flex;
     flex-direction: column;
     gap: .25rem;
+
+    .el-button {
+        margin: 1rem 0 2rem 0;
+    }
 }
 </style>

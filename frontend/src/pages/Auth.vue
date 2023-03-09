@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import Registration from "../components/Registration.vue"
 import Login from "../components/Login.vue"
 
-const mode = ref<'signIn' | 'signUp'>('signIn')
+const mode = ref<'signIn' | 'signUp'>('signUp')
 </script>
 
 <template>
@@ -33,20 +33,18 @@ const mode = ref<'signIn' | 'signUp'>('signIn')
 
     h2 {
         font-size: 34px;
+        margin-bottom: 2.5rem;
     }
 
     .el-input {
         width: 150px;
     }
 
-    .el-button {
-        color: var(--el-color-primary);
-    }
-
     .wrapper {
         width: var(--wrapper-regular-width);
         min-height: 400px;
         text-align: center;
+        padding-top: 2rem;
 
         .wrapper-body {
             display: flex;

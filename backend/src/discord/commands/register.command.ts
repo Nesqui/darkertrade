@@ -17,21 +17,21 @@ import {
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
-  codeBlock,
   PermissionFlagsBits,
-  InteractionReplyOptions,
 } from 'discord.js';
 import { User } from 'src/user/user.entity';
-
+import { difference } from "lodash"
 import { IsModalInteractionGuard } from '../guards/is-modal-interaction.guard';
-import { FormDto } from './dto/form.dto';
+import { v4 as uuidv4 } from 'uuid';
+import { ConfigService } from '@nestjs/config';
 
 const DISCORD_AUTH_ROLE_NAME = 'Authed';
 const DISCORD_AUTH_CHANNEL_NAME = 'authentication';
-
+const DISCORD_NAME_ATTEMPTS = 10;
+const DISCORD_TOS_AGREEMENT = 'agree'
 @Command({
-  name: 'submit-registration',
-  description: 'Apply for registration',
+  name: 'registration',
+  description: 'Create TaT account',
   defaultMemberPermissions: PermissionFlagsBits.UseApplicationCommands,
 })
 export class RegisterCommand {
@@ -40,11 +40,22 @@ export class RegisterCommand {
   private readonly commentComponentId = 'comment';
 
   constructor(
+    private configService: ConfigService,
     @Inject('USERS_REPOSITORY')
     private usersRepository: typeof User,
     @InjectDiscordClient()
     private readonly client: Client,
-  ) {}
+  ) { }
+
+  // async getNickname(nickname: string) {
+  //   for (let prefix = 0; prefix < DISCORD_NAME_ATTEMPTS; prefix++) {
+  //     if (! await this.usersRepository.findOne({ where: { nickname: nickname + prefix } })) {
+
+  //       return nickname + prefix;
+  //     }
+  //   }
+  //   return;
+  // }
 
   @Handler()
   async onRegisterCommand(interaction: CommandInteraction): Promise<void> {
@@ -60,9 +71,9 @@ export class RegisterCommand {
 
     const commentInputComponent = new TextInputBuilder()
       .setCustomId(this.commentComponentId)
-      .setLabel('Copy-paste from site')
+      .setLabel(`type "Agree" to confirm agreement with rules`)
       .setStyle(TextInputStyle.Short)
-      .setPlaceholder('Your discord has to match the one on site');
+      .setPlaceholder('Agree');
 
     const rows = [commentInputComponent].map((component) =>
       new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
@@ -80,61 +91,93 @@ export class RegisterCommand {
     // @IA(ModalFieldsTransformPipe) dto: FormDto,
     @EventParams() eventArgs: ClientEvents['interactionCreate'],
   ): Promise<void> {
+    // https://discord.gg/VT6grnfD6t
     const [modal] = eventArgs;
     if (!modal.isModalSubmit()) return;
     if (modal.customId !== this.requestParticipantModalId) return;
-    if (modal.channel.name !== DISCORD_AUTH_CHANNEL_NAME) return;
+    if (modal.channel.name !== DISCORD_AUTH_CHANNEL_NAME) {
+      await modal.reply({ content: 'Wrong channel', ephemeral: true })
+      return;
+    }
 
     const comment = modal['fields'].fields.get(this.commentComponentId).value;
+    if (comment.toLowerCase() !== DISCORD_TOS_AGREEMENT) {
+      await modal.reply({ content: 'TaT requires users to comply with the rules provided', ephemeral: true })
+      return;
+    }
 
     this.logger.log(`Modal ${modal.customId} submit`);
 
     const discUser = await this.client.users.fetch(modal.user.id);
+    const hash = uuidv4()
+    let siteUserNickname = discUser.username.toLowerCase().replace(/[_\\\-/+=!@\[\]\{\}\s\:\;]+/g, '')
 
-    let modalResponse = 'mismatch of discord name';
-    const responseDB = await this.usersRepository.findOne({
-      where: { hash: comment },
+    const discCheck = await this.usersRepository.findOne({
+      where: {
+        discordId: discUser.id
+      },
     });
-    if (responseDB) {
-      if (
-        responseDB.discord.toLowerCase() ===
-        discUser.username.toLowerCase() + '#' + discUser.discriminator
-      ) {
-        modalResponse = 'form submit success, ';
-        try {
-          modal.guild.members.cache
-            .get(discUser.id)
-            .roles.add(
-              modal.guild.roles.cache.find(
-                (r) => r.name === DISCORD_AUTH_ROLE_NAME,
-              ),
-            );
-          modalResponse += 'role assigned, ';
-        } catch (error) {
-          this.logger.log(`Modal ${modal.customId} ${error}`);
-        }
-        try {
-          //   await this.usersRepository.update(
-          //     {
-          //       discordActive: true,
-          //       hash: '',
-          //       discordId: discUser.id,
-          //     },
-          //     {
-          //       where: { hash: comment },
-          //     },
-          //   );
-          responseDB.discordActive = true;
-          responseDB.hash = '';
-          responseDB.discordId = discUser.id;
-          await responseDB.save();
-          modalResponse += 'site access granted';
-        } catch (error) {
-          this.logger.log(`Modal ${modal.customId} DB ${error}`);
-        }
-      }
+    if (discCheck?.discordId === discUser.id) {
+      await modal.reply({ content: 'discord ID is already registered', ephemeral: true })
+      return;
     }
 
-    await modal.reply({ content: modalResponse, ephemeral: true });
+    const names = [siteUserNickname, ...new Array(DISCORD_NAME_ATTEMPTS).fill(1).map((v, suffix) => `${siteUserNickname}${suffix}`)]
+
+    const existingNames = await this.usersRepository.findAll({
+      where: {
+        nickname: names
+      },
+      raw: true,
+      attributes: ['nickname']
+    });
+
+    const diffName = difference(names, existingNames.map(user => user.nickname))
+
+    if (!diffName?.length) {
+      await modal.reply({ content: 'Please file a form submit with a bug report stating NameGen', ephemeral: true })
+      return;
+    } else if (diffName?.length) {
+      siteUserNickname = diffName[0]
+    }
+
+    const hashCheck = await this.usersRepository.findOne({
+      where: {
+        hash
+      },
+      attributes: ['hash']
+    });
+
+    if (hashCheck?.hash === hash) {
+      await modal.reply({ content: 'server error try again', ephemeral: true })
+      return;
+    }
+
+    await this.usersRepository.create(
+      {
+        nickname: siteUserNickname,
+        discordId: discUser.id,
+        hash,
+        discord: discUser.username.toLowerCase() + '#' + discUser.discriminator,
+        active: true,
+      }
+    )
+    //226347736
+    try {
+      modal.guild.members.cache
+        .get(discUser.id)
+        .roles.add(
+          modal.guild.roles.cache.find(
+            (r) => r.name === DISCORD_AUTH_ROLE_NAME,
+          ),
+        );
+    } catch (error) {
+      this.logger.log(`Modal ${modal.customId} ${error}`);
+    }
+
+    await modal.reply({ content: this.configService.get('APP_URL') + `/signup?hash=${hash}`, ephemeral: true })
+    discUser.send(
+      this.configService.get('APP_URL') + `/signup?hash=${hash}` + `
+      Your link to complete registration on TaT`)
   }
 }

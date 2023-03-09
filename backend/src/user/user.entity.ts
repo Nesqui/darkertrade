@@ -7,6 +7,7 @@ import {
   Default,
   HasMany,
   BelongsToMany,
+  Validate,
 } from 'sequelize-typescript';
 import { CommunityUser } from 'src/community/community-user.entity';
 import { Community } from 'src/community/community.entity';
@@ -15,21 +16,31 @@ import { ExistingItem } from 'src/existing-item/existing-item.entity';
 @Table
 export class User extends Model {
   @Unique
+  @Validate({
+    is: /^[a-zA-Z0-9]+$/
+  })
   @Column
   nickname: string;
 
   @Column
   password: string;
 
+  @Validate({
+    is: /^[a-zA-Z0-9]+$/
+  })
   @Column
   name: string;
 
   @Column
   lastName: string;
 
+  @Validate({
+    is: /^[a-zA-Z0-9\s]+#[0-9]{4}$/
+  })
   @Column
   discord: string;
 
+  @Unique
   @Column
   discordId: string;
 
@@ -38,11 +49,6 @@ export class User extends Model {
 
   @HasMany(() => ExistingItem)
   existingItems: ExistingItem[];
-
-  @AllowNull(false)
-  @Default(false)
-  @Column
-  discordActive: boolean;
 
   @AllowNull(false)
   @Column

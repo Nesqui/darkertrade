@@ -72,7 +72,7 @@ $human-height: 600px;
     }
 
     .item-description {
-        right: 5px;
+        right: 0px;
         bottom: 5px;
         min-width: 125px;
         min-height: 125px;
@@ -89,50 +89,50 @@ $human-height: 600px;
 
     .head {
         top: 50px;
-        left: 220px;
+        left: 225px;
     }
 
     .chest {
         top: 160px;
-        left: 220px;
+        left: 225px;
     }
 
     .ring {
         top: 150px;
-        left: 295px;
+        left: 300px;
     }
 
     .gloves {
         top: 285px;
-        left: 130px;
+        left: 135px;
     }
 
 
     .weapon {
         top: 100px;
-        left: 65px;
+        left: 70px;
         height: 140px;
         width: 75px;
     }
 
     .amulet {
         top: 77px;
-        left: 295px;
+        left: 300px;
     }
 
     .boots {
         top: 496px;
-        left: 218px;
+        left: 223px;
     }
 
     .legs {
         top: 385px;
-        left: 218px;
+        left: 223px;
     }
 
     .img {
         background: url("../assets/human.png") no-repeat;
-        filter: brightness(0) invert(15%);
+        filter: brightness(0) invert(7%);
         width: var(--wrapper-medium-width);
         height: $human-height;
         background-position-x: center;

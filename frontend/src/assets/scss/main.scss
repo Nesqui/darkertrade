@@ -31,6 +31,15 @@ input:-webkit-autofill {
     -webkit-text-fill-color: yellow !important;
 }
 
+.el-skeleton :nth-child(2) {
+    width: 80%;
+}
+
+.el-skeleton {
+    --el-skeleton-color: #00000054;
+    --el-skeleton-to-color: #201d1d6e;
+}
+
 .el-switch__label {
     // color: var(--el-bg-color);
 }
@@ -134,8 +143,9 @@ button:hover {
     overflow-y: auto;
     max-height: 800px;
     outline: none;
-    box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
-    // box-shadow: 2px 3px 20px black, 0 0 125px #8f5922 inset;
+    // box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
+    box-shadow: 2px 3px 20px black, 0 0 125px #000000 inset;
+    border: 2px outset rgb(22 24 0 / 81%);
 }
 
 .el-form-item__content {
@@ -164,9 +174,11 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
+    font-weight: 800;
+    text-align: end;
 
     p {
-        color: darkred;
+        color: rgb(167, 0, 0);
         margin: 0 0 1rem 0;
     }
 

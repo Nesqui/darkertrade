@@ -181,8 +181,8 @@ onBeforeMount(async () => {
     <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
         <h2>Item creator | {{ offerType }}</h2>
         <div class="restrictions">
-            <p v-if="!limits.canCreateWtb()">You cant create more WTB items!</p>
-            <p v-if="!limits.canCreateWts()">You cant create more WTS items!</p>
+            <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
+            <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
             <CountExistingItem />
         </div>
         <div class="item-creator__wrapper">
@@ -218,8 +218,8 @@ onBeforeMount(async () => {
                         <div class="sub-title">
                             Stat value
                         </div>
-                        <el-input-number :precision="1" :step="1" :min="-200" :max="200"
-                            placeholder="Value" maxlength="3" ref="valueRef" v-model="value" />
+                        <el-input-number :precision="1" :step="1" :min="-200" :max="200" placeholder="Value" maxlength="3"
+                            ref="valueRef" v-model="value" />
                     </div>
                     <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
                 </div>
@@ -256,10 +256,15 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .item-creator {
+    min-height: 560px;
+    max-height: 750px;
+    overflow-y: hidden;
+
     &__wrapper {
         display: flex;
         gap: 1rem;
         margin-bottom: 2rem;
+        max-height: 540px;
     }
 
     .wrapper {

@@ -35,7 +35,7 @@ const initUserData = async () => {
     if (typeof userNickname === 'string') {
         user.value = await userApi.findByNickname(userNickname)
         if (!user.value) {
-            ElNotification('User not found')
+            router.push('/market')
             return
         }
     }
@@ -59,12 +59,12 @@ onBeforeMount(async () => {
         <div class="wrapper">
             <div @click="push(`/user/${user?.nickname}/items`)" class="tat-frame">
                 <div v-if="!user" class="loader">
-                    <el-skeleton :rows="1" style="margin-bottom: 1rem;" animated></el-skeleton>
-                    <el-skeleton animated style="--el-skeleton-circle-size: 100px">
+                    <el-skeleton class="skeleton" animated style="--el-skeleton-circle-size: 100px">
                         <template #template>
                             <el-skeleton-item variant="circle" />
                         </template>
                     </el-skeleton>
+                    <h2 class="darker-title user-nickname">Loading</h2>
                 </div>
                 <div v-else class="profile__info">
                     <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
@@ -77,18 +77,18 @@ onBeforeMount(async () => {
                     <span>Online: no</span>
                 </div>
                 <!-- <div class="profile__links">
-                                            <div class="profile__links__item">
-                                            </div>
-                                        </div> -->
+                                                    <div class="profile__links__item">
+                                                    </div>
+                                                </div> -->
 
             </div>
             <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
-                <p v-if="!limits.canCreateWtb()">You cant create more WTB items!</p>
-                <p v-if="!limits.canCreateWts()">You cant create more WTS items!</p>
+                <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
+                <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
                 <CountExistingItem />
             </div>
         </div>
-        <router-view />
+        <router-view v-if="user" />
     </div>
 </template>
 
@@ -97,10 +97,13 @@ onBeforeMount(async () => {
     display: flex;
     align-items: flex-start;
     gap: 2rem;
+    $frameHeight: 180px;
 
-    .loader {
+    .loader,
+    .profile__info {
         text-align: center;
         padding: 1rem 0 2rem 0;
+        height: $frameHeight;
     }
 
     .user-nickname {
@@ -119,6 +122,11 @@ onBeforeMount(async () => {
         display: flex;
         flex-direction: column;
         align-items: center;
+        min-height: 300px;
+    }
+
+    .skeleton {
+        margin-bottom: 2rem;
     }
 
     .avatar-wrapper {
