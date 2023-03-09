@@ -17,6 +17,7 @@ import { Item } from 'src/item/item.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Bid } from 'src/bid/bid.entity';
 import { where } from 'sequelize';
+import { ConfigService } from '@nestjs/config';
 
 // const DISCORD_JOIN_ROLE_NAME = 'fresh';
 @Injectable()
@@ -24,6 +25,7 @@ export class DiscordGateway {
   private readonly logger = new Logger(DiscordGateway.name);
 
   constructor(
+    private configService: ConfigService,
     @InjectDiscordClient()
     private readonly client: Client,
     @Inject('USERS_REPOSITORY')
@@ -78,9 +80,14 @@ export class DiscordGateway {
     if (bid.price > 0) {
       priceString = `with an offer of ${bid.price}`;
     }
-
+    const itemUrl =
+      this.configService.get('APP_URL') +
+      'user/' +
+      bid.existingItem.user.nickname +
+      '/items/' +
+      bid.existingItem.id;
     discordUser.send(` ${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at 
-    /user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}
+    ${itemUrl}
     has a new bid from ${bid.user.nickname}
     ${priceString}`);
     // discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}
