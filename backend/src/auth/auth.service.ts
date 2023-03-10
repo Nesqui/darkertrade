@@ -20,8 +20,6 @@ export class AuthService {
   }
 
   async login(user: User) {
-    console.log(user);
-
     return {
       user,
       jwtToken: this.jwtService.sign(user.dataValues),

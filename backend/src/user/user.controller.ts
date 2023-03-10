@@ -17,22 +17,27 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.userService.create(createUserDto);
   }
 
   @Get('/nickname/:nickname')
   @UseGuards(JwtAuthGuard)
-  findOneByNickname(@Param('nickname') nickname: string) {
-    return this.userService.findByNickname(nickname);
+  async findOneByNickname(@Param('nickname') nickname: string) {
+    return await this.userService.findByNickname(nickname);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Get('/hash/:hash')
+  async findOneByHash(@Param('hash') hash: string) {
+    return await this.userService.findByHash(hash);
+  }
+
+  @Patch('')
+  async update(@Body() updateUserDto: UpdateUserDto) {
+    return await this.userService.update(updateUserDto);
   }
 
   @Delete(':id')

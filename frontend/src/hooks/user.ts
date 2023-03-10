@@ -12,13 +12,32 @@ export interface User {
     lastName: string;
     discord?: string;
     active: boolean;
+    hash?: string;
 }
+
+
+export interface UpdateUserDto {
+    nickname: string;
+    password: string;
+    hash: string;
+}
+
 
 import { ElNotification } from "element-plus";
 import { useApi } from "./api"
 
 export const initUserApi = () => {
     const { axiosClient } = useApi()
+
+    const findOneByHash = async (hash: string) => {
+        if (!hash) {
+            ElNotification('Hash not provided')
+            return
+        }
+        const res = await axiosClient(`user/hash/${hash}`)
+
+        return res.data
+    }
 
     const findByNickname = async (nickname: string) => {
         if (!nickname) {
@@ -34,7 +53,18 @@ export const initUserApi = () => {
         return res.data
     }
 
+    const update = async (user: UpdateUserDto) => {
+        if (!user.hash) {
+            ElNotification('Hash not provided')
+            return
+        }
+        const res = await axiosClient.patch(`user`, user)
+        return res.data
+    }
+
     return {
-        findByNickname
+        findByNickname,
+        findOneByHash,
+        update
     }
 }

@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Registration from "../components/Registration.vue"
-import Login from "../components/Login.vue"
+import { onBeforeMount, ref } from 'vue'
+import SignUp from "./SignUp.vue"
+import SignIn from "./SignIn.vue"
+import { useRoute } from 'vue-router';
+import { UpdateUserDto } from '@/hooks';
 
-const mode = ref<'signIn' | 'signUp'>('signUp')
+const userCreated = ref<UpdateUserDto>()
+
+const route = useRoute()
+const mode = ref<'signIn' | 'signUp'>('signIn')
+onBeforeMount(() => {
+    if (route.query.hash)
+        mode.value = 'signUp'
+})
+
+const onUserCreated = (user: UpdateUserDto) => {
+    userCreated.value = user
+    mode.value = 'signIn'
+}
 </script>
 
 <template>
@@ -12,8 +26,8 @@ const mode = ref<'signIn' | 'signUp'>('signUp')
             <h2 class="darker-title">Authorization | {{ mode }}</h2>
 
             <div class="wrapper-body">
-                <Registration v-if="mode === 'signUp'" />
-                <Login v-else />
+                <SignUp @userCreated="onUserCreated" v-if="mode === 'signUp'" />
+                <SignIn :userCreated="userCreated" v-if="mode === 'signIn'" />
                 <img src="../assets/images/Artworks/c_m_rogue.png" alt="">
             </div>
 
@@ -33,7 +47,7 @@ const mode = ref<'signIn' | 'signUp'>('signUp')
 
     h2 {
         font-size: 34px;
-        margin-bottom: 2.5rem;
+        margin-bottom: 1.5rem;
     }
 
     .el-input {

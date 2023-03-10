@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 
 const val = ref(+(Math.random() * 100).toFixed(0))
 </script>
@@ -27,7 +27,7 @@ const val = ref(+(Math.random() * 100).toFixed(0))
     </div>
     <svg>
       <filter id="wavy2">
-        <feTurbulence x="0" y="0" baseFrequency="0.01" numOctaves="5" :seed="seed" />
+        <feTurbulence x="0" y="0" baseFrequency="0.01" numOctaves="5" :seed="val" />
         <feDisplacementMap in="SourceGraphic" scale="25" />
       </filter>
     </svg>

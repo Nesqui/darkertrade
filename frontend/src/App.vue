@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeMount } from 'vue'
 import { useUserStore, useAttributesStore } from './store'
 import Home from './pages/Home.vue'
-import Auth from './pages/Auth.vue'
+import Auth from './components/Auth.vue'
+
 
 const userStore = useUserStore()
 const isAuth = computed(() => userStore.isAuth)
-
 </script>
 
 <template>

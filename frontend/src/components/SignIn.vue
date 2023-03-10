@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { initAuthApi } from '../hooks';
+import { computed, onBeforeMount, PropType, ref } from 'vue'
+import { initAuthApi, UpdateUserDto } from '~/hooks';
 import bcrypt from 'bcryptjs'
 import { ElNotification } from 'element-plus';
-import { useUserStore } from '../store';
+import { useUserStore } from '~/store';
 import { useRouter } from 'vue-router';
 
+const props = defineProps({
+    userCreated: {
+        required: false,
+        type: Object as PropType<UpdateUserDto>,
+    }
+})
 const authApi = initAuthApi()
 const userStore = useUserStore()
 const router = useRouter()
@@ -17,11 +23,9 @@ const formData = ref({
     password: ''
 })
 
-
-
 const valid = computed(() => formData.value.nickname && formData.value.password && !loading.value)
 
-const login = async () => {
+const login = async (hashRequired = true) => {
     if (!valid) {
         ElNotification({
             message: 'Please input login and password'
@@ -30,7 +34,7 @@ const login = async () => {
     }
     loading.value = true
     try {
-        const hashPass = bcrypt.hashSync(formData.value.password, salt);
+        const hashPass = hashRequired ? bcrypt.hashSync(formData.value.password, salt) : formData.value.password
         const a = await authApi.signIn({
             nickname: formData.value.nickname.toLowerCase().trim(),
             password: hashPass
@@ -39,7 +43,7 @@ const login = async () => {
 
         userStore.saveUser(a.user)
         userStore.saveToken(a.jwtToken)
-        router.push('/market')
+        router.push('/')
     } catch (error) {
         ElNotification({
             message: "Login or password wrong"
@@ -48,6 +52,14 @@ const login = async () => {
         loading.value = false
     }
 }
+
+onBeforeMount(async () => {
+    if (props.userCreated) {
+        formData.value.nickname = props.userCreated.nickname
+        formData.value.password = props.userCreated.password
+        await login(false)
+    }
+})
 </script>
 
 <template>

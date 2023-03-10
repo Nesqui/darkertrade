@@ -24,7 +24,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Sign in' })
   async auth(@Query() userQuery: QueryUserDto) {
     const user = await this.authService.validateUser(userQuery);
-    if (!user) return new UnauthorizedException();
+    if (!user) return new UnauthorizedException("Login or password incorrect");
 
     return this.authService.login(user);
   }
