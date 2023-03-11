@@ -3,7 +3,7 @@ import { ExistingItem, ItemName, Slot, useApi } from "."
 export interface QueryItemDto {
     id?: number,
     slot?: Slot,
-    offerType?:'WTB' | 'WTS',
+    offerType?: 'WTB' | 'WTS',
     name?: ItemName,
     hideMine?: boolean,
     published?: boolean,
@@ -31,14 +31,14 @@ export interface DisabledItemActions {
 export const initItemApi = () => {
     const { axiosClient } = useApi()
 
-    const findAll = async (params: QueryItemDto):Promise<Item[]> => {
+    const findAll = async (params: QueryItemDto): Promise<Item[]> => {
         const res = await axiosClient('item', {
             params
         })
         return res.data
     }
 
-    const getMarket = async (params: QueryItemDto):Promise<Item[]> => {
+    const getMarket = async (params: QueryItemDto): Promise<Item[]> => {
         const res = await axiosClient('item/market', {
             params
         })
@@ -57,8 +57,12 @@ export const initItemApi = () => {
         return res.data
     }
 
-    const getImg = (item:Item) => {
-        return new URL(`/src/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
+    const getImg = (item: Item) => {
+        // const img = await import(`../assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`)
+        // return img.href
+        if (import.meta.env.VITE_ENV === 'development')
+            return new URL(`/src/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
+        return new URL(`@/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
     }
 
     return {
