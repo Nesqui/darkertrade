@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onBeforeMount, PropType, ref } from 'vue'
-import { Attribute, Item, QueryItemDto, Stat, truncate, initItemApi, useMoment } from '../hooks'
+import { PropType } from 'vue'
+import { Item, Stat, truncate, initItemApi, useMoment } from '../hooks'
 import { useAttributesStore } from '../store'
+
 const itemApi = initItemApi()
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById

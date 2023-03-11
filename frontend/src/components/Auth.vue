@@ -28,7 +28,7 @@ const onUserCreated = (user: UpdateUserDto) => {
             <div class="wrapper-body">
                 <SignUp @userCreated="onUserCreated" v-if="mode === 'signUp'" />
                 <SignIn :userCreated="userCreated" v-if="mode === 'signIn'" />
-                <img src="../assets/images/Artworks/c_m_rogue.png" alt="">
+                <img src="../assets/images/c_m_rogue.png" alt="">
             </div>
 
             <el-button @click="mode = 'signUp'" v-if="mode === 'signIn'" link>Signup</el-button>
