@@ -1,6 +1,6 @@
 import { ExistingItem, ItemName, Slot, useApi } from "."
 const gallery = Object.values(import.meta.glob('@assets/images/items/*.{png,jpg,jpeg,PNG,JPEG}', { eager: true, as: 'url' }))
-const galleryNames = gallery.map(g => g.split('items/')).map(g => g[1])
+const galleryNames = gallery.map(g => g.split('/')).map(g => g[g.length-1])
 export interface QueryItemDto {
     id?: number,
     slot?: Slot,
