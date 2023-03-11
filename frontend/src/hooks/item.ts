@@ -1,6 +1,6 @@
 import { ExistingItem, ItemName, Slot, useApi } from "."
 const gallery = Object.values(import.meta.glob('@assets/images/items/*.{png,jpg,jpeg,PNG,JPEG}', { eager: true, as: 'url' }))
-const galleryNames = gallery.map(g => g.split('/')).map(g => g[g.length-1])
+
 export interface QueryItemDto {
     id?: number,
     slot?: Slot,
@@ -59,7 +59,8 @@ export const initItemApi = () => {
     }
 
     const getImg = (item: Item) => {
-        const href = gallery.find((href, index) => index === galleryNames.findIndex(name => name === `60px-${item.name.replaceAll(' ', '_')}.png`))
+        const itemName = `60px-${item.name.replaceAll(' ', '_')}.png`
+        const href = import.meta.env.VITE_ENV === 'production' ? `/assets/${itemName}` : `/src/assets/images/items/${itemName}`
         return href
     }
 
