@@ -62,7 +62,7 @@ export const initItemApi = () => {
         // return img.href
         if (import.meta.env.VITE_ENV === 'development')
             return new URL(`/src/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
-        return new URL(`@/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
+        return new URL(`/assets/images/${item.slot}/60px-${item.name.replaceAll(' ', '_')}.png`, import.meta.env.VITE_URL).href
     }
 
     return {
