@@ -8,7 +8,7 @@ export const initLimits = () => {
 
   onBeforeMount(async () => {
     try {
-    counts.value = await existingItemApi.count()
+      counts.value = await existingItemApi.count()
     } catch (error) {
     } finally {
       loading.value = false
@@ -20,7 +20,11 @@ export const initLimits = () => {
   const canCreateWtb = () => {
     if (counts.value) {
       const wtbQuantity = counts.value.quantity.find(quantity => quantity.offerType === 'WTB')
-      if (wtbQuantity && wtbQuantity.offerTypeCount < counts.value.limits.WTB)
+      
+      if (!wtbQuantity)
+        return true
+      
+        if (wtbQuantity.offerTypeCount < counts.value.limits.WTB)
         return true
       return false
     }
@@ -29,8 +33,12 @@ export const initLimits = () => {
 
   const canCreateWts = () => {
     if (counts.value) {
-      const wtbQuantity = counts.value.quantity.find(quantity => quantity.offerType === 'WTS')
-      if (wtbQuantity && wtbQuantity.offerTypeCount < counts.value.limits.WTS)
+      const wtsQuantity = counts.value.quantity.find(quantity => quantity.offerType === 'WTS')
+
+      if (!wtsQuantity)
+      return true
+
+      if (wtsQuantity.offerTypeCount < counts.value.limits.WTS)
         return true
       return false
     }
