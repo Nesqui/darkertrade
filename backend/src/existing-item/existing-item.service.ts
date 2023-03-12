@@ -49,7 +49,7 @@ export class ExistingItemService {
     })
 
     if (quantityOfExistingItems >= LIMITS[createExistingItemDto.offerType])
-      throw new ForbiddenException(`You cant have more than ${LIMITS.WTB} ${createExistingItemDto.offerType} items`)
+      throw new ForbiddenException(`You cant have more than ${LIMITS[createExistingItemDto.offerType]} ${createExistingItemDto.offerType} items`)
 
     const item = await this.existingItemRepository.create(
       {

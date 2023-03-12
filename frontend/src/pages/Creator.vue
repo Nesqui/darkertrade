@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, PropType, ref } from 'vue'
+import { computed, nextTick, onBeforeMount, PropType, ref } from 'vue'
 import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
@@ -25,7 +25,8 @@ const loading = ref(false)
 const itemApi = initItemApi()
 const limits = initLimits()
 const items = ref<Item[]>([])
-
+const itemAutoCompleteRef = ref()
+const requiredClear = ref(false)
 const props = defineProps({
     noWrapper: {
         type: Boolean,
@@ -46,6 +47,24 @@ const item = ref<Item>({
     name: ''
 })
 
+const clearItem = () => {
+    itemName.value = ''
+    itemAutoCompleteRef.value.inputRef.blur()
+    requiredClear.value = true
+
+    item.value = {
+        id: 0,
+        slot: '',
+        name: ''
+    }
+}
+
+const clearAttribute = () => {
+    attributeName.value = ''
+    itemAutoCompleteRef.value.inputRef.blur()
+    requiredClear.value = true
+}
+
 const existingItem = computed((): ExistingItem => ({
     itemId: item.value.id!,
     stats: stats.value,
@@ -55,8 +74,13 @@ const existingItem = computed((): ExistingItem => ({
 }))
 
 const itemSearch = (queryString: string, cb: any) => {
-    const results = queryString
-        ? items.value.filter(item => item.name.toLowerCase().indexOf(queryString.toLowerCase()) != -1)
+    let query = queryString
+    if (requiredClear.value) {
+        query = requiredClear.value ? '' : queryString
+        requiredClear.value = false
+    }
+    const results = query
+        ? items.value.filter(item => item.name.toLowerCase().indexOf(query.toLowerCase()) != -1)
         : items.value
     // call callback function to return suggestions
     cb(results)
@@ -64,14 +88,19 @@ const itemSearch = (queryString: string, cb: any) => {
 
 const attributeSearch = (queryString: string, cb: any) => {
     let results = attributes
-    console.log(queryString.toLowerCase());
+    let query = queryString
+
+    if (requiredClear.value) {
+        query = requiredClear.value ? '' : queryString
+        requiredClear.value = false
+    }
 
     if (stats.value.length) {
         results = results.filter(attribute => !stats.value.find(stat => stat.attributeId === attribute.id))
     }
 
-    results = queryString
-        ? results.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) !== -1)
+    results = query
+        ? results.filter(attribute => attribute.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
         : results
     // call callback function to return suggestions
     cb(results)
@@ -187,8 +216,9 @@ onBeforeMount(async () => {
         </div>
         <div class="item-creator__wrapper">
             <div class="item-creator__item">
-                <el-autocomplete v-if="!prefillItem?.id" value-key="name" v-model="itemName" clearable
-                    :fetch-suggestions="itemSearch" placeholder="Item name" @select="handleSelectItem" />
+                <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
+                    @focus="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Item name"
+                    @select="handleSelectItem" />
                 <div class="item-creator__attributes__actions">
                     <div>
                         <div class="sub-title">
@@ -211,7 +241,7 @@ onBeforeMount(async () => {
                         <div class="sub-title">
                             Stat name
                         </div>
-                        <el-autocomplete value-key="name" v-model="attributeName" :fetch-suggestions="attributeSearch"
+                        <el-autocomplete @click="clearAttribute" value-key="name" v-model="attributeName" :fetch-suggestions="attributeSearch"
                             clearable placeholder="Stat name" @select="handleSelectAttribute" />
                     </div>
                     <div>
@@ -240,12 +270,17 @@ onBeforeMount(async () => {
 
 
         <div class="item-creator__actions">
-            <div>
+            <div
+                v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
                 <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
                     size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create item and publish' }}</el-button>
                 <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
                     size="large">Create
                     item</el-button>
+            </div>
+            <div v-else>
+                <p>You cant create more {{ existingItem.offerType }} offers</p>
+                <p>Please delete not relevant {{ existingItem.offerType }} offers via profile</p>
             </div>
             <el-button v-if="item.id || stats.length" @click="clear" size="large">
                 Clear</el-button>

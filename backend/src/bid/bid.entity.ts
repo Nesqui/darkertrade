@@ -35,14 +35,14 @@ export class Bid extends Model {
   @Column
   existingItemId: number;
 
-  @BelongsTo(() => ExistingItem)
+  @BelongsTo(() => ExistingItem, { foreignKey: 'existingItemId' })
   existingItem: ExistingItem;
 
   @ForeignKey(() => ExistingItem)
   @Column
   suggestedExistingItemId: number;
 
-  @BelongsTo(() => ExistingItem)
+  @BelongsTo(() => ExistingItem, { foreignKey: 'suggestedExistingItemId' })
   suggestedExistingItem: ExistingItem;
 
   @Default('created')

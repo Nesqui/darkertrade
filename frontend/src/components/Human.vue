@@ -72,8 +72,8 @@ $human-height: 600px;
     }
 
     .item-description {
-        right: 0px;
-        bottom: 5px;
+        left: 0px;
+        bottom: 10px;
         min-width: 125px;
         min-height: 125px;
         font-size: 14px;

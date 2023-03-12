@@ -31,7 +31,7 @@ export class BidService {
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
     @Inject('ITEMS_REPOSITORY')
     private itemRepository: typeof Item,
-  ) {}
+  ) { }
 
   async create(createBidDto: CreateBidDto, user: User) {
     const existingItem = await this.existingItemRepository.findOne({
@@ -99,9 +99,15 @@ export class BidService {
       if (!createBidDto.suggestedExistingItemId)
         throw new NotAcceptableException('Suggested item not presented');
 
-      const suggestItem = await this.existingItemRepository.findByPk(
-        createBidDto.suggestedExistingItemId,
-      );
+      const suggestItem = await this.existingItemRepository.findOne({
+        where: {
+          id: createBidDto.suggestedExistingItemId,
+          userId: user.id
+        }
+      });
+
+      if (!suggestItem)
+        throw new NotAcceptableException('You cant suggest this item');
 
       if (suggestItem.itemId !== existingItem.itemId)
         throw new NotAcceptableException('Suggested item has different type');
