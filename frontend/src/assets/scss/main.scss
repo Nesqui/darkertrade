@@ -40,6 +40,17 @@ input:-webkit-autofill {
     --el-skeleton-to-color: #201d1d6e;
 }
 
+.labeled-switch {
+    display: flex;
+    // align-items: center;
+    flex-direction: column;
+    gap: .3rem;
+
+    // label {
+    //     font-size: 12px;
+    // }
+}
+
 .el-switch__label {
     // color: var(--el-bg-color);
 }
@@ -184,6 +195,26 @@ button:hover {
 
     margin-bottom: 1rem;
 }
+
+.el-tabs__item.is-active {
+    color: var(--el-text-color-regular);
+    font-weight: 900;
+    opacity: 1;
+}
+
+.el-tabs__item:hover {
+    color: var(--el-text-color-regular);
+    opacity: 0.9;
+}
+
+.el-tabs__item {
+    opacity: 0.5;
+}
+
+.el-tabs__active-bar {
+    background-color: var(--el-color-danger)
+}
+
 
 .tat-frame,
 .no-hover:hover {

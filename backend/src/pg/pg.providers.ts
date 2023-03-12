@@ -68,7 +68,9 @@ export const pgProviders = [
         CommunityUser
       ]);
       try {
-        await sequelize.sync({ alter: true });
+        await sequelize.sync(
+          // { alter: true }
+        );
         await initData(sequelize, ConfigService);
         return sequelize;
       } catch (error) {

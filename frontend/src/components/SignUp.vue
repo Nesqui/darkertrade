@@ -159,6 +159,9 @@ onBeforeMount(async () => {
     }
   }
 })
+
+const env = ref(import.meta.env.VITE_ENV)
+
 </script>
 
 <template>
@@ -169,7 +172,7 @@ onBeforeMount(async () => {
       Use the /registration command in our server to proceed with registration.
     </p>
     <div class="register-discord">
-      <a class="tat-frame" href="https://discord.gg/VT6grnfD6t">
+      <a class="tat-frame" :href="env === 'production' ? 'https://discord.gg/VT6grnfD6t' : 'https://discord.gg/rD9bgctHNr'">
         <svg width="70px" height="70px" viewBox="0 -28.5 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid">
           <g>
@@ -185,7 +188,7 @@ onBeforeMount(async () => {
   <el-form v-else ref="ruleFormRef" :model="form" :rules="rules" status-icon>
     <div class="register">
       <el-form-item prop="nickname">
-        <el-input readonly onfocus="this.removeAttribute('readonly');" :placeholder="user?.nickname || 'nickname'"
+        <el-input readonly onfocus="this.removeAttribute('readonly');" :placeholder="user?.nickname ? `nickname (${user.nickname})` : 'nickname'"
           v-model="form.nickname"></el-input>
       </el-form-item>
       <el-form-item prop="password">

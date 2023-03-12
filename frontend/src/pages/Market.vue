@@ -51,7 +51,7 @@ onBeforeMount(async () => {
 <template>
     <div class="market">
         <Human :filterItem="filterItem" />
-        <ItemList :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions"
+        <ItemList :is-market="true" :filterItem="filterItem" :items="items" :disabled-item-actions="disabledItemActions"
             :existing-items-source="existingItemsApi.findAllByItemId" :loading="loading" />
     </div>
 </template>

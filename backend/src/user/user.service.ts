@@ -78,13 +78,17 @@ export class UserService {
     if (!user)
       throw new NotFoundException('This hash already not valid, please try signUp via discord')
 
-    if (user.nickname === updateUserDto.nickname.toLowerCase().trim())
-      throw new ForbiddenException('This login already exist')
+    // if (user.nickname === updateUserDto.nickname.toLowerCase().trim())
+    //   throw new ForbiddenException('This login already exist')
 
     user.hash = ''
     user.nickname = updateUserDto.nickname.toLowerCase().trim()
     user.password = updateUserDto.password
-    await user.save()
+    try {
+      await user.save()
+    } catch (error) {
+      throw new NotFoundException('This nickname already exist')
+    }
     return { message: 'user created' }
   }
 

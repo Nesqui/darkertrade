@@ -35,6 +35,9 @@ const push = async (url: string) => {
       <div class="top-menu__item">
         <el-button link @click="() => push(`/user/${userStore.currentUser.nickname}/items`)">My items</el-button>
       </div>
+      <div class="top-menu__item">
+        <el-button link @click="() => push(`/bids/`)">My bids</el-button>
+      </div>
     </div>
     <div v-if="isAuth" class="logout">
       <div class="top-menu__item">

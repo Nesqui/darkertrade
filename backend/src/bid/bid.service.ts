@@ -5,6 +5,8 @@ import {
   Injectable,
   NotAcceptableException,
 } from '@nestjs/common';
+import sequelize from 'sequelize';
+import { Attribute } from 'src/attribute/attribute.entity';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import DiscordGateway from 'src/discord/discord.gateway';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -13,6 +15,7 @@ import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { Bid } from './bid.entity';
 import { CreateBidDto } from './dto/create-bid.dto';
+import { QueryBidDto } from './dto/query-bid.dto';
 const DELAY_TIME_CREATE_BIT = 60 * 1000 * 5;
 
 @Injectable()
@@ -31,6 +34,8 @@ export class BidService {
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
     @Inject('ITEMS_REPOSITORY')
     private itemRepository: typeof Item,
+    @Inject('ATTRIBUTES_REPOSITORY')
+    private attributeRepository: typeof Attribute,
   ) { }
 
   async create(createBidDto: CreateBidDto, user: User) {
@@ -159,12 +164,62 @@ export class BidService {
     await this.discordGateway.onBidCreated(bid);
     delete bid.user.dataValues.discordId;
     delete bid.existingItem.user.dataValues.discordId;
-    delete bid.suggestedExistingItem.user.dataValues.discordId;
+    if (bid.suggestedExistingItem)
+      delete bid.suggestedExistingItem.user.dataValues.discordId;
     return bid;
   }
 
-  findAll() {
-    return `This action returns all bid`;
+  async filter(query: QueryBidDto, user: User) {
+    const bidsWhere = {}
+    const suggestedExistingItemWhere = {}
+    const existingItemWhere = {
+      offerType: query.offerType
+    }
+
+    console.log(JSON.stringify(query));
+
+    if (query.mine)
+      existingItemWhere['userId'] = user.id
+    // else
+    //   suggestedExistingItemWhere['userId'] = user.id
+
+    const req = {
+      where: existingItemWhere,
+      limit: query.limit,
+      offset: query.offset,
+      include: [
+        {
+          model: this.statRepository,
+          include: [this.attributeRepository]
+        },
+        {
+          required: true,
+          model: this.bidRepository,
+          include: [{
+            as: 'suggestedExistingItem',
+            model: this.existingItemRepository,
+            include: [{
+              model: this.statRepository,
+              include: [this.attributeRepository]
+            },]
+          }, {
+            model: this.userRepository,
+            attributes: {
+              exclude: ['password', 'discord', 'discordId']
+            }
+          }]
+        },
+        {
+          model: this.itemRepository
+        }
+      ]
+    }
+
+    // if (query.sort && query.sort.length)
+    //   req['order'] = query.sort
+
+    const existingItems = await this.existingItemRepository.findAll(req)
+    return existingItems
   }
 
   findOne(id: number) {

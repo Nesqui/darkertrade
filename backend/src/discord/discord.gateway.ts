@@ -82,7 +82,7 @@ export class DiscordGateway {
     }
     const itemUrl =
       this.configService.get('APP_URL') +
-      'user/' +
+      '/user/' +
       bid.existingItem.user.nickname +
       '/items/' +
       bid.existingItem.id;

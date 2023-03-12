@@ -65,16 +65,16 @@ defineProps({
                     {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
                         truncate(getAttributeNameById(stat.attributeId), 35) }}
                 </div>
-                <div class="divider"></div>
-                <div class="stat">Slot: {{ item?.slot || 'Empty slot' }}</div>
-                <div class="stat" v-if="wantedPrice">Wanted price: {{ wantedPrice }} gold</div>
+                <div v-if="!wantedPrice">Category</div>
+                <div class="divider" v-if="wantedPrice"></div>
+                <div class="darker-title" v-if="wantedPrice">Price: {{ wantedPrice }} gold</div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped lang="scss">
-$frameHeight: 240px;
+$frameHeight: 190px;
 $item-description-padding: .7rem .5rem;
 
 .item-preview {

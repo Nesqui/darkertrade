@@ -192,15 +192,16 @@ export class RegisterCommand {
       this.logger.log(`Modal ${modal.customId} ${error}`);
     }
 
-    await modal.reply({
-      content: this.configService.get('APP_URL') + `/signup?hash=${hash}`,
-      ephemeral: true,
-    });
     discUser.send(
       this.configService.get('APP_URL') +
         `/signup?hash=${hash}` +
         `
       Your link to complete registration on TaT`,
     );
+    
+    await modal.reply({
+      content: this.configService.get('APP_URL') + `/signup?hash=${hash}`,
+      ephemeral: true,
+    });
   }
 }

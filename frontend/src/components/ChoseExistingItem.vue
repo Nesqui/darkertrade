@@ -9,7 +9,7 @@ const chosenExistingItem = ref<ExistingItem>()
 const existingItemApi = initExistingItemApi()
 const loading = ref(false)
 const showDialog = ref(false)
-const showCreator = ref(false)
+const showCreator = ref('selectExisting')
 const emit = defineEmits(['onItemChosen'])
 const userStore = useUserStore()
 const props = defineProps({
@@ -91,23 +91,18 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
 
     <el-dialog class="chose-existing-item-dialog wrapper" draggable align-center v-model="showDialog">
       <div>
-        <div class="chose-item__actions">
-          <el-button-group>
-            <el-button class="show-hide-button" :disabled="showCreator" @click="showCreator = !showCreator">Create new
-              item</el-button>
-            <el-button class="show-hide-button" :disabled="!showCreator" @click="showCreator = !showCreator">Select exist
-              item</el-button>
-          </el-button-group>
-        </div>
+        <el-tabs v-model="showCreator">
+          <el-tab-pane label="Create item to sell" name="createNew">
+            <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" :no-wrapper="true" />
+          </el-tab-pane>
+          <el-tab-pane label="Select existing item" name="selectExisting">
+            <ItemList :no-wrapper="true" :disabledItemActions="disabledItemActions"
+              :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="[props.item]"
+              :existing-items-source="findAllByItemIdAndUserId" :loading="false">
+            </ItemList>
+          </el-tab-pane>
+        </el-tabs>
 
-        <Creator :prefillItem="prefillItem" :doAfterCreate="doAfterItemSelection" v-if="showCreator" :no-wrapper="true" />
-        <div v-else>
-          <h2>Select created item | WTS</h2>
-          <ItemList :no-wrapper="true" :disabledItemActions="disabledItemActions"
-            :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="[props.item]"
-            :existing-items-source="findAllByItemIdAndUserId" :loading="false">
-          </ItemList>
-        </div>
       </div>
     </el-dialog>
   </div>
@@ -154,6 +149,14 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   .right {
     transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
+  }
+}
+</style>
+
+<style lang="scss">
+.el-tabs__content {
+  .search-wrapper {
+    flex-direction: unset;
   }
 }
 </style>

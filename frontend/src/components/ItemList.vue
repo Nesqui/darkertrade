@@ -19,6 +19,10 @@ const pagination = ref({
 const itemsRef = ref()
 
 const props = defineProps({
+  isMarket: {
+    type: Boolean,
+    default: false
+  },
   items: { type: Object as PropType<Item[]>, required: true },
   filterItem: { type: Object as PropType<QueryItemDto>, required: true },
   loading: {
@@ -180,8 +184,8 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
           inactive-text="Show all" />
         <el-button-group v-if="!disabledItemActions.offerType">
-          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">WTB</el-button>
-          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">WTS</el-button>
+          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">{{ isMarket? 'I want to sell' : 'WTB only'}}</el-button>
+          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">{{ isMarket? 'I want to buy' : 'WTS only'}}</el-button>
         </el-button-group>
       </div>
       <div class="search">

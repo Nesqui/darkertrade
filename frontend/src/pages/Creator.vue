@@ -208,7 +208,10 @@ onBeforeMount(async () => {
 
 <template>
     <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
-        <h2>Item creator | {{ offerType }}</h2>
+        <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
+            <el-tab-pane label="Create item to sell" name="WTS"></el-tab-pane>
+            <el-tab-pane label="Create item to buy" name="WTB"></el-tab-pane>
+        </el-tabs>
         <div class="restrictions">
             <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
             <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
@@ -219,34 +222,51 @@ onBeforeMount(async () => {
                 <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
                     @focus="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Item name"
                     @select="handleSelectItem" />
-                <div class="item-creator__attributes__actions">
+                <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
+                    <div class="labeled-switch">
+                        <!-- <label class="sub-title" for="">Offer type:</label> -->
+                    </div>
+                </div>
+                <div class="item-creator__attributes__line">
                     <div>
                         <div class="sub-title">
-                            Wanted price (Optional)
+                            Wanted price (Optional):
                         </div>
                         <el-input-number :step-strictly="true" :precision="0" :step="25" :min="1" :max="9999" type="number"
                             placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
                     </div>
-                    <el-button-group v-if="!prefillItem?.offerType">
-                        <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
-                            buy</el-button>
-                        <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
-                            Want to sell
-                        </el-button>
-                    </el-button-group>
+                    <!-- <div>
+                                        <div class="sub-title">
+                                            Offer type:
+                                        </div>
+                                        <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
+                                            <el-option label="Want to sell" value="WTS" />
+                                            <el-option label="Want to buy" value="WTB" />
+                                        </el-select>
+                                    </div> -->
+                    <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB"
+                                            inactive-text="WTS" /> -->
+                    <!-- <el-button-group v-if="!prefillItem?.offerType">
+                                                                            <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
+                                                                                buy</el-button>
+                                                                            <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
+                                                                                Want to sell
+                                                                            </el-button>
+                                                                        </el-button-group> -->
 
                 </div>
                 <div class="item-creator__attributes__actions">
                     <div>
                         <div class="sub-title">
-                            Stat name
+                            Stat name:
                         </div>
-                        <el-autocomplete @click="clearAttribute" value-key="name" v-model="attributeName" :fetch-suggestions="attributeSearch"
-                            clearable placeholder="Stat name" @select="handleSelectAttribute" />
+                        <el-autocomplete @click="clearAttribute" value-key="name" v-model="attributeName"
+                            :fetch-suggestions="attributeSearch" clearable placeholder="Stat name"
+                            @select="handleSelectAttribute" />
                     </div>
                     <div>
                         <div class="sub-title">
-                            Stat value
+                            Stat value:
                         </div>
                         <el-input-number :precision="1" :step="1" :min="-200" :max="200" placeholder="Value" maxlength="3"
                             ref="valueRef" v-model="value" />
@@ -291,15 +311,18 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .item-creator {
-    min-height: 560px;
+    min-height: 460px;
     max-height: 750px;
     overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
 
     &__wrapper {
         display: flex;
         gap: 1rem;
         margin-bottom: 2rem;
         max-height: 540px;
+        flex: 1;
     }
 
     .wrapper {
@@ -310,20 +333,26 @@ onBeforeMount(async () => {
         width: 100%;
         display: flex;
         flex-direction: column;
-        gap: .5rem;
+        gap: .7rem;
     }
 
     &__attributes {
         display: flex;
         flex-direction: column;
         width: 100%;
+
+        &__line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
     }
 
     &__attributes__actions {
         align-items: flex-end;
         // justify-content: flex-end;
         display: flex;
-        gap: .25rem;
+        gap: .55rem;
     }
 
     // CREATE AND PUBLISH BUTTONS
@@ -331,6 +360,7 @@ onBeforeMount(async () => {
         display: flex;
         justify-content: space-between;
         align-self: flex-end;
+        width: 100%;
     }
 
     .stats {

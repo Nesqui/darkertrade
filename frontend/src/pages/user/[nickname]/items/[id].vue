@@ -154,7 +154,7 @@ onBeforeMount(async () => {
       <div v-else class="item-details">
         <div class="item-info">
           <h2>Info</h2>
-          <p v-if="item.createdAt">Item created: {{ moment.fromNow(item.createdAt) }}</p>
+          <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{ moment.fromNow(item.existingItems[0].createdAt) }}</p>
           <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
           <el-divider />
           <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" />

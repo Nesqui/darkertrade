@@ -7,13 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from 'src/user/user.decorator';
 import { User } from 'src/user/user.entity';
 import { BidService } from './bid.service';
 import { CreateBidDto } from './dto/create-bid.dto';
-import { UpdateBidDto } from './dto/update-bid.dto';
+import { QueryBidDto } from './dto/query-bid.dto';
 
 @Controller('bid')
 export class BidController {
@@ -26,8 +27,9 @@ export class BidController {
   }
 
   @Get()
-  findAll() {
-    return this.bidService.findAll();
+  @UseGuards(JwtAuthGuard)
+  filter(@ReqUser() user: User, @Query() query: QueryBidDto,) {
+    return this.bidService.filter(query, user);
   }
 
   @Get(':id')

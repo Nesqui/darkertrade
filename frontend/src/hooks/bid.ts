@@ -1,5 +1,5 @@
 import { ExistingItem, useApi, User } from "."
-
+export type BidSortParam = [string, 'ABC' | 'DESC']
 export interface Bid {
   id: number,
   price: number;
@@ -11,6 +11,15 @@ export interface Bid {
   updateAt: string,
   user: User
 }
+
+export interface QueryBidDto {
+  mine: boolean;
+  limit: number
+  offset: number
+  sort: BidSortParam[]
+  offerType: "WTS" | "WTB"
+}
+
 
 export interface CreateBidDto {
   price: number;
@@ -26,6 +35,13 @@ export const initBidApi = () => {
     return res.data
   }
 
+  const filter = async (params: QueryBidDto): Promise<ExistingItem[]> => {
+    const res = await axiosClient.get('bid', {
+      params
+    })
+    return res.data
+  }
+
   const deleteBid = async (id: number): Promise<Boolean> => {
     const res = await axiosClient.delete(`bid/${id}`)
     return !!res.data
@@ -33,6 +49,7 @@ export const initBidApi = () => {
 
   return {
     create,
-    deleteBid
+    deleteBid,
+    filter
   }
 }
