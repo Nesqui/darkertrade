@@ -268,5 +268,4 @@ export class BidService {
     userBid.save();
     return userBid;
   }
-  
 }
