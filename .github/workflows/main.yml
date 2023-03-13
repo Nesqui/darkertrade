@@ -12,7 +12,8 @@ jobs:
       uses: actions/checkout@v2
     - name: pull request
       run: |
-           cd ./opt/darkertrade/
+           cd /
+           cd /opt/darkertrade/
            git pull
     - name: update FE
       run: |
