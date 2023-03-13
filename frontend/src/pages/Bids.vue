@@ -88,7 +88,7 @@ const changeOfferType = (offerType: 'WTB' | 'WTS') => {
 }
 
 const acceptBid = async (bid: Bid) => { }
-
+const declineBid = async (bid: Bid) => {}
 onBeforeMount(async () => {
   await init()
 })
