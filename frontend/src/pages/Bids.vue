@@ -15,7 +15,7 @@ const tabName = ref<'sentOffers' | 'receivedOffers'>('receivedOffers')
 const canDeleteBid = (bid: Bid) => bid.userId === userStore.currentUser.id
 const canAcceptBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
 const canDeclineBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
-const maxCount = ref(15)
+const maxCount = ref(6)
 const route = useRoute()
 const router = useRouter()
 const selectedExistingItem = ref<ExistingItem>()
@@ -23,9 +23,14 @@ const selectedExistingItem = ref<ExistingItem>()
 const filter = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
-  limit: 3,
+  limit: 6,
   offset: 0,
   offerType: 'WTS'
+})
+
+const pagination = ref({
+  limit: 6,
+  offset: 0,
 })
 
 const bids = ref<Bid[]>()
@@ -33,7 +38,10 @@ const bids = ref<Bid[]>()
 const init = async () => {
   loading.value = true
   try {
-    const { rows, count } = await bidApi.filter(filter.value)
+    const { rows, count } = await bidApi.filter({
+      ...filter.value,
+      ...pagination.value
+    })
     existingItems.value = rows
     maxCount.value = count
   } catch (error) {
@@ -44,13 +52,13 @@ const init = async () => {
 
 const loadMoreExistingItems = async () => {
   try {
-    console.log('load');
-    const res = await bidApi.filter(filter.value)
-    existingItems.value = res.rows
-
-    if (filter.value.offset + filter.value.limit < maxCount.value) {
-      filter.value.offset = filter.value.limit + filter.value.offset
-      const { rows } = await bidApi.filter(filter.value)
+    if (pagination.value.offset + pagination.value.limit < maxCount.value) {
+      console.log('load');
+      pagination.value.offset = pagination.value.limit + pagination.value.offset
+      const { rows } = await bidApi.filter({
+        ...filter.value,
+        ...pagination.value
+      })
       if (existingItems.value?.length)
         existingItems.value = [...existingItems.value, ...rows]
     }
@@ -119,8 +127,8 @@ onBeforeMount(async () => {
         <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems }} -->
-      <div v-if="existingItems?.length" class="bids-table">
-        <div>
+      <div class="bids-table">
+        <div v-if="existingItems?.length">
           <div class="bids-items-list infinite-scroll" infinite-scroll-distance="300"
             v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
@@ -139,7 +147,7 @@ onBeforeMount(async () => {
             <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
             <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
           </el-button-group>
-          <el-table v-if="!loading" :data="bids" style="width: 100%">
+          <el-table v-if="existingItems?.length && !loading" :data="bids" style="width: 100%">
             <el-table-column prop="user.nickname" label="Nickname" width="140">
               <template #default="scope">
                 <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
@@ -215,10 +223,10 @@ onBeforeMount(async () => {
           </el-table>
         </div>
       </div>
-      <div v-else-if="loading">
+      <div v-if="loading">
         <el-skeleton :rows="6"></el-skeleton>
       </div>
-      <div v-else>
+      <div v-else-if="!existingItems?.length">
         <p>Currently no bids here</p>
       </div>
     </div>
