@@ -22,5 +22,5 @@ jobs:
           cd ../backend/
           pnpm i 
     - name: start BE 
-      run: pm2 start "nest start --watch" --name BE
+      run: pm2 start "nest start" --name BE
     
