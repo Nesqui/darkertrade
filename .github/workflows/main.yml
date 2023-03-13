@@ -17,16 +17,18 @@ jobs:
            git pull
     - name: update FE
       run: |
+          cd /
+          cd /opt/darkertrade/
           cd /frontend/
-          pnpm i 
-      working-directory: ./opt/darkertrade/
+          pnpm i
     - name: start FE 
       run: pm2 start "pnpm run build" --name FE    
     - name: update BE
       run: |
-          cd ../backend/
+          cd /
+          cd /opt/darkertrade/
+          cd /backend/
           pnpm i 
-      working-directory: ./opt/darkertrade/
     - name: start BE 
       run: pm2 start "nest start" --name BE
     
