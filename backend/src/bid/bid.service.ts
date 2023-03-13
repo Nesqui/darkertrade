@@ -161,16 +161,22 @@ export class BidService {
         },
       ],
     });
-    await this.discordGateway.onBidCreated(bid);
-    delete bid.user.dataValues.discordId;
-    delete bid.existingItem.user.dataValues.discordId;
-    if (bid.suggestedExistingItem)
-      delete bid.suggestedExistingItem.user.dataValues.discordId;
+
+    try {
+      await this.discordGateway.onBidCreated(bid);
+      delete bid.user.dataValues.discordId;
+      delete bid.existingItem.user.dataValues.discordId;
+      if (bid.suggestedExistingItem)
+        delete bid.suggestedExistingItem.user.dataValues.discordId;
+    } catch (error) {
+      console.log('DISCORD CANT SEND', error);
+    }
     return bid;
   }
 
   async filter(query: QueryBidDto, user: User) {
     const bidsWhere = {}
+    const excludedStatuses = ['deleted']
     const suggestedExistingItemWhere = {}
     const existingItemWhere = {
       offerType: query.offerType
@@ -180,6 +186,11 @@ export class BidService {
 
     if (query.mine)
       existingItemWhere['userId'] = user.id
+
+    bidsWhere[sequelize.Op.not] = {
+      status: excludedStatuses
+    }
+
     // else
     //   suggestedExistingItemWhere['userId'] = user.id
 
@@ -195,13 +206,19 @@ export class BidService {
         {
           required: true,
           model: this.bidRepository,
+          where: bidsWhere,
           include: [{
             as: 'suggestedExistingItem',
             model: this.existingItemRepository,
             include: [{
               model: this.statRepository,
               include: [this.attributeRepository]
-            },]
+            },{
+              model: this.userRepository,
+              attributes: {
+                exclude: ['password', 'discord', 'discordId']
+              }
+            }]
           }, {
             model: this.userRepository,
             attributes: {

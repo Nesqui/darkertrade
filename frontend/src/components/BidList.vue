@@ -65,7 +65,7 @@ const deleteBid = async (bid: Bid) => {
                 <template #reference>
                   <el-button class="m-2">Item</el-button>
                 </template>
-                <ItemPreview :item="item" @click="push(`/user/${bid.user.nickname}/items/${bid.suggestedExistingItemId}`)" :stats="bid.suggestedExistingItem?.stats" />
+                <ItemPreview :item="item" @click="push(`/user/${bid.user.nickname}/items/${bid.suggestedExistingItemId}`)" :wanted-price="bid.suggestedExistingItem?.wantedPrice" :stats="bid.suggestedExistingItem?.stats" />
               </el-popover>
               <el-popconfirm v-if="canDeleteBid(bid)" width="350" @confirm="deleteBid(bid)" confirm-button-text="OK"
                 cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">

@@ -40,6 +40,14 @@ input:-webkit-autofill {
     --el-skeleton-to-color: #201d1d6e;
 }
 
+.el-table {
+    --el-table-header-bg-color: transparent;
+    --el-table-fixed-box-shadow: var(--el-box-shadow);
+    --el-table-bg-color: transparent;
+    --el-table-tr-bg-color: transparent;
+    --el-table-border-color: var(--el-color-danger)
+}
+
 .labeled-switch {
     display: flex;
     // align-items: center;
@@ -252,13 +260,14 @@ button:hover {
 }
 
 .el-popper.is-dark {
-    background: var(--el-color-primary-light-9);
+    background: var(--el-bg-color);
     border: 1px solid var(--el-color-primary);
+    color: var(--color-text);
 }
 
 .el-popper.is-dark .el-popper__arrow::before {
     border: 1px solid var(--el-color-primary);
-    background: var(--el-color-primary-light-9);
+    background: var(--el-bg-color);
     right: 0;
 }
 

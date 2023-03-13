@@ -9,7 +9,8 @@ export interface Bid {
   userId: number;
   createdAt: string,
   updateAt: string,
-  user: User
+  user: User,
+  status: 'created' | 'accepted' | 'declined' | 'deleted'
 }
 
 export interface QueryBidDto {

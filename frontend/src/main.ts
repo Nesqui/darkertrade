@@ -9,6 +9,7 @@ import generatedRoutes from "~pages";
 import { setupLayouts } from "virtual:generated-layouts";
 import { initApi } from './hooks';
 import { createPinia } from 'pinia'
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
 const routes = setupLayouts(generatedRoutes);
 initApi()
@@ -19,6 +20,9 @@ initApi()
 
 ViteSSG(App, { routes }, ({ app, router, routes, isClient, initialState }) => {
   const pinia = createPinia()
+  for (const [key, component] of Object.entries<[any, any]>(ElementPlusIconsVue)) {
+    app.component(key, component)
+  }
   app.use(pinia)
   app.use(ElementPlus)
   app.use(router)
