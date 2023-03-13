@@ -88,7 +88,7 @@ const changeOfferType = (offerType: 'WTB' | 'WTS') => {
 }
 
 const acceptBid = async (bid: Bid) => { }
-const declineBid = async (bid: Bid) => {}
+const declineBid = async (bid: Bid) => { }
 onBeforeMount(async () => {
   await init()
 })
@@ -107,7 +107,9 @@ onBeforeMount(async () => {
           <div class="bids-items-list">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
-                <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' : existingItem.bids.length }}</div>
+                <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
+                  class="item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' : existingItem.bids.length }}
+                </div>
               </div>
               <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
@@ -228,9 +230,10 @@ $itemsListWidth: 300px;
   .item-preview__head {
     position: relative;
     width: 100%;
+
     &__counter {
       position: absolute;
-      right: 5px;
+      left: calc($itemsListWidth - 2rem - 23px);
       top: -13px;
       background-color: var(--el-color-danger);
       box-shadow: var(--wrapper-box-shadow);
@@ -275,7 +278,7 @@ $itemsListWidth: 300px;
   .bids-items-list {
     margin-top: .25rem;
     border-right: 1px solid var(--el-border-color);
-    overflow-y: auto;
+    overflow-y: visible;
     overflow-x: hidden;
     width: $itemsListWidth;
     max-height: 650px;

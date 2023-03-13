@@ -36,14 +36,14 @@ export class BidService {
     private itemRepository: typeof Item,
     @Inject('ATTRIBUTES_REPOSITORY')
     private attributeRepository: typeof Attribute,
-  ) { }
+  ) {}
 
   async create(createBidDto: CreateBidDto, user: User) {
     const existingItem = await this.existingItemRepository.findOne({
       where: {
         id: createBidDto.existingItemId,
         archived: false,
-        published: true
+        published: true,
       },
     });
     if (!existingItem) throw new NotAcceptableException('Item not found');
@@ -107,8 +107,8 @@ export class BidService {
       const suggestItem = await this.existingItemRepository.findOne({
         where: {
           id: createBidDto.suggestedExistingItemId,
-          userId: user.id
-        }
+          userId: user.id,
+        },
       });
 
       if (!suggestItem)
@@ -163,11 +163,13 @@ export class BidService {
     });
 
     try {
-      await this.discordGateway.onBidCreated(bid);
-      delete bid.user.dataValues.discordId;
-      delete bid.existingItem.user.dataValues.discordId;
-      if (bid.suggestedExistingItem)
-        delete bid.suggestedExistingItem.user.dataValues.discordId;
+      if (bid) {
+        await this.discordGateway.onBidCreated(bid);
+        delete bid.user.dataValues.discordId;
+        delete bid.existingItem.user.dataValues.discordId;
+        if (bid.suggestedExistingItem)
+          delete bid.suggestedExistingItem.user.dataValues.discordId;
+      }
     } catch (error) {
       console.log('DISCORD CANT SEND', error);
     }
@@ -175,22 +177,24 @@ export class BidService {
   }
 
   async filter(query: QueryBidDto, user: User) {
-    const bidsWhere = {}
-    const excludedStatuses = ['deleted']
-    const suggestedExistingItemWhere = {}
+    const bidsWhere = {};
+    const excludedStatuses = ['deleted'];
+    const suggestedExistingItemWhere = {};
     const existingItemWhere = {
       offerType: query.offerType,
-      published: true
-    }
+      published: true,
+    };
 
     console.log(JSON.stringify(query));
 
-    if (query.mine)
-      existingItemWhere['userId'] = user.id
+    if (query.mine) existingItemWhere['userId'] = user.id;
+    else {
+      bidsWhere['userId'] = user.id;
+    }
 
     bidsWhere[sequelize.Op.not] = {
-      status: excludedStatuses
-    }
+      status: excludedStatuses,
+    };
 
     // else
     //   suggestedExistingItemWhere['userId'] = user.id
@@ -202,42 +206,48 @@ export class BidService {
       include: [
         {
           model: this.statRepository,
-          include: [this.attributeRepository]
+          include: [this.attributeRepository],
         },
         {
           required: true,
           model: this.bidRepository,
           where: bidsWhere,
-          include: [{
-            as: 'suggestedExistingItem',
-            model: this.existingItemRepository,
-            include: [{
-              model: this.statRepository,
-              include: [this.attributeRepository]
-            },{
+          include: [
+            {
+              as: 'suggestedExistingItem',
+              model: this.existingItemRepository,
+              include: [
+                {
+                  model: this.statRepository,
+                  include: [this.attributeRepository],
+                },
+                {
+                  model: this.userRepository,
+                  attributes: {
+                    exclude: ['password', 'discord', 'discordId'],
+                  },
+                },
+              ],
+            },
+            {
               model: this.userRepository,
               attributes: {
-                exclude: ['password', 'discord', 'discordId']
-              }
-            }]
-          }, {
-            model: this.userRepository,
-            attributes: {
-              exclude: ['password', 'discord', 'discordId']
-            }
-          }]
+                exclude: ['password', 'discord', 'discordId'],
+              },
+            },
+          ],
         },
         {
-          model: this.itemRepository
-        }
-      ]
-    }
+          model: this.itemRepository,
+        },
+      ],
+    };
 
     // if (query.sort && query.sort.length)
     //   req['order'] = query.sort
 
-    const existingItems = await this.existingItemRepository.findAll(req)
-    return existingItems
+    const existingItems = await this.existingItemRepository.findAll(req);
+    return existingItems;
   }
 
   findOne(id: number) {
