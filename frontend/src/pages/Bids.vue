@@ -11,11 +11,11 @@ const existingItems = ref<ExistingItem[]>()
 const userStore = useUserStore()
 const moment = useMoment()
 const loading = ref(true)
-const tabName = ref<'sentOffers' | 'receivedOffers'>('sentOffers')
+const tabName = ref<'sentOffers' | 'receivedOffers'>('receivedOffers')
 const canDeleteBid = (bid: Bid) => bid.userId === userStore.currentUser.id
 const canAcceptBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
 const canDeclineBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
-
+const maxCount = ref(15)
 const route = useRoute()
 const router = useRouter()
 const selectedExistingItem = ref<ExistingItem>()
@@ -23,7 +23,7 @@ const selectedExistingItem = ref<ExistingItem>()
 const filter = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
-  limit: 15,
+  limit: 3,
   offset: 0,
   offerType: 'WTS'
 })
@@ -33,18 +33,34 @@ const bids = ref<Bid[]>()
 const init = async () => {
   loading.value = true
   try {
-    existingItems.value = await bidApi.filter(filter.value)
+    const { rows, count } = await bidApi.filter(filter.value)
+    existingItems.value = rows
+    maxCount.value = count
   } catch (error) {
   } finally {
     loading.value = false
   }
 }
 
+const loadMoreExistingItems = async () => {
+  try {
+    console.log('load');
+    const res = await bidApi.filter(filter.value)
+    existingItems.value = res.rows
+
+    if (filter.value.offset + filter.value.limit < maxCount.value) {
+      filter.value.offset = filter.value.limit + filter.value.offset
+      const { rows } = await bidApi.filter(filter.value)
+      if (existingItems.value?.length)
+        existingItems.value = [...existingItems.value, ...rows]
+    }
+  } catch (error) {
+  }
+}
+
 const deleteBid = async (bid: Bid) => {
   try {
     loading.value = true
-    console.log(1);
-
     await bidApi.deleteBid(bid.id)
   } catch (error) {
   } finally {
@@ -53,11 +69,12 @@ const deleteBid = async (bid: Bid) => {
 }
 
 watch(filter.value, async () => {
+  bids.value = []
   await init()
 })
 
 const changeTab = () => {
-  filter.value.mine = !filter.value.mine
+  filter.value.mine = tabName.value === 'sentOffers' ? true : false
 }
 
 const push = async (url: string) => {
@@ -98,13 +115,14 @@ onBeforeMount(async () => {
   <div class="bids">
     <div class="wrapper">
       <el-tabs v-model="tabName" class="bids-tabs" @tab-click="changeTab">
-        <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
         <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
+        <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems }} -->
-      <div class="bids-table">
+      <div v-if="existingItems?.length" class="bids-table">
         <div>
-          <div class="bids-items-list">
+          <div class="bids-items-list infinite-scroll" infinite-scroll-distance="300"
+            v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
                 <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
@@ -196,6 +214,12 @@ onBeforeMount(async () => {
             </el-table-column>
           </el-table>
         </div>
+      </div>
+      <div v-else-if="loading">
+        <el-skeleton :rows="6"></el-skeleton>
+      </div>
+      <div v-else>
+        <p>Currently no bids here</p>
       </div>
     </div>
   </div>

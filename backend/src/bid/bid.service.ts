@@ -223,17 +223,13 @@ export class BidService {
                 },
                 {
                   model: this.userRepository,
-                  attributes: {
-                    exclude: ['password', 'discord', 'discordId'],
-                  },
+                  attributes: ['nickname', 'id'],
                 },
               ],
             },
             {
               model: this.userRepository,
-              attributes: {
-                exclude: ['password', 'discord', 'discordId'],
-              },
+              attributes: ['nickname', 'id'],
             },
           ],
         },
@@ -246,7 +242,9 @@ export class BidService {
     // if (query.sort && query.sort.length)
     //   req['order'] = query.sort
 
-    const existingItems = await this.existingItemRepository.findAll(req);
+    const existingItems = await this.existingItemRepository.findAndCountAll(
+      req,
+    );
     return existingItems;
   }
 
