@@ -20,7 +20,7 @@ initApi()
 
 ViteSSG(App, { routes }, ({ app, router, routes, isClient, initialState }) => {
   const pinia = createPinia()
-  for (const [key, component] of Object.entries<[any, any]>(ElementPlusIconsVue)) {
+  for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
     app.component(key, component)
   }
   app.use(pinia)
