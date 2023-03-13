@@ -8,22 +8,23 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-    - name: pull request
+    - name: checkout
       uses: actions/checkout@v2
     - name: pull request
+      working-directory: ./opt/darkertrade/
       run: git pull
     - name: update FE
       run: |
           cd /frontend/
           pnpm i 
-      working-directory: /opt/darkertrade/
+      working-directory: ./opt/darkertrade/
     - name: start FE 
       run: pm2 start "pnpm run build" --name FE    
     - name: update BE
       run: |
           cd ../backend/
           pnpm i 
-      working-directory: /opt/darkertrade/
+      working-directory: ./opt/darkertrade/
     - name: start BE 
       run: pm2 start "nest start" --name BE
     
