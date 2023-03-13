@@ -22,11 +22,7 @@ jobs:
           cd frontend
           pnpm i
     - name: start FE 
-      run: |
-          cd /
-          cd /opt/darkertrade/
-          cd frontend
-          pm2 start "pnpm run build" --name FE    
+      run:  cd /opt/darkertrade/frontend ; pm2 start "pnpm run build" --name FE    
     - name: update BE
       run: |
           cd /
