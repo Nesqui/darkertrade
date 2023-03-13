@@ -179,7 +179,8 @@ export class BidService {
     const excludedStatuses = ['deleted']
     const suggestedExistingItemWhere = {}
     const existingItemWhere = {
-      offerType: query.offerType
+      offerType: query.offerType,
+      published: true
     }
 
     console.log(JSON.stringify(query));

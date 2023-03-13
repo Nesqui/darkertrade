@@ -107,7 +107,7 @@ onBeforeMount(async () => {
           <div class="bids-items-list">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
-                <div @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">9+</div>
+                <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' : existingItem.bids.length }}</div>
               </div>
               <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
@@ -131,7 +131,7 @@ onBeforeMount(async () => {
               <!-- HAS SUGGESTED ITEM  -->
               <template #default="scope">
                 <div v-if="scope.row.suggestedExistingItem">
-                  <el-popover placement="top-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
+                  <el-popover placement="right-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
                     <template #reference>
                       <el-button class="m-2"><el-icon>
                           <View />
