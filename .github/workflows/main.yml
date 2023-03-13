@@ -9,8 +9,6 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-    - name: checkout
-      uses: actions/checkout@v2
     - name: pull request
       run: |
            cd /
