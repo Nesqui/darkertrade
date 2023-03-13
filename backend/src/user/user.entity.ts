@@ -17,7 +17,7 @@ import { ExistingItem } from 'src/existing-item/existing-item.entity';
 export class User extends Model {
   @Unique
   @Validate({
-    is: /^[a-zA-Z0-9]+$/
+    is: /^[a-zA-Z0-9]+$/,
   })
   @Column
   nickname: string;
@@ -26,7 +26,7 @@ export class User extends Model {
   password: string;
 
   @Validate({
-    is: /^[a-zA-Z0-9]+$/
+    is: /^[a-zA-Z0-9]+$/,
   })
   @Column
   name: string;
@@ -35,7 +35,7 @@ export class User extends Model {
   lastName: string;
 
   @Validate({
-    is: /^[a-zA-Z0-9\s]+#[0-9]{4}$/
+    is: /^[a-zA-Z0-9\s]+#[0-9]{4}$/,
   })
   @Column
   discord: string;
@@ -43,6 +43,10 @@ export class User extends Model {
   @Unique
   @Column
   discordId: string;
+
+  @Default(true)
+  @Column
+  discordNotification: boolean;
 
   @Column
   hash: string;

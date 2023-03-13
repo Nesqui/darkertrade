@@ -55,6 +55,19 @@ export class DiscordGateway {
   onBidAccepted = async (bid: Bid) => {
     // TODO implement DiscordNotify
     const discordId = bid.user.discordId;
+
+    const userDbResponse = await this.usersRepository.findOne({
+      where: {
+        discordId: discordId,
+      },
+    });
+
+    if (!userDbResponse.discordNotification) {
+      return;
+    }
+    if (!bid.existingItem.discordNotification) {
+      return;
+    }
     try {
       const discordUser = await this.client.users.fetch(discordId);
       await discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
@@ -89,6 +102,18 @@ export class DiscordGateway {
       '/items/' +
       bid.existingItem.id;
 
+    const userDbResponse = await this.usersRepository.findOne({
+      where: {
+        discordId: discordId,
+      },
+    });
+
+    if (!userDbResponse.discordNotification) {
+      return;
+    }
+    if (!bid.existingItem.discordNotification) {
+      return;
+    }
     try {
       const discordUser = await this.client.users.fetch(discordId);
       await discordUser.send(` ${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at 
@@ -98,6 +123,7 @@ export class DiscordGateway {
     } catch (error) {
       this.logger.log(`disc send ${error}`);
     }
+
     // discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}
     // Bid was created messaga`);
 
