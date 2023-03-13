@@ -45,7 +45,7 @@ export class RegisterCommand {
     private usersRepository: typeof User,
     @InjectDiscordClient()
     private readonly client: Client,
-  ) { }
+  ) {}
 
   // async getNickname(nickname: string) {
   //   for (let prefix = 0; prefix < DISCORD_NAME_ATTEMPTS; prefix++) {
@@ -193,16 +193,14 @@ export class RegisterCommand {
     }
 
     try {
-      discUser.send(
+      await discUser.send(
         this.configService.get('APP_URL') +
-        `/signup?hash=${hash}` +
-        `
+          `/signup?hash=${hash}` +
+          `
       Your link to complete registration on TaT`,
       );
-
     } catch (error) {
       this.logger.log(`disc send ${error}`);
-
     }
 
     await modal.reply({

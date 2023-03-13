@@ -55,9 +55,9 @@ export class DiscordGateway {
   onBidAccepted = async (bid: Bid) => {
     // TODO implement DiscordNotify
     const discordId = bid.user.discordId;
-    const discordUser = await this.client.users.fetch(discordId);
     try {
-      discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
+      const discordUser = await this.client.users.fetch(discordId);
+      await discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
     Your bid was accepted`);
     } catch (error) {
       this.logger.log(`disc send ${error}`);
@@ -72,7 +72,6 @@ export class DiscordGateway {
   onBidCreated = async (bid: Bid) => {
     // TODO implement DiscordNotify
     const discordId = bid.existingItem.user.discordId;
-    const discordUser = await this.client.users.fetch(discordId);
 
     // $name greet your $item created at
     // url
@@ -91,7 +90,8 @@ export class DiscordGateway {
       bid.existingItem.id;
 
     try {
-      discordUser.send(` ${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at 
+      const discordUser = await this.client.users.fetch(discordId);
+      await discordUser.send(` ${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at 
         ${itemUrl}
         has a new bid from ${bid.user.nickname}
         ${priceString}`);
