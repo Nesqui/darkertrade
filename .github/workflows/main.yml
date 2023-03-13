@@ -19,7 +19,7 @@ jobs:
       run: |
           cd /
           cd /opt/darkertrade/
-          cd /frontend/
+          cd frontend
           pnpm i
     - name: start FE 
       run: pm2 start "pnpm run build" --name FE    
@@ -27,7 +27,7 @@ jobs:
       run: |
           cd /
           cd /opt/darkertrade/
-          cd /backend/
+          cd backend
           pnpm i 
     - name: start BE 
       run: pm2 start "nest start" --name BE
