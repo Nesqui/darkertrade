@@ -11,7 +11,7 @@ module.exports = {
     out_file: '../logs/backend-out.log'
   },
   {
-    name: 'frontend',
+    name: 'fe',
     cwd: './frontend/',
     "script": "pnpm",
     "args": "run build",
