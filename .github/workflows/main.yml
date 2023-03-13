@@ -13,14 +13,14 @@ jobs:
     - name: pull request
       run: git pull
     - name: update FE
-      working-directory: /opt/darkertrade/
+      working-directory: ../opt/darkertrade/
       run: |
           cd /frontend/
           pnpm i 
     - name: start FE 
       run: pm2 start "pnpm run build" --name FE    
     - name: update BE
-      working-directory: /opt/darkertrade/
+      working-directory: ../opt/darkertrade/
       run: |
           cd ../backend/
           pnpm i 
