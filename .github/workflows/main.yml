@@ -11,8 +11,9 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
     - name: pull request
-      working-directory: ./opt/darkertrade/
-      run: git pull
+      run: |
+           cd ./opt/darkertrade/
+           git pull
     - name: update FE
       run: |
           cd /frontend/
