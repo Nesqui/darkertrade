@@ -3,12 +3,15 @@ on:
   push:
     branches:
       - 'main'
-      - '!development'
+    branches-ignore:
+      - 'development'
   workflow_dispatch:
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
+    - name: checkout
+      uses: actions/checkout@v2
     - name: pull request
       run: |
            cd /
