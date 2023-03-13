@@ -2,10 +2,7 @@ name: CI
 on:
   push:
     branches:
-      - 'main'
-    branches-ignore:
-      - 'development'
-  workflow_dispatch:
+      - main
 jobs:
   deploy:
     runs-on: self-hosted
