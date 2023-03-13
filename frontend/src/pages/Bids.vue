@@ -107,7 +107,7 @@ onBeforeMount(async () => {
           <div class="bids-items-list">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
-                <div @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">{{ existingItem.bids?.length }}</div>
+                <div @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">9+</div>
               </div>
               <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />

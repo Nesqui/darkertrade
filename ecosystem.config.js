@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'be',
-    cwd: './backend/',
+    cwd: '/opt/darkertrade/backend/',
     "script": "nest",
     "args": "start",
     instances: 1,
@@ -12,7 +12,7 @@ module.exports = {
   },
   {
     name: 'fe',
-    cwd: './frontend/',
+    cwd: '/opt/darkertrade/frontend/',
     "script": "pnpm",
     "args": "run build",
     instances: 1,
