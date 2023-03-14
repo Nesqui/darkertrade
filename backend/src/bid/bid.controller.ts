@@ -28,7 +28,7 @@ export class BidController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  filter(@ReqUser() user: User, @Query() query: QueryBidDto,) {
+  filter(@ReqUser() user: User, @Query() query: QueryBidDto) {
     return this.bidService.filter(query, user);
   }
 
@@ -38,6 +38,7 @@ export class BidController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   accept(@Param('id') id: string, @ReqUser() user: User) {
     return this.bidService.accept(+id, user);
   }

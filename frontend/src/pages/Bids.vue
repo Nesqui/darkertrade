@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { ExistingItem, useMoment } from '@/hooks'
 import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid'
-import { onBeforeMount, ref, watch } from 'vue'
+import { nextTick, onBeforeMount, ref, watch } from 'vue'
 import ItemPreview from '@/components/ItemPreview.vue';
 import { useUserStore } from '@/store';
 import { useRoute, useRouter } from 'vue-router';
+import { ElNotification } from 'element-plus';
 
 const bidApi = initBidApi()
 const existingItems = ref<ExistingItem[]>()
 const userStore = useUserStore()
 const moment = useMoment()
 const loading = ref(true)
-const tabName = ref<'sentOffers' | 'receivedOffers'>('sentOffers')
+const tabName = ref<'sentOffers' | 'receivedOffers'>('receivedOffers')
 const canDeleteBid = (bid: Bid) => bid.userId === userStore.currentUser.id
 const canAcceptBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
 const canDeclineBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
-
+const maxCount = ref(6)
 const route = useRoute()
 const router = useRouter()
 const selectedExistingItem = ref<ExistingItem>()
@@ -23,9 +24,14 @@ const selectedExistingItem = ref<ExistingItem>()
 const filter = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
-  limit: 15,
+  limit: 6,
   offset: 0,
   offerType: 'WTS'
+})
+
+const pagination = ref({
+  limit: 6,
+  offset: 0,
 })
 
 const bids = ref<Bid[]>()
@@ -33,19 +39,64 @@ const bids = ref<Bid[]>()
 const init = async () => {
   loading.value = true
   try {
-    existingItems.value = await bidApi.filter(filter.value)
+    existingItems.value = []
+    const { rows, count } = await bidApi.filter({
+      ...filter.value,
+      ...pagination.value
+    })
+    existingItems.value = rows
+    maxCount.value = count
   } catch (error) {
   } finally {
     loading.value = false
   }
 }
 
+const loadMoreExistingItems = async () => {
+  try {
+    if (pagination.value.offset + pagination.value.limit < maxCount.value) {
+      pagination.value.offset = pagination.value.limit + pagination.value.offset
+      const { rows } = await bidApi.filter({
+        ...filter.value,
+        ...pagination.value
+      })
+      if (existingItems.value?.length)
+        existingItems.value = [...existingItems.value, ...rows]
+    }
+  } catch (error) {
+  }
+}
+
 const deleteBid = async (bid: Bid) => {
   try {
+    if (!bids.value || !existingItems.value || !selectedExistingItem.value)
+      return
     loading.value = true
-    console.log(1);
+    let success = false
+    const bidIndex = bids.value.findIndex(b => b.id === bid.id)
+    if (bidIndex !== -1) {
+      bids.value?.splice(bidIndex, 1)
+      if (!bids.value?.length) {
+        const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value.id)
+        if (eiIndex !== -1) {
+          existingItems.value.splice(eiIndex, 1)
+          selectedExistingItem.value = undefined
+          await bidApi.deleteBid(bid.id)
+          success = true
+        }
 
-    await bidApi.deleteBid(bid.id)
+        // if ()
+      }
+    }
+    if (success) {
+      ElNotification({
+        message: 'Bid successfully deleted'
+      })
+      return
+    }
+    ElNotification({
+      message: 'Bid not found'
+    })
   } catch (error) {
   } finally {
     loading.value = false
@@ -53,11 +104,13 @@ const deleteBid = async (bid: Bid) => {
 }
 
 watch(filter.value, async () => {
+  pagination.value.offset = 0
+  bids.value = []
   await init()
 })
 
-const changeTab = () => {
-  filter.value.mine = !filter.value.mine
+const changeTab = (v) => {
+  filter.value.mine = tabName.value === 'sentOffers' ? false : true
 }
 
 const push = async (url: string) => {
@@ -87,8 +140,17 @@ const changeOfferType = (offerType: 'WTB' | 'WTS') => {
   clear()
 }
 
-const acceptBid = async (bid: Bid) => { }
-const declineBid = async (bid: Bid) => {}
+const acceptBid = async (bid: Bid) => {
+  try {
+    await bidApi.accept(bid.id)
+    ElNotification({
+      message: 'Bid accepted'
+    })
+    bid.status = 'accepted'
+  } catch (error) {
+  }
+}
+const declineBid = async (bid: Bid) => { }
 onBeforeMount(async () => {
   await init()
 })
@@ -96,18 +158,22 @@ onBeforeMount(async () => {
 
 <template>
   <div class="bids">
+    {{ existingItems?.length }} {{ pagination.limit }} {{ pagination.offset }} {{ maxCount }}
     <div class="wrapper">
-      <el-tabs v-model="tabName" class="bids-tabs" @tab-click="changeTab">
-        <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
+      <el-tabs v-model="tabName" class="bids-tabs" @tab-change="changeTab">
         <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
+        <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems }} -->
       <div class="bids-table">
-        <div>
-          <div class="bids-items-list">
+        <div v-if="existingItems?.length">
+          <div class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
+            v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="300">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
-                <div @click="() => selectExistingItem(existingItem)" class="item-preview__head__counter">9+</div>
+                <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
+                  class="item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' : existingItem.bids.length }}
+                </div>
               </div>
               <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
@@ -119,7 +185,8 @@ onBeforeMount(async () => {
             <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
             <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
           </el-button-group>
-          <el-table v-if="!loading" :data="bids" style="width: 100%">
+          <el-table empty-text="Please choose any item" v-if="existingItems?.length && !loading" :data="bids"
+            style="width: 100%">
             <el-table-column prop="user.nickname" label="Nickname" width="140">
               <template #default="scope">
                 <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
@@ -131,7 +198,7 @@ onBeforeMount(async () => {
               <!-- HAS SUGGESTED ITEM  -->
               <template #default="scope">
                 <div v-if="scope.row.suggestedExistingItem">
-                  <el-popover placement="top-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
+                  <el-popover placement="right-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
                     <template #reference>
                       <el-button class="m-2"><el-icon>
                           <View />
@@ -195,6 +262,12 @@ onBeforeMount(async () => {
           </el-table>
         </div>
       </div>
+      <div v-if="loading">
+        <el-skeleton :rows="6"></el-skeleton>
+      </div>
+      <div v-else-if="!existingItems?.length">
+        <p>Currently no bids here</p>
+      </div>
     </div>
   </div>
 </template>
@@ -228,9 +301,10 @@ $itemsListWidth: 300px;
   .item-preview__head {
     position: relative;
     width: 100%;
+
     &__counter {
       position: absolute;
-      right: 5px;
+      left: calc($itemsListWidth - 2rem - 23px);
       top: -13px;
       background-color: var(--el-color-danger);
       box-shadow: var(--wrapper-box-shadow);
@@ -275,7 +349,7 @@ $itemsListWidth: 300px;
   .bids-items-list {
     margin-top: .25rem;
     border-right: 1px solid var(--el-border-color);
-    overflow-y: auto;
+    overflow-y: visible;
     overflow-x: hidden;
     width: $itemsListWidth;
     max-height: 650px;

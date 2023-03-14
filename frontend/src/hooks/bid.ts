@@ -1,4 +1,4 @@
-import { ExistingItem, useApi, User } from "."
+import { CountedExistingItemsResponse, ExistingItem, useApi, User } from "."
 export type BidSortParam = [string, 'ABC' | 'DESC']
 export interface Bid {
   id: number,
@@ -21,7 +21,6 @@ export interface QueryBidDto {
   offerType: "WTS" | "WTB"
 }
 
-
 export interface CreateBidDto {
   price: number;
   existingItemId: number;
@@ -36,7 +35,12 @@ export const initBidApi = () => {
     return res.data
   }
 
-  const filter = async (params: QueryBidDto): Promise<ExistingItem[]> => {
+  const accept = async (id: number): Promise<Bid> => {
+    const res = await axiosClient.patch(`bid/${id}`)
+    return res.data
+  }
+
+  const filter = async (params: QueryBidDto): Promise<CountedExistingItemsResponse> => {
     const res = await axiosClient.get('bid', {
       params
     })
@@ -51,6 +55,7 @@ export const initBidApi = () => {
   return {
     create,
     deleteBid,
-    filter
+    filter,
+    accept
   }
 }
