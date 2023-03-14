@@ -77,7 +77,7 @@ const deleteBid = async (bid: Bid) => {
     if (bidIndex !== -1) {
       bids.value?.splice(bidIndex, 1)
       if (!bids.value?.length) {
-        const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value.id)
+        const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value?.id)
         if (eiIndex !== -1) {
           existingItems.value.splice(eiIndex, 1)
           selectedExistingItem.value = undefined
@@ -109,7 +109,7 @@ watch(filter.value, async () => {
   await init()
 })
 
-const changeTab = (v) => {
+const changeTab = () => {
   filter.value.mine = tabName.value === 'sentOffers' ? false : true
 }
 
