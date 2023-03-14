@@ -9,7 +9,6 @@ const { sendWS, init, connected } = initWs()
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
 
-
 onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)

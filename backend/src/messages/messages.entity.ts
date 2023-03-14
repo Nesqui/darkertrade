@@ -6,7 +6,6 @@ import {
   BelongsTo,
   ForeignKey,
   Length,
-  
 } from 'sequelize-typescript';
 import { Chat } from 'src/chat/chat.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -16,7 +15,7 @@ import { User } from 'src/user/user.entity';
 export class Message extends Model {
   @Length({
     min: 1,
-    max: 333
+    max: 333,
   })
   @Column
   text: string;
@@ -41,6 +40,6 @@ export class Message extends Model {
   @Column
   existingItemId: number;
 
-  @BelongsTo(() => User)
-  existingItem: User;
+  @BelongsTo(() => ExistingItem)
+  existingItem: ExistingItem;
 }
