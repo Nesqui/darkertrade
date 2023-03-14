@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
     name: 'be',
-    cwd: '/opt/darkertrade/backend/',
+    cwd: '/opt/darkertrade/backend/dist',
     "script": "pnpm",
     "args": "run start",
     instances: 1,
