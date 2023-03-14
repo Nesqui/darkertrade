@@ -2,13 +2,13 @@ name: CI
 on:
   push:
     branches:
-      - 'main'
-      - '!development'
-  workflow_dispatch:
+      - main
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
+    - name: checkout
+      uses: actions/checkout@v2
     - name: pull request
       run: |
            cd /
@@ -26,6 +26,12 @@ jobs:
           cd /opt/darkertrade/
           cd backend
           pnpm i 
+    - name: build BE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd backend
+          nest build
     - name: restart PM2
       run: pm2 restart /opt/darkertrade/ecosystem.config.js
     
