@@ -151,6 +151,25 @@ button:hover {
 
 .el-collapse {
     --el-collapse-border-color: unset;
+    --el-collapse-header-bg-color: unset;
+
+    .el-collapse-item__header {
+        box-shadow: 2px 3px 20px black,
+            0 0 125px #000000 inset;
+    }
+
+    .el-collapse {
+        background-image: unset;
+        box-shadow: unset;
+
+        .el-collapse-item__header {
+            box-shadow: unset;
+        }
+    }
+
+    .el-collapse-item__wrap {
+        background-color: unset;
+    }
 }
 
 .wrapper {
