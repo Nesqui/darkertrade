@@ -149,6 +149,11 @@ button:hover {
     animation: unset;
 }
 
+
+.el-button:focus-visible {
+    --el-button-outline-color: var(--el-border-color)
+}
+
 .el-collapse {
     --el-collapse-border-color: unset;
     --el-collapse-header-bg-color: unset;

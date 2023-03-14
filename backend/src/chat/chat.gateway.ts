@@ -18,7 +18,7 @@ import { User } from 'src/user/user.entity';
 import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { QueryChatDto } from './dto/query-chat.dto';
+import { GetChatDto, QueryChatDto } from './dto/query-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 
 type EmitTypes =
@@ -173,6 +173,12 @@ export class ChatGateway {
       include: [
         {
           model: this.bidRepository,
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
           where: {
             status: 'accepted',
           },
@@ -238,18 +244,32 @@ export class ChatGateway {
     });
   }
 
-  // @SubscribeMessage('findOneChat')
-  // findOne(@MessageBody() id: number) {
-  //   return this.chatService.findOne(id);
-  // }
+  @SubscribeMessage('getChat')
+  @UseGuards(JwtWSAuthGuard)
+  async getChat(
+    @MessageBody() query: GetChatDto,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log({ query });
 
-  // @SubscribeMessage('updateChat')
-  // update(@MessageBody() updateChatDto: UpdateChatDto) {
-  //   return this.chatService.update(updateChatDto.id, updateChatDto);
-  // }
+    const messages = this.messagesRepository.findAndCountAll({
+      where: {
+        chatId: query.chatId,
+      },
+      limit: query.limit,
+      offset: query.offset,
+      order: [['id', 'DESC']],
+      include: [
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
+        },
+      ],
+    });
 
-  // @SubscribeMessage('removeChat')
-  // remove(@MessageBody() id: number) {
-  //   return this.chatService.remove(id);
-  // }
+    // await this.notifyUser(query.user.id, 'chatsCountsReceived', {
+    //   sentOffers,
+    //   receivedOffers,
+    // });
+  }
 }
