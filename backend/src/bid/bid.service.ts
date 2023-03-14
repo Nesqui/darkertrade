@@ -178,7 +178,7 @@ export class BidService {
 
   async filter(query: QueryBidDto, user: User) {
     const bidsWhere = {};
-    const excludedStatuses = ['deleted'];
+    const excludedStatuses = 'deleted';
     const suggestedExistingItemWhere = {};
     const existingItemWhere = {
       offerType: query.offerType,
@@ -192,17 +192,17 @@ export class BidService {
       bidsWhere['userId'] = user.id;
     }
 
-    bidsWhere[sequelize.Op.not] = {
-      status: excludedStatuses,
+    bidsWhere['status'] = {
+      [sequelize.Op.not]: excludedStatuses,
     };
 
-    // else
-    //   suggestedExistingItemWhere['userId'] = user.id
+    console.log({ bidsWhere, existingItemWhere });
 
     const req = {
       where: existingItemWhere,
       limit: query.limit,
       offset: query.offset,
+      distinct: true,
       include: [
         {
           model: this.statRepository,
@@ -268,14 +268,16 @@ export class BidService {
       ],
     });
 
-    if (user.id !== bid.existingItemId || bid.status !== 'created')
+    if (user.id !== bid.existingItem.userId || bid.status !== 'created')
       throw new ConflictException('You cant accept this bid');
 
     bid.status = 'accepted';
 
     await bid.save();
-    await this.discordGateway.onBidAccepted(bid);
-    await this.chatGateway.onBidAccepted(bid);
+    try {
+      await this.discordGateway.onBidAccepted(bid);
+      await this.chatGateway.onBidAccepted(bid);
+    } catch (error) {}
 
     return 'accepted';
   }

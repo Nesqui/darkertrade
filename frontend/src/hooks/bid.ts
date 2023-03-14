@@ -35,6 +35,11 @@ export const initBidApi = () => {
     return res.data
   }
 
+  const accept = async (id: number): Promise<Bid> => {
+    const res = await axiosClient.patch(`bid/${id}`)
+    return res.data
+  }
+
   const filter = async (params: QueryBidDto): Promise<CountedExistingItemsResponse> => {
     const res = await axiosClient.get('bid', {
       params
@@ -50,6 +55,7 @@ export const initBidApi = () => {
   return {
     create,
     deleteBid,
-    filter
+    filter,
+    accept
   }
 }

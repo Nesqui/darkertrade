@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ExistingItem, useMoment } from '@/hooks'
 import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid'
-import { onBeforeMount, ref, watch } from 'vue'
+import { nextTick, onBeforeMount, ref, watch } from 'vue'
 import ItemPreview from '@/components/ItemPreview.vue';
 import { useUserStore } from '@/store';
 import { useRoute, useRouter } from 'vue-router';
+import { ElNotification } from 'element-plus';
 
 const bidApi = initBidApi()
 const existingItems = ref<ExistingItem[]>()
@@ -38,6 +39,7 @@ const bids = ref<Bid[]>()
 const init = async () => {
   loading.value = true
   try {
+    existingItems.value = []
     const { rows, count } = await bidApi.filter({
       ...filter.value,
       ...pagination.value
@@ -53,7 +55,6 @@ const init = async () => {
 const loadMoreExistingItems = async () => {
   try {
     if (pagination.value.offset + pagination.value.limit < maxCount.value) {
-      console.log('load');
       pagination.value.offset = pagination.value.limit + pagination.value.offset
       const { rows } = await bidApi.filter({
         ...filter.value,
@@ -68,8 +69,34 @@ const loadMoreExistingItems = async () => {
 
 const deleteBid = async (bid: Bid) => {
   try {
+    if (!bids.value || !existingItems.value || !selectedExistingItem.value)
+      return
     loading.value = true
-    await bidApi.deleteBid(bid.id)
+    let success = false
+    const bidIndex = bids.value.findIndex(b => b.id === bid.id)
+    if (bidIndex !== -1) {
+      bids.value?.splice(bidIndex, 1)
+      if (!bids.value?.length) {
+        const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value.id)
+        if (eiIndex !== -1) {
+          existingItems.value.splice(eiIndex, 1)
+          selectedExistingItem.value = undefined
+          await bidApi.deleteBid(bid.id)
+          success = true
+        }
+
+        // if ()
+      }
+    }
+    if (success) {
+      ElNotification({
+        message: 'Bid successfully deleted'
+      })
+      return
+    }
+    ElNotification({
+      message: 'Bid not found'
+    })
   } catch (error) {
   } finally {
     loading.value = false
@@ -77,12 +104,13 @@ const deleteBid = async (bid: Bid) => {
 }
 
 watch(filter.value, async () => {
+  pagination.value.offset = 0
   bids.value = []
   await init()
 })
 
-const changeTab = () => {
-  filter.value.mine = tabName.value === 'sentOffers' ? true : false
+const changeTab = (v) => {
+  filter.value.mine = tabName.value === 'sentOffers' ? false : true
 }
 
 const push = async (url: string) => {
@@ -112,7 +140,16 @@ const changeOfferType = (offerType: 'WTB' | 'WTS') => {
   clear()
 }
 
-const acceptBid = async (bid: Bid) => { }
+const acceptBid = async (bid: Bid) => {
+  try {
+    await bidApi.accept(bid.id)
+    ElNotification({
+      message: 'Bid accepted'
+    })
+    bid.status = 'accepted'
+  } catch (error) {
+  }
+}
 const declineBid = async (bid: Bid) => { }
 onBeforeMount(async () => {
   await init()
@@ -121,16 +158,17 @@ onBeforeMount(async () => {
 
 <template>
   <div class="bids">
+    {{ existingItems?.length }} {{ pagination.limit }} {{ pagination.offset }} {{ maxCount }}
     <div class="wrapper">
-      <el-tabs v-model="tabName" class="bids-tabs" @tab-click="changeTab">
+      <el-tabs v-model="tabName" class="bids-tabs" @tab-change="changeTab">
         <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
         <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems }} -->
       <div class="bids-table">
         <div v-if="existingItems?.length">
-          <div class="bids-items-list infinite-scroll" infinite-scroll-distance="300"
-            v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
+          <div class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
+            v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="300">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
                 <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
@@ -147,7 +185,8 @@ onBeforeMount(async () => {
             <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
             <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
           </el-button-group>
-          <el-table v-if="existingItems?.length && !loading" :data="bids" style="width: 100%">
+          <el-table empty-text="Please choose any item" v-if="existingItems?.length && !loading" :data="bids"
+            style="width: 100%">
             <el-table-column prop="user.nickname" label="Nickname" width="140">
               <template #default="scope">
                 <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
