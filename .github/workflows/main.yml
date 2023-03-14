@@ -26,6 +26,12 @@ jobs:
           cd /opt/darkertrade/
           cd backend
           pnpm i 
+    - name: build BE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd backend
+          nest build
     - name: restart PM2
       run: pm2 restart /opt/darkertrade/ecosystem.config.js
     
