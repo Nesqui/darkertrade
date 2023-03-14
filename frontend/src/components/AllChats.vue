@@ -153,7 +153,6 @@ const loadChats = (opened: number) => {
     margin-bottom: .1rem;
     background-color: #0000004a;
     padding: .25rem 1rem;
-    cursor: pointer;
   }
 
   .item:hover {
