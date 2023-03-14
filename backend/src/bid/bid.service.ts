@@ -196,7 +196,7 @@ export class BidService {
       [sequelize.Op.not]: excludedStatuses,
     };
 
-    console.log({ bidsWhere, existingItemWhere });
+    // console.log({ bidsWhere, existingItemWhere });
 
     const req = {
       where: existingItemWhere,
@@ -235,6 +235,10 @@ export class BidService {
         },
         {
           model: this.itemRepository,
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
         },
       ],
     };
@@ -280,6 +284,33 @@ export class BidService {
     } catch (error) {}
 
     return 'accepted';
+  }
+
+  async decline(id: number, user: User) {
+    const bid = await this.bidRepository.findByPk(id, {
+      include: [
+        {
+          model: this.existingItemRepository,
+          as: 'existingItem',
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
+        },
+        this.userRepository,
+      ],
+    });
+
+    if (user.id !== bid.existingItem.userId || bid.status !== 'created')
+      throw new ConflictException('You cant decline this bid');
+
+    bid.status = 'declined';
+    try {
+      await this.chatGateway.onBidDeclined(bid);
+    } catch (error) {}
+    await bid.save();
+    return 'declined';
   }
 
   async remove(id: number, user: User) {

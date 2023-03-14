@@ -11,6 +11,7 @@ import {
   Max,
   Default,
 } from 'sequelize-typescript';
+import { Chat } from 'src/chat/chat.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
 
@@ -48,4 +49,11 @@ export class Bid extends Model {
   @Default('created')
   @Column
   status: 'created' | 'accepted' | 'declined' | 'deleted';
+
+  @ForeignKey(() => Chat)
+  @Column
+  chatId: number;
+
+  @BelongsTo(() => Chat, { foreignKey: 'chatId' })
+  chat: Chat;
 }

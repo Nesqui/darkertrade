@@ -6,6 +6,7 @@ import ItemPreview from '@/components/ItemPreview.vue';
 import { useUserStore } from '@/store';
 import { useRoute, useRouter } from 'vue-router';
 import { ElNotification } from 'element-plus';
+import { max } from 'moment';
 
 const bidApi = initBidApi()
 const existingItems = ref<ExistingItem[]>()
@@ -24,13 +25,13 @@ const selectedExistingItem = ref<ExistingItem>()
 const filter = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
-  limit: 6,
+  limit: 3,
   offset: 0,
   offerType: 'WTS'
 })
 
 const pagination = ref({
-  limit: 6,
+  limit: 3,
   offset: 0,
 })
 
@@ -56,12 +57,14 @@ const loadMoreExistingItems = async () => {
   try {
     if (pagination.value.offset + pagination.value.limit < maxCount.value) {
       pagination.value.offset = pagination.value.limit + pagination.value.offset
-      const { rows } = await bidApi.filter({
+      const { rows, count } = await bidApi.filter({
         ...filter.value,
         ...pagination.value
       })
-      if (existingItems.value?.length)
+      if (existingItems.value?.length) {
         existingItems.value = [...existingItems.value, ...rows]
+        maxCount.value = count
+      }
     }
   } catch (error) {
   }
@@ -83,9 +86,9 @@ const deleteBid = async (bid: Bid) => {
           selectedExistingItem.value = undefined
           await bidApi.deleteBid(bid.id)
           success = true
+          pagination.value.offset--
+          await loadMoreExistingItems()
         }
-
-        // if ()
       }
     }
     if (success) {
@@ -150,7 +153,18 @@ const acceptBid = async (bid: Bid) => {
   } catch (error) {
   }
 }
-const declineBid = async (bid: Bid) => { }
+
+const declineBid = async (bid: Bid) => {
+  try {
+    await bidApi.decline(bid.id)
+    ElNotification({
+      message: 'Bid declined'
+    })
+    bid.status = 'declined'
+  } catch (error) {
+  }
+}
+
 onBeforeMount(async () => {
   await init()
 })
@@ -158,13 +172,12 @@ onBeforeMount(async () => {
 
 <template>
   <div class="bids">
-    {{ existingItems?.length }} {{ pagination.limit }} {{ pagination.offset }} {{ maxCount }}
     <div class="wrapper">
       <el-tabs v-model="tabName" class="bids-tabs" @tab-change="changeTab">
         <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
         <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
-      <!-- {{ existingItems }} -->
+      {{ existingItems?.length }} {{ JSON.stringify(pagination) }} {{ maxCount }}
       <div class="bids-table">
         <div v-if="existingItems?.length">
           <div class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
@@ -185,22 +198,27 @@ onBeforeMount(async () => {
             <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
             <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
           </el-button-group>
-          <el-table empty-text="Please choose any item" v-if="existingItems?.length && !loading" :data="bids"
-            style="width: 100%">
-            <el-table-column prop="user.nickname" label="Nickname" width="140">
+          <el-table empty-text="Please choose any item" v-if="existingItems?.length && !loading" :data="bids">
+            <el-table-column prop="user.nickname" label="From" width="120">
               <template #default="scope">
                 <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
               </template>
             </el-table-column>
+            <el-table-column v-if="selectedExistingItem && selectedExistingItem.user" prop="To" label="To" width="120">
+              <template #default="scope">
+                <router-link :to="`/user/${selectedExistingItem.user.nickname}/items/${selectedExistingItem.id}`">{{
+                  selectedExistingItem.user.nickname }}</router-link>
+              </template>
+            </el-table-column>
             <el-table-column prop="price" label="Price" width="80" />
             <el-table-column prop="status" label="Status" width="100" />
-            <el-table-column v-if="filter.offerType === 'WTB'" prop="suggestedExistingItem" label="Suggest" width="125">
+            <el-table-column v-if="filter.offerType === 'WTB'" prop="suggestedExistingItem" label="Suggest" width="85">
               <!-- HAS SUGGESTED ITEM  -->
               <template #default="scope">
                 <div v-if="scope.row.suggestedExistingItem">
                   <el-popover placement="right-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
                     <template #reference>
-                      <el-button class="m-2"><el-icon>
+                      <el-button circle class="m-2"><el-icon>
                           <View />
                         </el-icon></el-button>
                     </template>
@@ -230,7 +248,7 @@ onBeforeMount(async () => {
                       <el-popconfirm width="350" @confirm="acceptBid(scope.row)" confirm-button-text="OK"
                         cancel-button-text="No, Thanks" :title="`Are you sure to accept this bid?`">
                         <template #reference>
-                          <el-button :loading="loading"><el-icon><Select /></el-icon></el-button>
+                          <el-button circle :loading="loading"><el-icon><Select /></el-icon></el-button>
                         </template>
                       </el-popconfirm>
                     </div>
@@ -241,7 +259,7 @@ onBeforeMount(async () => {
                         confirm-button-text="OK" cancel-button-text="No, Thanks"
                         :title="`Are you sure to decline this bid?`">
                         <template #reference>
-                          <el-button :loading="loading"><el-icon>
+                          <el-button circle :loading="loading"><el-icon>
                               <Close />
                             </el-icon></el-button>
                         </template>
@@ -251,7 +269,7 @@ onBeforeMount(async () => {
                   <el-popconfirm v-if="canDeleteBid(scope.row)" width="350" @confirm="() => deleteBid(scope.row)"
                     confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
                     <template #reference>
-                      <el-button :loading="loading"><el-icon>
+                      <el-button circle :loading="loading"><el-icon>
                           <Delete />
                         </el-icon></el-button>
                     </template>
@@ -343,7 +361,6 @@ $itemsListWidth: 300px;
 
   .bids-list {
     width: 100%;
-    padding: 0 1rem;
   }
 
   .bids-items-list {
@@ -373,6 +390,10 @@ $itemsListWidth: 300px;
 }
 
 .bids {
+  .el-table {
+    width: 860px;
+  }
+
   .el-table__cell {
     text-align: center;
   }
