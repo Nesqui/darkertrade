@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 import { Attribute, initAttributesApi, Item } from "../hooks";
 
 defineProps<{ item: Item }>()
@@ -7,8 +7,10 @@ const attributeApi = initAttributesApi()
 
 const attributes = ref<Attribute[]>([])
 
-onBeforeMount(async() => {
-    attributes.value = await attributeApi.findAll()
+onMounted(async () => {
+    setTimeout(async () => {
+        attributes.value = await attributeApi.findAll()
+    }, 2000)
 })
 </script>
 
@@ -18,5 +20,4 @@ onBeforeMount(async() => {
     </div>
 </template>
 
-<style scoped lang="scss">
-</style>
+<style scoped lang="scss"></style>

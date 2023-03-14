@@ -1,8 +1,4 @@
-import {
-  Table,
-  Model,
-  BelongsToMany,
-} from 'sequelize-typescript';
+import { Table, Model, BelongsToMany } from 'sequelize-typescript';
 import { User } from 'src/user/user.entity';
 import { CommunityUser } from './community-user.entity';
 
