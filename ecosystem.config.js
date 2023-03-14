@@ -3,7 +3,7 @@ module.exports = {
     name: "be",
     cwd: "/opt/darkertrade/backend/dist/",
     script: "pnpm",
-    args: "run start",
+    args: "start",
     instances: 1,
     autorestart: true,
     watch: false,
