@@ -19,8 +19,8 @@ import { ExistingItem } from './existing-item.entity';
 const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
 const LIMITS = {
   WTB: 10,
-  WTS: 20
-}
+  WTS: 20,
+};
 @Injectable()
 export class ExistingItemService {
   constructor(
@@ -38,18 +38,23 @@ export class ExistingItemService {
     private attributeRepository: typeof Attribute,
     @Inject('SEQUELIZE')
     private db,
-  ) { }
+  ) {}
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
     const quantityOfExistingItems = await this.existingItemRepository.count({
       where: {
         userId: user.id,
-        offerType: createExistingItemDto.offerType
+        offerType: createExistingItemDto.offerType,
+        archived: false,
       },
-    })
+    });
 
-    if (quantityOfExistingItems >= LIMITS[createExistingItemDto.offerType])
-      throw new ForbiddenException(`You cant have more than ${LIMITS[createExistingItemDto.offerType]} ${createExistingItemDto.offerType} items`)
+    if (quantityOfExistingItems > LIMITS[createExistingItemDto.offerType])
+      throw new ForbiddenException(
+        `You cant have more than ${LIMITS[createExistingItemDto.offerType]} ${
+          createExistingItemDto.offerType
+        } items`,
+      );
 
     const item = await this.existingItemRepository.create(
       {
@@ -72,22 +77,26 @@ export class ExistingItemService {
       },
       attributes: [
         'offerType',
-        [sequelize.fn('COUNT', sequelize.col('offerType')), 'offerTypeCount']
+        [sequelize.fn('COUNT', sequelize.col('offerType')), 'offerTypeCount'],
       ],
-      group: ['offerType']
-    })
+      group: ['offerType'],
+    });
 
-    return { quantity: quantityOfExistingItems, limits: LIMITS }
+    return { quantity: quantityOfExistingItems, limits: LIMITS };
   }
 
-  async findAllByItemIdAndUserId(query: QueryItemDto, itemId: number, userId: number | null = null, user: User) {
+  async findAllByItemIdAndUserId(
+    query: QueryItemDto,
+    itemId: number,
+    userId: number | null = null,
+    user: User,
+  ) {
     const existingItemWhere = {
       archived: false,
       itemId,
     };
 
-    if (userId)
-      existingItemWhere['userId'] = userId
+    if (userId) existingItemWhere['userId'] = userId;
 
     if (isNaN(query.limit) || isNaN(query.offset))
       throw new ForbiddenException('You must paginate this query');
@@ -104,10 +113,9 @@ export class ExistingItemService {
 
     existingItemWhere['published'] = query.published;
 
-    if (!query.published)
-      existingItemWhere['userId'] = user.id;
+    if (!query.published) existingItemWhere['userId'] = user.id;
 
-    // ALL FILTER 
+    // ALL FILTER
     // if (query.offerType) existingItemWhere['offerType'] = query.offerType;
 
     existingItemWhere['offerType'] = query.offerType;
@@ -276,8 +284,8 @@ export class ExistingItemService {
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
       : [6, 7, 8, 9].includes(baseExistingItem.item.id)
-        ? [6, 7, 8, 9]
-        : [baseExistingItem.item.id];
+      ? [6, 7, 8, 9]
+      : [baseExistingItem.item.id];
 
     const baseExistingItemAttributeIds = baseExistingItem.stats.map(
       (a) => a.attributeId,
@@ -301,10 +309,10 @@ export class ExistingItemService {
       SUM(
         CASE 
           WHEN "Stat"."attributeId" IN (${baseExistingItem.stats
-        .map((a) => a.attributeId)
-        .join(
-          ', ',
-        )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
+            .map((a) => a.attributeId)
+            .join(
+              ', ',
+            )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
           ELSE CAST("Stat"."value" AS INTEGER) 
         END
       ) AS weight
