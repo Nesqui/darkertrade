@@ -2,13 +2,13 @@ module.exports = {
   apps: [{
     name: 'be',
     cwd: '/opt/darkertrade/backend/',
-    "script": "nest",
-    "args": "start",
+    "script": "pnpm",
+    "args": "run start",
     instances: 1,
     autorestart: true,
     watch: false,
-    error_file: '../logs/backend-err.log',
-    out_file: '../logs/backend-out.log'
+    error_file: '/opt/darkertrade/logs/backend-err.log',
+    out_file: '/opt/darkertrade/logs/backend-out.log'
   },
   {
     name: 'fe',
@@ -16,7 +16,7 @@ module.exports = {
     "script": "pnpm",
     "args": "run build",
     instances: 1,
-    error_file: '../logs/frontend-err.log',
-    out_file: '../logs/frontend-out.log'
+    error_file: '/opt/darkertrade/logs/frontend-err.log',
+    out_file: '/opt/darkertrade/logs/frontend-out.log'
   }]
 }
