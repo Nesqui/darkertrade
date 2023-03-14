@@ -161,7 +161,7 @@ const loadMoreExistingItems = async () => {
     return
   if (pagination.value.offset + pagination.value.limit < maxCount.value) {
     pagination.value.offset = pagination.value.limit + pagination.value.offset
-    const { rows, count } = await findExistingItemsById(chosenItem.value.id)
+    const { rows } = await findExistingItemsById(chosenItem.value.id)
     // await new Promise(resolve => setTimeout(() => resolve(1), 500))
     if (existingItems.value?.length)
       existingItems.value = [...existingItems.value, ...rows]

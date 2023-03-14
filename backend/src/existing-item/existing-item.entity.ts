@@ -49,6 +49,10 @@ export class ExistingItem extends Model {
   @Column
   published: boolean;
 
+  @Default(false)
+  @Column
+  discordNotification: boolean;
+
   @IsDecimal
   @Min(0)
   @Max(9999)

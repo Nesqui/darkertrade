@@ -28,7 +28,7 @@ export class BidController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  filter(@ReqUser() user: User, @Query() query: QueryBidDto,) {
+  filter(@ReqUser() user: User, @Query() query: QueryBidDto) {
     return this.bidService.filter(query, user);
   }
 
@@ -37,11 +37,17 @@ export class BidController {
     return this.bidService.findOne(+id);
   }
 
+  @Patch('/decline/:id')
+  @UseGuards(JwtAuthGuard)
+  decline(@Param('id') id: string, @ReqUser() user: User) {
+    return this.bidService.decline(+id, user);
+  }
+
   @Patch(':id')
+  @UseGuards(JwtAuthGuard)
   accept(@Param('id') id: string, @ReqUser() user: User) {
     return this.bidService.accept(+id, user);
   }
-
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(@ReqUser() user: User, @Param('id') id: string) {

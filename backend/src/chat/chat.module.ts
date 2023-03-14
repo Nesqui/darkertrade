@@ -6,16 +6,23 @@ import { messagesProviders } from 'src/messages/messages.providers';
 import { chatsProvider } from './chat.providers';
 import { communityProvider } from 'src/community/community.providers';
 import { communityUsersProviders } from 'src/community/community-user.provider';
+import { bidProviders } from 'src/bid/bid.providers';
+import { existingItemProviders } from 'src/existing-item/existing-item.providers';
+import { itemsProviders } from 'src/item/item.providers';
 
 @Module({
   providers: [
+    JwtService,
     ChatGateway,
     ...usersProviders,
-    JwtService,
     ...messagesProviders,
     ...chatsProvider,
     ...communityProvider,
-    ...communityUsersProviders],
-  exports: [ChatGateway]
+    ...communityUsersProviders,
+    ...bidProviders,
+    ...existingItemProviders,
+    ...itemsProviders,
+  ],
+  exports: [ChatGateway],
 })
-export class ChatModule { }
+export class ChatModule {}

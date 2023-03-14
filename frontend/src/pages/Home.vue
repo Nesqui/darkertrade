@@ -1,56 +1,36 @@
 <script setup lang="ts">
-import { io, Socket } from "socket.io-client";
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { initAttributesApi } from '../hooks'
+import { Chat, initAttributesApi, initWs } from '../hooks'
 import { useUserStore, useAttributesStore } from '../store'
-import Chat from "../components/Chat.vue";
+import AllChats from "../components/AllChats.vue";
 import TopMenu from '../components/TopMenu.vue'
 
-const userStore = useUserStore()
-const connected = ref(false);
-
+const { sendWS, init, connected } = initWs()
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
+
 
 onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)
 })
 
-onMounted(() => {
-  let socket: Socket = io(import.meta.env.VITE_WEBSOCKET_URL);
-  socket.on("connect", async () => {
-    console.log('connect');
-    connected.value = true
-    socket.emit("auth", {
-      token: userStore.token
-    })
-  })
-
-  socket.on('authRequired', async () => {
-    console.log('authRequired');
-  })
-
-  socket.on('chatCreated', async () => {
-    console.log('chatCreated');
-  })
-
-  socket.on("disconnect", () => {
-    connected.value = false
-    console.log('disconnect');
-  });
+onMounted(async () => {
+  await init()
 });
 
 </script>
 
 <template>
   <div class="main">
+    {{ connected }}
+
     <TopMenu />
     <div class="main-wrapper">
       <!-- <div class="ws">connected: {{ connected }}</div> -->
-      <router-view/>
+      <router-view />
     </div>
-    <Chat />
+    <AllChats v-if="connected" :connected="connected" />
   </div>
 </template>
 
