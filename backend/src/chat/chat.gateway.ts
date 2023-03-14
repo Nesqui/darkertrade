@@ -25,7 +25,8 @@ type EmitTypes =
   | 'chatCreated'
   | 'authRequired'
   | 'authorized'
-  | 'chatsReceived';
+  | 'chatsReceived'
+  | 'chatsCountsReceived';
 
 @WebSocketGateway({
   cors: {
@@ -231,7 +232,7 @@ export class ChatGateway {
         },
       ],
     });
-    await this.notifyUser(query.user.id, 'chatsReceived', {
+    await this.notifyUser(query.user.id, 'chatsCountsReceived', {
       sentOffers,
       receivedOffers,
     });

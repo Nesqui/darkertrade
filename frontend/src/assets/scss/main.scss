@@ -149,6 +149,10 @@ button:hover {
     animation: unset;
 }
 
+.el-collapse {
+    --el-collapse-border-color: unset;
+}
+
 .wrapper {
     border-radius: 5px;
     scrollbar-gutter: stable both-edges;

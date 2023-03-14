@@ -1,3 +1,4 @@
+import { ExistingItem } from "./existingItem";
 import { User } from "./user";
 
 export interface Chat {
@@ -11,6 +12,16 @@ export interface Chat {
 export interface Community {
   id: number;
   users: User[];
+}
+
+export interface ChatsCountsResponse {
+  sentOffers: number
+  receivedOffers: number
+}
+
+export interface ChatsResponse {
+  sentOffers: ExistingItem[]
+  receivedOffers: ExistingItem[]
 }
 
 export interface CommunityUser {

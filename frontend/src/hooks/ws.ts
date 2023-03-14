@@ -3,45 +3,38 @@ import { QueryUserDto, User } from "./user"
 import { io, Socket } from "socket.io-client";
 import { Chat } from "@/hooks"
 import { useUserStore } from "@/store";
-import { ref } from "vue";
+import { computed, ref, watch } from "vue";
+let socket: Socket | any = ref()
 
 export const initWs = () => {
   const userStore = useUserStore()
-  const connected = ref(false);
-  const onChatsReceived = async (data: Chat[]) => {
-    console.log('onChatsReceived', data);
-  }
 
-  let socket: Socket | any = undefined
+  const connected = ref(false)
 
   const sendWS = (eventName: string, data: any = {}) => {
-    return socket.emit(eventName, {
+    return socket.value.emit(eventName, {
       ...data,
       token: userStore.token,
     })
   }
 
   const init = () => {
-    socket = io(import.meta.env.VITE_WEBSOCKET_URL);
-    console.log(socket);
+    return new Promise((res) => {
+      socket.value = io(import.meta.env.VITE_WEBSOCKET_URL);
 
-    socket.on("connect", async () => {
-      connected.value = true
-      console.log('connect');
+      socket.value.on("connect", async () => {
+        socket.value.emit("auth", {
+          token: userStore.token
+        })
 
-      socket.emit("auth", {
-        token: userStore.token
+        socket.value.on('authorized', () => {
+          console.log('authorized', connected.value);
+          res(true)
+          connected.value = true
+        })
       })
     })
 
-
-    socket.on('authorized', async () => {
-      console.log('authorized');
-      sendWS("countAllChat")
-      sendWS("findAllChat")
-    })
-
-    socket.on('chatsReceived', onChatsReceived)
 
     socket.on('authRequired', async () => {
       console.log('authRequired');
@@ -59,6 +52,8 @@ export const initWs = () => {
 
   return {
     sendWS,
-    init
+    init,
+    socket,
+    connected
   }
 }

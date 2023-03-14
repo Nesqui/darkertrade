@@ -1,34 +1,36 @@
 <script setup lang="ts">
 import { onBeforeMount, onMounted, ref } from 'vue'
-import { initAttributesApi, initWs } from '../hooks'
+import { Chat, initAttributesApi, initWs } from '../hooks'
 import { useUserStore, useAttributesStore } from '../store'
 import AllChats from "../components/AllChats.vue";
 import TopMenu from '../components/TopMenu.vue'
 
-const ws = initWs()
+const { sendWS, init, connected } = initWs()
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
+
 
 onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)
 })
 
-
-onMounted(() => {
-  ws.init()
+onMounted(async () => {
+  await init()
 });
 
 </script>
 
 <template>
   <div class="main">
+    {{ connected }}
+
     <TopMenu />
     <div class="main-wrapper">
       <!-- <div class="ws">connected: {{ connected }}</div> -->
       <router-view />
     </div>
-    <AllChats />
+    <AllChats v-if="connected" :connected="connected" />
   </div>
 </template>
 
