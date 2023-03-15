@@ -126,17 +126,22 @@ onBeforeUnmount(() => {
   socket.value.off('receiveMessage', onMessagesReceive)
 })
 
-
+// FIND OPENED CHATS WITHOUT MESSAGES 
 const loadChats = (opened: number) => {
   if (opened) {
     loadingMessages.value = true
-    loading.value
     sendWS("findAllChat")
   }
 }
 
+const pagination = ref({
+  limit: 15,
+  offset: 0
+})
+
+// Get chat by id and get Messages 
 const initChat = async (chatId: number) => {
-  sendWS("getChat", { chatId })
+  sendWS("getChat", { chatId, ...pagination.value})
 }
 
 const clearActiveChat = async () => {

@@ -33,7 +33,7 @@ const reconnect = async () => {
     await init()
   } catch (error) {
     ElNotification({
-      message: 'Unfortunaly chat service not responding. Please contact with us via discord'
+      message: 'Unfortunately chat service not responding. Please contact with us via discord'
     })
   }
   finally {
