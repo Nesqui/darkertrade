@@ -24,7 +24,7 @@ const form = ref({
 
 const submitBid = async () => {
   if (props.item.existingItems) {
-    const req:CreateBidDto = {
+    const req: CreateBidDto = {
       existingItemId: props.item.existingItems[0].id!,
       price: form.value.amount,
     }
@@ -75,7 +75,8 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
         <p>What price are you asking for item that you offer</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">
-            <el-input-number v-model="form.amount" :min="1" :step="25" :step-strictly="true" :precision="0" :max="9999" />
+            <el-input-number v-model="form.amount" :min="25" :step="25" :step-strictly="true" :precision="0"
+              :max="9999" />
           </el-form-item>
           <p>After creating bid you will able to chat with user.</p>
           <el-form-item>
