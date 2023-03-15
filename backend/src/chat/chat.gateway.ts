@@ -1,11 +1,10 @@
-import { Inject, UseGuards } from '@nestjs/common';
+import { ForbiddenException, Inject, UseGuards } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
 import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
 } from '@nestjs/websockets';
-import { async } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { JwtWSAuthGuard } from 'src/auth/guards/ws-jwt-auth.guard';
 import { Bid } from 'src/bid/bid.entity';
@@ -17,16 +16,17 @@ import { Message } from 'src/messages/messages.entity';
 import { User } from 'src/user/user.entity';
 import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
-import { CreateChatDto } from './dto/create-chat.dto';
+import { sendMessageDto } from './dto/create-message.dto';
 import { GetChatDto, QueryChatDto } from './dto/query-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
 
 type EmitTypes =
   | 'chatCreated'
   | 'authRequired'
   | 'authorized'
   | 'chatsReceived'
-  | 'chatsCountsReceived';
+  | 'chatsCountsReceived'
+  | 'receiveChatMessages'
+  | 'receiveMessage';
 
 @WebSocketGateway({
   cors: {
@@ -58,33 +58,27 @@ export class ChatGateway {
   }
 
   handleDisconnect(client: Socket) {
+    console.log(client.id);
     for (const key in this.users) {
-      if (Object.prototype.hasOwnProperty.call(this.users, key)) {
-        this.users[key] = this.users[key].filter((ws) => ws.id !== client.id);
-        if (!this.users[key].length) delete this.users[key];
+      if (this.users[key].id === client.id) {
+        delete this.users[key];
+        break;
       }
     }
     console.log(
-      'DISCONNECT ---------------- USERS',
-      Object.keys(this.users).length,
+      'DISCONNECT ---------------- Current Users ->',
+      Object.keys(this.users),
     );
-
-    for (const key in this.users) {
-      console.log('key', key, 'length', this.users[key].length);
-    }
   }
 
-  handleConnection(client: Socket, ...args: any[]) {}
+  // handleConnection(client: Socket, ...args: any[]) {}
 
   async notifyUser(userId: number, emitType: EmitTypes, payload?: any) {
     if (!this.users[userId]) {
-      throw new Error('User not found');
+      return;
     }
-
     try {
-      await Promise.all(
-        this.users[userId].map((socket) => socket.emit(emitType, payload)),
-      );
+      this.users[userId].emit(emitType, payload);
     } catch (error) {
       console.log('notify err', error);
     }
@@ -121,15 +115,12 @@ export class ChatGateway {
   @SubscribeMessage('auth')
   @UseGuards(JwtWSAuthGuard)
   async auth(@MessageBody() auth: AuthDto, @ConnectedSocket() socket: Socket) {
-    if (!this.users[auth.user.id]) {
-      this.users[auth.user.id] = [socket];
-    } else this.users[auth.user.id] = [...this.users[auth.user.id], socket];
+    this.users[auth.user.id] = socket;
 
-    console.log('CONNECT ----------------');
-
-    for (const key in this.users) {
-      console.log('key', key, 'length', this.users[key].length);
-    }
+    console.log(
+      'CONNECT ---------------- Connected users -> ',
+      Object.keys(this.users),
+    );
     await this.notifyUser(auth.user.id, 'authorized');
   }
 
@@ -157,6 +148,10 @@ export class ChatGateway {
             status: 'accepted',
             userId: query.user.id,
           },
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
         },
         {
           model: this.itemRepository,
@@ -244,15 +239,59 @@ export class ChatGateway {
     });
   }
 
+  @SubscribeMessage('sendMessage')
+  @UseGuards(JwtWSAuthGuard)
+  async sendMessage(
+    @MessageBody() query: sendMessageDto,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    if (query.text.length > 150)
+      throw new ForbiddenException('Message too long, 150 letters max');
+
+    const currentChat = await this.chatRepository.findOne({
+      where: { id: query.chatId },
+      include: [
+        {
+          model: this.communityRepository,
+          include: [
+            {
+              required: true,
+              attributes: ['nickname', 'id'],
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (
+      !currentChat ||
+      !currentChat.community.users.find((u) => u.id === query.user.id)
+    )
+      throw new ForbiddenException('You cant text to this chat');
+
+    const message = await this.messagesRepository.create({
+      text: query.text,
+      userId: query.user.id,
+      chatId: query.chatId,
+    });
+
+    // await this.notifyUser(query.user.id, 'receiveMessage', message);
+    await Promise.all(
+      currentChat.community.users.map((u) =>
+        this.notifyUser(u.id, 'receiveMessage', message),
+      ),
+    );
+    return;
+  }
+
   @SubscribeMessage('getChat')
   @UseGuards(JwtWSAuthGuard)
   async getChat(
     @MessageBody() query: GetChatDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log({ query });
-
-    const messages = this.messagesRepository.findAndCountAll({
+    const messages = await this.messagesRepository.findAndCountAll({
       where: {
         chatId: query.chatId,
       },
@@ -267,9 +306,10 @@ export class ChatGateway {
       ],
     });
 
-    // await this.notifyUser(query.user.id, 'chatsCountsReceived', {
-    //   sentOffers,
-    //   receivedOffers,
-    // });
+    await this.notifyUser(query.user.id, 'receiveChatMessages', {
+      chatId: query.chatId,
+      messages: messages.rows || [],
+      count: messages.count,
+    });
   }
 }

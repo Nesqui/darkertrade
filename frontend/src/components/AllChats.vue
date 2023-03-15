@@ -1,13 +1,19 @@
 <script setup lang="ts">
-import { Chat, ChatsCountsResponse, ChatsResponse, initWs } from "@/hooks";
-import { useUserStore } from "@/store";
-import { onBeforeMount, ref, watch } from "vue";
+import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, initUserApi, initWs, Message } from "@/hooks";
+import { useChatStore, useUserStore } from "@/store";
+import { storeToRefs } from "pinia";
+import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
-const selectedChat = ref()
+const chatStore = useChatStore()
+const expand = computed(() => chatStore.expand)
+const selectedChat = computed(() => chatStore.selectedChat)
+const loading = ref(true)
+
+const loadingMessages = ref(false)
 const push = async (url: string) => {
   await router.push({
     path: '/redirect'
@@ -23,23 +29,28 @@ const push = async (url: string) => {
     router.go(0)
 }
 
-const expand = ref({
-  chats: false,
-  sentOffers: false,
-  receiveOffers: false
-})
-const showBid = ref(false)
+const messagesRef = ref()
+
+const loadingMessageInput = ref(false)
 const counts = ref<ChatsCountsResponse>()
 const groups = ref<ChatsResponse>()
-
+const message = ref('')
 const { sendWS, socket } = initWs()
 
 const props = defineProps({
   connected: {
     type: Boolean,
-    required: true
+    required: true,
   }
 })
+
+const scroll = () => {
+  messagesRef.value.scroll({
+    top: messagesRef.value.scrollHeight,
+    left: 0,
+    behavior: "smooth",
+  })
+}
 
 const onChatsCountsReceived = async (data: ChatsCountsResponse) => {
   counts.value = data
@@ -47,23 +58,79 @@ const onChatsCountsReceived = async (data: ChatsCountsResponse) => {
 
 const onChatsReceived = async (data: ChatsResponse) => {
   groups.value = data
+  loading.value = false
 }
 
-watch(() => props.connected, () => {
+const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
+  console.log('onChatMessagesReceive');
+  chatStore.changeSelectedChat(data)
+  loadingMessages.value = false
+  nextTick(() => {
+    scroll()
+  })
+}
+
+const onMessagesReceive = async (data: Message) => {
+  loadingMessageInput.value = false
+  if (selectedChat.value.chatId === data.chatId) {
+    selectedChat.value.messages.push(data)
+
+    nextTick(() => {
+      scroll()
+    })
+  }
+}
+
+const sendMessage = () => {
+  loadingMessageInput.value = true
+  sendWS("sendMessage", {
+    text: message.value,
+    chatId: selectedChat.value.chatId
+  })
+  message.value = ''
+}
+
+watchEffect(() => {
   if (props.connected) {
     sendWS("countAllChat")
-    socket.value.on('chatsCountsReceived', onChatsReceived)
   }
+})
+
+watch(() => expand.value.chats, () => {
+  if (expand.value.chats)
+    sendWS("findAllChat")
 })
 
 onBeforeMount(() => {
   sendWS("countAllChat")
+  if (expand.value.chats)
+    sendWS("findAllChat")
+  console.log('MOUNT');
   socket.value.on('chatsCountsReceived', onChatsCountsReceived)
   socket.value.on('chatsReceived', onChatsReceived)
+  socket.value.on('receiveChatMessages', onChatMessagesReceive)
+  socket.value.on('receiveMessage', onMessagesReceive)
 })
+
+onMounted(() => {
+  nextTick(() => {
+    scroll()
+  })
+})
+
+onBeforeUnmount(() => {
+  console.log('UNMOUNT');
+  socket.value.off('chatsCountsReceived', onChatsCountsReceived)
+  socket.value.off('chatsReceived', onChatsReceived)
+  socket.value.off('receiveChatMessages', onChatMessagesReceive)
+  socket.value.off('receiveMessage', onMessagesReceive)
+})
+
 
 const loadChats = (opened: number) => {
   if (opened) {
+    loadingMessages.value = true
+    loading.value
     sendWS("findAllChat")
   }
 }
@@ -72,16 +139,21 @@ const initChat = async (chatId: number) => {
   sendWS("getChat", { chatId })
 }
 
+const clearActiveChat = async () => {
+  chatStore.changeSelectedChat(undefined)
+  sendWS("countAllChat")
+  sendWS("findAllChat")
+}
+
 </script>
 
 <template>
   <div class="chat">
-
     <!-- ALL CHAT BUTTON  -->
     <el-collapse accordion v-model="expand.chats" @change="loadChats">
       <el-collapse-item class="el-collapse-item__header__first"
         :title="`Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}`" name="1">
-        <div v-if="!selectedChat">
+        <div v-if="selectedChat.chatId === 0">
           <!-- OFFER TYPES - RECEIVED OFFERS -->
           <el-collapse v-if="groups?.receivedOffers.length" accordion v-model="expand.receiveOffers" @change="loadChats">
             <el-collapse-item class="" title="Received offers" name="1">
@@ -94,7 +166,7 @@ const initChat = async (chatId: number) => {
                     <template #title>
                       <div class="item-name">
                         <span class="darker-title">
-                          {{ existingItem.item?.name }}
+                          {{ existingItem.item?.name }} | {{ existingItem.offerType }} | {{ existingItem.wantedPrice }}g
                         </span>
                         <el-button
                           :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${existingItem.id}` }"
@@ -106,8 +178,41 @@ const initChat = async (chatId: number) => {
                     </template>
 
                     <!-- CHATS  -->
-                    <div class="bid" @click="initChat(bid.chatId)">
-                      <strong>{{ bid.user.nickname }}</strong> <span>{{ bid.price }} gold</span>
+                    <div class="bid" @click="initChat(bid.chatId || 0)">
+                      <strong>{{ bid.user.nickname }}</strong> <span>{{ bid.price }}g</span>
+                    </div>
+
+                  </el-collapse-item>
+                </el-collapse>
+              </div>
+            </el-collapse-item>
+          </el-collapse>
+
+          <el-collapse v-if="groups?.sentOffers.length" accordion v-model="expand.sentOffers" @change="loadChats">
+            <el-collapse-item class="" title="Sent offers" name="1">
+              <div v-for="(existingItem, index) in groups.sentOffers" :key="index">
+
+                <!-- EXISTING ITEMS  -->
+                <el-collapse v-if="groups?.receivedOffers" accordion>
+                  <el-collapse-item v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" class="item"
+                    :name="existingItem.item?.name">
+                    <template #title>
+                      <div class="item-name">
+                        <span class="darker-title">
+                          {{ existingItem.item?.name }} | {{ existingItem.offerType }} | {{ existingItem.wantedPrice }}g
+                        </span>
+                        <el-button
+                          :class="{ 'icon-active': route.path === `/user/${existingItem.user?.nickname}/items/${existingItem.id}` }"
+                          @click.stop="push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)"
+                          circle><el-icon>
+                            <View />
+                          </el-icon></el-button>
+                      </div>
+                    </template>
+
+                    <!-- CHATS  -->
+                    <div class="bid" @click="initChat(bid.chatId || 0)">
+                      <strong>{{ existingItem.user?.nickname }}</strong> <span>{{ bid.price }}g</span>
                     </div>
 
                   </el-collapse-item>
@@ -116,31 +221,24 @@ const initChat = async (chatId: number) => {
               </div>
             </el-collapse-item>
           </el-collapse>
-
-          <el-collapse v-if="groups?.sentOffers.length" accordion v-model="expand.sentOffers" @change="loadChats">
-            <el-collapse-item class="" title="Sent offers" name="1">
-
-            </el-collapse-item>
-          </el-collapse>
         </div>
-        <div class="selected-chat" v-else>
-          <div class="selected-chat__messages">
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
-            <p>asd</p>
+        <div class="selected-chat" v-else-if="selectedChat.chatId">
+          <div class="selected-chat__actions">
+            <el-button @click="scroll">Scroll</el-button>
+            <el-button @click="clearActiveChat">Back</el-button>
+          </div>
+          <div ref="messagesRef" class="selected-chat__messages">
+            <p v-if="!selectedChat.messages.length">Chat started</p>
+            <span v-for="(message, index) of selectedChat.messages" class="message" :class="{
+              'left-message': userStore.currentUser.id === message.userId,
+              'right-message': userStore.currentUser.id !== message.userId
+            }" :key="index">{{
+  message.text }}</span>
           </div>
           <div class="message-input">
-            <el-input placeholder="input text"></el-input>
+            <el-input @keyup.enter="sendMessage" :disabled="loadingMessageInput" v-model="message"
+              placeholder="input text">
+            </el-input>
           </div>
         </div>
       </el-collapse-item>
@@ -154,7 +252,7 @@ const initChat = async (chatId: number) => {
   color: var(--el-color-primary);
   border-radius: 5pt 0 0 0;
   outline: none;
-  width: 350px;
+  width: 340px;
   position: fixed;
   bottom: 0;
   right: 0;
@@ -171,6 +269,53 @@ const initChat = async (chatId: number) => {
     cursor: pointer;
   }
 
+  .message {
+    // border-radius: 5px;
+    background-color: var(--el-color-danger);
+    color: var(--el-bg-color);
+    padding: 2px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    max-width: 70%;
+    margin-bottom: .45rem;
+    position: relative;
+  }
+
+  .left-message {
+    align-self: self-start;
+  }
+
+  .left-message:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-top: 10px solid var(--el-color-danger);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-radius: 10px;
+    top: 0;
+    left: -10px;
+  }
+
+  .right-message {
+    align-self: flex-end;
+  }
+
+
+  .right-message:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-bottom: 10px solid var(--el-color-danger);
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-radius: 10px;
+    bottom: 0;
+    right: -10px;
+  }
+
   .selected-chat {
     display: flex;
     flex-direction: column;
@@ -179,11 +324,21 @@ const initChat = async (chatId: number) => {
     padding: 0rem 1rem;
     height: 100%;
 
+    &__actions {
+      display: flex;
+      justify-content: end;
+      align-items: center;
+      padding-top: .8rem;
+      gap: .25rem;
+    }
+
     &__messages {
-      padding: .25rem 1rem;
+      padding: .55rem 1rem;
       height: 100%;
       overflow-y: auto;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
       border-radius: 15px;
       margin: 1rem 0;
       background-color: #0000005e;
@@ -255,7 +410,6 @@ const initChat = async (chatId: number) => {
   }
 
   .message-input {
-    // padding: 0 1rem 10px 1rem;
     margin-bottom: 1rem;
 
     .el-input {
@@ -270,6 +424,8 @@ const initChat = async (chatId: number) => {
   }
 
   .el-collapse {
+    --el-transition-duration: .25s;
+
     .el-collapse {
       .el-collapse-item__content {
         padding: 0;
@@ -281,9 +437,14 @@ const initChat = async (chatId: number) => {
     overflow: hidden;
 
     >.el-collapse-item__wrap {
-      height: 500px;
-      overflow-y: auto;
-      overflow-x: hidden;
+      overflow: hidden;
+      // height: 700px;
+
+      >.el-collapse-item__content {
+        height: 700px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
     }
 
     .el-collapse-item__header {
@@ -292,7 +453,6 @@ const initChat = async (chatId: number) => {
     }
 
     .el-collapse-item__content {
-      height: 100%;
       padding: 0;
 
       .el-collapse-item__header {

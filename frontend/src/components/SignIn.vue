@@ -40,11 +40,6 @@ const login = async (hashRequired = true) => {
       password: hashPass
     })
     if (!a) throw new Error()
-    if (!a.user) {
-      ElNotification({
-        message: "Login or password wrong"
-      })
-    }
 
     userStore.saveUser(a.user)
     userStore.saveToken(a.jwtToken)
@@ -56,9 +51,9 @@ const login = async (hashRequired = true) => {
 
     }
   } catch (error) {
-    ElNotification({
-      message: "Login or password wrong 2222"
-    })
+    // ElNotification({
+    //   message: "Login or password wrong"
+    // })
   } finally {
     loading.value = false
   }

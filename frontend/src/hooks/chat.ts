@@ -32,6 +32,12 @@ export interface CommunityUser {
   communityId: number;
 }
 
+export interface ChatMessagesResponse {
+  chatId: number,
+  messages: Message[],
+  count: number
+}
+
 export interface Message {
   id: number;
   text: string;

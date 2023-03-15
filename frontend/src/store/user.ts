@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { User } from '../hooks'
-import { useStorage } from '@vueuse/core'
+import { useLocalStorage, useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
 
 export const useUserStore = defineStore('user', () => {
-    const currentUser = useStorage('currentUser', {} as User)
-    const token = useStorage('token', '')
+    const currentUser = useLocalStorage('currentUser', {} as User)
+    const token = useLocalStorage('token', '')
     const isAuth = computed(() => !!token.value)
     const router = useRouter()
     const saveUser = (user: User) => {
