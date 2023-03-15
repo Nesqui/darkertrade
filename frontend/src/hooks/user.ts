@@ -13,6 +13,7 @@ export interface User {
     discord?: string;
     active: boolean;
     hash?: string;
+    discordNotification: boolean;
 }
 
 
