@@ -6,6 +6,7 @@ import {
   BelongsTo,
   ForeignKey,
   Length,
+  Default,
 } from 'sequelize-typescript';
 import { Chat } from 'src/chat/chat.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -24,6 +25,10 @@ export class Message extends Model {
   @AllowNull(false)
   @Column
   userId: number;
+
+  @Default(false)
+  @Column
+  read: boolean;
 
   @BelongsTo(() => User)
   user: User;

@@ -15,6 +15,13 @@ body {
     font-family: "Montserrat";
 }
 
+a {
+    color: var(--el-color-danger);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
+
 h2 {
     font-weight: 800;
     font-size: 26px;
@@ -152,6 +159,26 @@ button:hover {
 
 .el-button:focus-visible {
     --el-button-outline-color: var(--el-border-color)
+}
+
+.unread-count {
+    // background-color: var(--el-color-danger);
+    padding: .05rem .5rem;
+    // color: var(--el-bg-color);
+    border-radius: 6px;
+    font-weight: 500;
+    margin-left: 1rem;
+    // box-shadow: var(--el-box-shadow);
+    border: 1px solid rgba(255, 255, 255, 0.184);
+    display: flex;
+    font-size: 13px;
+    align-items: center;
+    justify-content: center;
+}
+
+.gold {
+    font-weight: 600;
+    font-family: "Solmoe";
 }
 
 .el-collapse {

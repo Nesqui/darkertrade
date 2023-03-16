@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, initUserApi, initWs, Message } from "@/hooks";
+import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, initUserApi, initWs, Message, UnreadMessagesCount } from "@/hooks";
 import { useChatStore, useUserStore } from "@/store";
 import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch, watchEffect } from "vue";
+import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, onUnmounted, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from 'vue-router';
+import ChatItems from "./ChatItems.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -12,6 +13,8 @@ const chatStore = useChatStore()
 const expand = computed(() => chatStore.expand)
 const selectedChat = computed(() => chatStore.selectedChat)
 const loading = ref(true)
+const unreadMessagesCount = ref<UnreadMessagesCount[]>([])
+
 
 const loadingMessages = ref(false)
 const push = async (url: string) => {
@@ -45,6 +48,9 @@ const props = defineProps({
 })
 
 const scroll = () => {
+  if (!selectedChat.value.chatId)
+    return
+
   messagesRef.value.scroll({
     top: messagesRef.value.scrollHeight,
     left: 0,
@@ -53,6 +59,8 @@ const scroll = () => {
 }
 
 const onChatsCountsReceived = async (data: ChatsCountsResponse) => {
+  console.log('onChatsCountsReceived', data);
+
   counts.value = data
 }
 
@@ -62,15 +70,17 @@ const onChatsReceived = async (data: ChatsResponse) => {
 }
 
 const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
-  console.log('onChatMessagesReceive');
   chatStore.changeSelectedChat(data)
   loadingMessages.value = false
-  nextTick(() => {
-    scroll()
-  })
+}
+
+const onCountMessages = async (data: UnreadMessagesCount[]) => {
+  unreadMessagesCount.value = data
 }
 
 const onMessagesReceive = async (data: Message) => {
+  console.log('onMessagesReceive', data);
+
   loadingMessageInput.value = false
   if (selectedChat.value.chatId === data.chatId) {
     selectedChat.value.messages.push(data)
@@ -90,11 +100,19 @@ const sendMessage = () => {
   message.value = ''
 }
 
-watchEffect(() => {
-  if (props.connected) {
-    sendWS("countAllChat")
-  }
-})
+// watchEffect(() => {
+//   if (props.connected) {
+//     console.log('WATCH PROPS');
+//     sendWS("countAllChat")
+//   }
+// })
+
+// watch(() => props.connected, () => {
+//   if (props.connected) {
+//     console.log('WATCH PROPS');
+//     sendWS("countAllChat")
+//   }
+// })
 
 watch(() => expand.value.chats, () => {
   if (expand.value.chats)
@@ -103,13 +121,15 @@ watch(() => expand.value.chats, () => {
 
 onBeforeMount(() => {
   sendWS("countAllChat")
-  if (expand.value.chats)
+  if (expand.value.chats) {
     sendWS("findAllChat")
-  console.log('MOUNT');
+    sendWS("countMessages")
+  }
   socket.value.on('chatsCountsReceived', onChatsCountsReceived)
   socket.value.on('chatsReceived', onChatsReceived)
   socket.value.on('receiveChatMessages', onChatMessagesReceive)
   socket.value.on('receiveMessage', onMessagesReceive)
+  socket.value.on('countMessages', onCountMessages)
 })
 
 onMounted(() => {
@@ -118,38 +138,41 @@ onMounted(() => {
   })
 })
 
-onBeforeUnmount(() => {
-  console.log('UNMOUNT');
+onUnmounted(() => {
   socket.value.off('chatsCountsReceived', onChatsCountsReceived)
   socket.value.off('chatsReceived', onChatsReceived)
   socket.value.off('receiveChatMessages', onChatMessagesReceive)
   socket.value.off('receiveMessage', onMessagesReceive)
+  socket.value.off('countMessages', onCountMessages)
 })
 
 // FIND OPENED CHATS WITHOUT MESSAGES 
 const loadChats = (opened: number) => {
+  console.log('loadChats');
+  sendWS("countAllChat")
   if (opened) {
     loadingMessages.value = true
     sendWS("findAllChat")
   }
 }
 
-const pagination = ref({
-  limit: 15,
-  offset: 0
-})
-
-// Get chat by id and get Messages 
-const initChat = async (chatId: number) => {
-  sendWS("getChat", { chatId, ...pagination.value})
+const loadMoreMessages = () => {
+  if (chatStore.messagePagination.offset + chatStore.messagePagination.limit > selectedChat.value.count)
+    return
+  chatStore.messagePagination.offset += chatStore.messagePagination.limit
+  sendWS("getChat", { chatId: selectedChat.value.chatId, ...chatStore.messagePagination })
 }
+
+const conversationContact = computed(() => {
+  if (!selectedChat.value.users) return undefined
+  return selectedChat.value.users.find(user => user.id !== userStore.currentUser.id)
+})
 
 const clearActiveChat = async () => {
   chatStore.changeSelectedChat(undefined)
   sendWS("countAllChat")
   sendWS("findAllChat")
 }
-
 </script>
 
 <template>
@@ -157,88 +180,35 @@ const clearActiveChat = async () => {
     <!-- ALL CHAT BUTTON  -->
     <el-collapse accordion v-model="expand.chats" @change="loadChats">
       <el-collapse-item class="el-collapse-item__header__first"
-        :title="`Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}`" name="1">
+        :title="counts? `Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}` : 'Chats'" name="1">
         <div v-if="selectedChat.chatId === 0">
           <!-- OFFER TYPES - RECEIVED OFFERS -->
-          <el-collapse v-if="groups?.receivedOffers.length" accordion v-model="expand.receiveOffers" @change="loadChats">
-            <el-collapse-item class="" title="Received offers" name="1">
-              <div v-for="(existingItem, index) in groups.receivedOffers" :key="index">
-
-                <!-- EXISTING ITEMS  -->
-                <el-collapse v-if="groups?.receivedOffers" accordion>
-                  <el-collapse-item v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" class="item"
-                    :name="existingItem.item?.name">
-                    <template #title>
-                      <div class="item-name">
-                        <span class="darker-title">
-                          {{ existingItem.item?.name }} | {{ existingItem.offerType }} | {{ existingItem.wantedPrice }}g
-                        </span>
-                        <el-button
-                          :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${existingItem.id}` }"
-                          @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${existingItem.id}`)"
-                          circle><el-icon>
-                            <View />
-                          </el-icon></el-button>
-                      </div>
-                    </template>
-
-                    <!-- CHATS  -->
-                    <div class="bid" @click="initChat(bid.chatId || 0)">
-                      <strong>{{ bid.user.nickname }}</strong> <span>{{ bid.price }}g</span>
-                    </div>
-
-                  </el-collapse-item>
-                </el-collapse>
-              </div>
-            </el-collapse-item>
-          </el-collapse>
-
-          <el-collapse v-if="groups?.sentOffers.length" accordion v-model="expand.sentOffers" @change="loadChats">
-            <el-collapse-item class="" title="Sent offers" name="1">
-              <div v-for="(existingItem, index) in groups.sentOffers" :key="index">
-
-                <!-- EXISTING ITEMS  -->
-                <el-collapse v-if="groups?.receivedOffers" accordion>
-                  <el-collapse-item v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" class="item"
-                    :name="existingItem.item?.name">
-                    <template #title>
-                      <div class="item-name">
-                        <span class="darker-title">
-                          {{ existingItem.item?.name }} | {{ existingItem.offerType }} | {{ existingItem.wantedPrice }}g
-                        </span>
-                        <el-button
-                          :class="{ 'icon-active': route.path === `/user/${existingItem.user?.nickname}/items/${existingItem.id}` }"
-                          @click.stop="push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)"
-                          circle><el-icon>
-                            <View />
-                          </el-icon></el-button>
-                      </div>
-                    </template>
-
-                    <!-- CHATS  -->
-                    <div class="bid" @click="initChat(bid.chatId || 0)">
-                      <strong>{{ existingItem.user?.nickname }}</strong> <span>{{ bid.price }}g</span>
-                    </div>
-
-                  </el-collapse-item>
-                </el-collapse>
-
-              </div>
-            </el-collapse-item>
-          </el-collapse>
+          <ChatItems v-if="groups?.receivedOffers.length" :connected="connected" :offer-type="'receivedOffers'"
+            :offers="groups.receivedOffers" :unread-messages-count="unreadMessagesCount" />
+          <ChatItems v-if="groups?.sentOffers.length" :connected="connected" :offers="groups.sentOffers"
+            :offer-type="'sentOffers'" :unread-messages-count="unreadMessagesCount" />
         </div>
         <div class="selected-chat" v-else-if="selectedChat.chatId">
           <div class="selected-chat__actions">
-            <el-button @click="scroll">Scroll</el-button>
+            <span>Chat with: <router-link v-if="conversationContact" :to="'/'">{{ conversationContact.nickname
+            }}</router-link></span>
             <el-button @click="clearActiveChat">Back</el-button>
           </div>
           <div ref="messagesRef" class="selected-chat__messages">
+            length-{{ selectedChat.messages.length }} | maxCount-{{ selectedChat.count }} | offset-{{
+              chatStore.messagePagination.offset }} | limit-{{
+    chatStore.messagePagination.limit
+  }}
+            <el-button v-if="selectedChat.messages.length < selectedChat.count" @click="loadMoreMessages">MORE
+              BLYAT</el-button>
             <p v-if="!selectedChat.messages.length">Chat started</p>
-            <span v-for="(message, index) of selectedChat.messages" class="message" :class="{
+
+            <!-- MESSAGES  -->
+            <p v-for="(message, index) of selectedChat.messages" class="message" :class="{
               'left-message': userStore.currentUser.id === message.userId,
               'right-message': userStore.currentUser.id !== message.userId
-            }" :key="index">{{
-  message.text }}</span>
+            }" :key="index">{{ message.text }}</p>
+
           </div>
           <div class="message-input">
             <el-input @keyup.enter="sendMessage" :disabled="loadingMessageInput" v-model="message"
@@ -284,6 +254,7 @@ const clearActiveChat = async () => {
     max-width: 70%;
     margin-bottom: .45rem;
     position: relative;
+    word-wrap: break-word;
   }
 
   .left-message {
@@ -331,7 +302,7 @@ const clearActiveChat = async () => {
 
     &__actions {
       display: flex;
-      justify-content: end;
+      justify-content: space-between;
       align-items: center;
       padding-top: .8rem;
       gap: .25rem;
@@ -350,47 +321,10 @@ const clearActiveChat = async () => {
     }
   }
 
-  .icon-active {
-    background-color: var(--el-color-danger);
-    color: var(--el-bg-color);
-  }
 
   .el-divider {
     margin: 0rem 0 .35rem 0;
   }
-
-  .bid {
-    padding: 1rem 2rem 1rem 2rem;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .bid:hover {
-    background-color: #0000006f;
-  }
-
-  .item {
-    margin-bottom: .1rem;
-    background-color: #0000004a;
-    // padding: .25rem 1rem;
-  }
-
-  .item-name {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding-right: 1rem;
-
-    .darker-title {
-      font-size: 14px;
-      font-weight: 400;
-    }
-  }
-
 
   .chat-bids {
     padding: 0.3rem 1rem;
@@ -432,6 +366,20 @@ const clearActiveChat = async () => {
     --el-transition-duration: .25s;
 
     .el-collapse {
+
+      .el-collapse-item__header {
+        opacity: 0.7;
+      }
+
+      .el-collapse-item__header:hover {
+        opacity: 1;
+      }
+
+      .el-collapse-item__header.is-active {
+        opacity: 1;
+      }
+
+
       .el-collapse-item__content {
         padding: 0;
       }

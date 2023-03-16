@@ -9,7 +9,13 @@ export const useChatStore = defineStore('chat', () => {
   const selectedChat = useLocalStorage<ChatMessagesResponse>('selectedChat', {
     chatId: 0,
     messages: [],
-    count: 0
+    count: 0,
+    users: []
+  })
+
+  const messagePagination = useLocalStorage('messagePagination',{
+    limit: 10,
+    offset: 0
   })
 
   const changeSelectedChat = (data: ChatMessagesResponse | undefined) => {
@@ -17,6 +23,14 @@ export const useChatStore = defineStore('chat', () => {
       selectedChat.value.chatId = 0
       selectedChat.value.messages = []
       selectedChat.value.count = 0
+      selectedChat.value.users = []
+      messagePagination.value.limit = 10
+      messagePagination.value.offset = 0
+      return
+    }
+    if (selectedChat.value.chatId === data.chatId) {
+      selectedChat.value.count = data.count
+      selectedChat.value.messages = [...data.messages, ...selectedChat.value.messages]
       return
     }
     selectedChat.value = data
@@ -25,12 +39,14 @@ export const useChatStore = defineStore('chat', () => {
   const expand = useLocalStorage('expand', {
     chats: '',
     sentOffers: '',
-    receiveOffers: ''
+    receivedOffers: '',
+    offerType: 'receivedOffers'
   })
 
   return {
     selectedChat,
     expand,
-    changeSelectedChat
+    changeSelectedChat,
+    messagePagination
   }
 })

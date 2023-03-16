@@ -35,7 +35,8 @@ export interface CommunityUser {
 export interface ChatMessagesResponse {
   chatId: number,
   messages: Message[],
-  count: number
+  count: number,
+  users: User[]
 }
 
 export interface Message {

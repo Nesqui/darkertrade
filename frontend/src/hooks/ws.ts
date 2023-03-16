@@ -6,6 +6,12 @@ import { useUserStore } from "@/store";
 import { computed, ref, watch } from "vue";
 let socket: Socket | any = ref()
 
+export interface UnreadMessagesCount {
+  chatId: number
+  userId: number
+  unreadMessages: string
+}
+
 export const initWs = () => {
   const userStore = useUserStore()
 
