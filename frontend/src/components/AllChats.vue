@@ -180,7 +180,7 @@ const clearActiveChat = async () => {
     <!-- ALL CHAT BUTTON  -->
     <el-collapse accordion v-model="expand.chats" @change="loadChats">
       <el-collapse-item class="el-collapse-item__header__first"
-        :title="counts? `Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}` : 'Chats'" name="1">
+        :title="counts ? `Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}` : 'Chats'" name="1">
         <div v-if="selectedChat.chatId === 0">
           <!-- OFFER TYPES - RECEIVED OFFERS -->
           <ChatItems v-if="groups?.receivedOffers.length" :connected="connected" :offer-type="'receivedOffers'"
@@ -205,8 +205,8 @@ const clearActiveChat = async () => {
 
             <!-- MESSAGES  -->
             <p v-for="(message, index) of selectedChat.messages" class="message" :class="{
-              'left-message': userStore.currentUser.id === message.userId,
-              'right-message': userStore.currentUser.id !== message.userId
+              'left-message': userStore.currentUser.id !== message.userId,
+              'right-message': userStore.currentUser.id === message.userId
             }" :key="index">{{ message.text }}</p>
 
           </div>
