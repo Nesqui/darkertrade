@@ -38,8 +38,6 @@ export const useChatStore = defineStore('chat', () => {
 
   const expand = useLocalStorage('expand', {
     chats: '',
-    sentOffers: '',
-    receivedOffers: '',
     offerType: 'receivedOffers'
   })
 

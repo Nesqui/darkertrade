@@ -100,8 +100,8 @@ const unreadMessagesCountByChatId = (chatId: number) => {
 
 <template>
   <!-- OFFER TYPES - RECEIVED OFFERS -->
-  <el-collapse class="chat-items" v-model="expand.sentOffers" accordion @change="loadChats">
-    <el-collapse-item class="" title="Received offers" :name="offerType">
+  <el-collapse class="chat-items" v-model="expand.offerType" accordion @change="loadChats">
+    <el-collapse-item class="" :title="offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers'" :name="offerType">
       <div v-for="(existingItem, index) in offers" :key="index">
 
         <!-- EXISTING ITEMS  -->
