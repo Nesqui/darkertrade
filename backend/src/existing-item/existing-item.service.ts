@@ -301,12 +301,30 @@ export class ExistingItemService {
       },
     });
 
-    // this.chatGateway.
-
-    // try {
-    // } catch (error) {}
+    try {
+      this.chatGateway.onExistingItemUnpublish(id);
+    } catch (error) {
+      console.log('unpublish err', error);
+    }
 
     return updateExistingItemDto.archived || (await this.findOne(id));
+  }
+
+  async changeDiscordNotification(id: number, bool: boolean, user: User) {
+    const currentExistingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        userId: user.id,
+        archived: false,
+      },
+    });
+
+    if (!currentExistingItem)
+      throw new ForbiddenException('You cant change this item');
+
+    currentExistingItem.discordNotification = bool;
+    await currentExistingItem.save();
+    return bool;
   }
 
   remove(id: number) {

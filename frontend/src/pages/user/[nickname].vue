@@ -9,6 +9,7 @@ import { useUserStore } from '@/store'
 const userApi = initUserApi()
 const user = ref<User>()
 const loading = ref(true)
+const discordNotificationLoading = ref(false)
 const route = useRoute()
 const router = useRouter()
 const limits = initLimits()
@@ -39,6 +40,16 @@ const initUserData = async () => {
       router.push('/market')
       return
     }
+  }
+}
+
+const onDiscordNotificationChange = async (value: boolean) => {
+  try {
+    discordNotificationLoading.value = true
+    await userApi.changeDiscordNotification(value)
+  } catch (error) {
+  } finally {
+    discordNotificationLoading.value = false
   }
 }
 
@@ -77,18 +88,17 @@ onBeforeMount(async () => {
           <span v-if="user?.lastName">Name: {{ user.lastName }}</span>
           <span>Banned: {{ user?.active ? 'no' : 'yes' }}</span>
           <span>Online: no</span>
-          <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
-
-          </div>
         </div>
-        <!-- <div class="profile__links">
-                                                                                                        <div class="profile__links__item">
-                                                                                                        </div>
-                                                                                                    </div> -->
 
       </div>
+      <div v-if="user && userStore.currentUser.id === user.id" class="settings">
+        <span>Discord DM:</span>
+        <div class="settings__discord">
+          <el-switch v-model="user.discordNotification" :loading="discordNotificationLoading" @change="onDiscordNotificationChange" size="large"
+            active-text="On" inactive-text="Off" />
+        </div>
+      </div>
       <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
-        <el-checkbox v-model="user.discordNotification" label="Allow discord DM notifications" size="large" />
         <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
         <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
         <CountExistingItem />
@@ -104,6 +114,7 @@ onBeforeMount(async () => {
   align-items: flex-start;
   gap: 2rem;
   $frameHeight: 180px;
+
 
   .loader,
   .profile__info {

@@ -478,6 +478,21 @@ export class UserService {
     });
   }
 
+  async changeDiscordNotification(bool: boolean, user: User) {
+    const currentUser = await this.usersRepository.findOne({
+      where: {
+        id: user.id,
+        active: true,
+      },
+    });
+
+    if (!currentUser) throw new ForbiddenException('You cant change this user');
+
+    currentUser.discordNotification = bool;
+    await currentUser.save();
+    return bool;
+  }
+
   async update(updateUserDto: UpdateUserDto) {
     if (!regeXnickname.test(updateUserDto.nickname))
       throw new ForbiddenException(

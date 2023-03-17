@@ -19,6 +19,7 @@ const user = ref<User>()
 const route = useRoute()
 const showBidCreator = ref(false)
 const router = useRouter()
+const discordNotificationLoading = ref(false)
 
 const existingItemsApi = initExistingItemApi()
 const moment = useMoment()
@@ -105,6 +106,22 @@ watch(() => route.params.nickname, async () => {
   await initPageData()
 })
 
+const onDiscordNotificationChange = async (value: boolean) => {
+  if (!item.value?.existingItems?.length && !item.value?.existingItems)
+    return
+
+  if (!item.value?.existingItems[0].id)
+    return
+
+  try {
+    discordNotificationLoading.value = true
+    await existingItemsApi.changeDiscordNotification(item.value.existingItems[0].id, value)
+  } catch (error) {
+  } finally {
+    discordNotificationLoading.value = false
+  }
+}
+
 onBeforeMount(async () => {
   try {
     await initPageData()
@@ -142,7 +159,7 @@ onBeforeMount(async () => {
           </el-popconfirm>
         </div>
         <div v-if="loading">
-            <el-skeleton :rows="4" animated></el-skeleton>
+          <el-skeleton :rows="4" animated></el-skeleton>
         </div>
       </div>
 
@@ -154,8 +171,19 @@ onBeforeMount(async () => {
       <div v-else class="item-details">
         <div class="item-info">
           <h2>Info</h2>
-          <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{ moment.fromNow(item.existingItems[0].createdAt) }}</p>
+          <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{
+            moment.fromNow(item.existingItems[0].createdAt) }}</p>
           <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
+          <div v-if="ownToUser() && item?.existingItems && item.existingItems[0].id" class="settings">
+            <el-divider />
+            <h2>Settings</h2>
+            <div class="settings__discord">
+              <span>Discord DM:</span>
+              <el-switch v-model="item.existingItems[0].discordNotification" :loading="discordNotificationLoading"
+                @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
+            </div>
+            <pre>Notify on new bids</pre>
+          </div>
           <el-divider />
           <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" />
         </div>
@@ -172,6 +200,19 @@ onBeforeMount(async () => {
 .item {
   display: flex;
   flex-direction: column;
+
+  .settings {
+    flex-direction: column;
+    align-items: start;
+    gap: unset;
+
+    &__discord {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
 
   .item-details {
     display: flex;

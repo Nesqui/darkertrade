@@ -49,3 +49,9 @@ export interface Message {
   existingItemId: number;
   existingItem: User;
 }
+
+export interface ExistingItemUnpublishedChats {
+  existingItemId: number
+}
+
+export type ChatOfferType = "receivedOffers" | "sentOffers"

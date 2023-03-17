@@ -30,7 +30,8 @@ type EmitTypes =
   | 'receiveChatMessages'
   | 'receiveMessage'
   | 'countMessages'
-  | 'notifyError';
+  | 'notifyError'
+  | 'existingItemUnpublish';
 
 @WebSocketGateway({
   cors: {
@@ -79,6 +80,66 @@ export class ChatGateway {
     this.notifyUser(userId, 'notifyError', err);
   }
 
+  async onExistingItemUnpublish(id: number) {
+    const chats = await this.chatRepository.findAll({
+      include: [
+        {
+          model: this.bidRepository,
+          attributes: ['id'],
+          where: {
+            [sequelize.Op.or]: [
+              {
+                existingItemId: id,
+              },
+              {
+                suggestedExistingItemId: id,
+              },
+            ],
+          },
+        },
+        {
+          attributes: ['id'],
+          model: this.communityRepository,
+          include: [
+            {
+              attributes: ['id'],
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!chats) return;
+
+    await this.chatRepository.update(
+      {
+        active: false,
+      },
+      {
+        where: {
+          id: chats.map((chat) => chat.id),
+        },
+      },
+    );
+
+    const userIds = [
+      ...chats
+        .map((chat) => chat.community.users.map((user) => user.id))
+        .flat(),
+    ];
+
+    if (!userIds.length) return;
+
+    await Promise.all(
+      userIds.map((uId) =>
+        this.notifyUser(uId, 'existingItemUnpublish', {
+          existingItemId: id,
+        }),
+      ),
+    );
+  }
+
   // handleConnection(client: Socket, ...args: any[]) {}
 
   async notifyUser(userId: number, emitType: EmitTypes, payload?: any) {
@@ -110,6 +171,9 @@ export class ChatGateway {
       const communityIds = communities.map((c) => c.id);
 
       const counts = await this.chatRepository.findAll({
+        where: {
+          active: true,
+        },
         attributes: [
           // 'id' as 'chatId',
           [sequelize.col('"Chat"."id"'), 'chatId'],
@@ -143,15 +207,6 @@ export class ChatGateway {
             where: {
               id: communityIds,
             },
-            // include: [
-            //   {
-            //     model: this.userRepository,
-            //     required: true,
-            //     where: {
-            //       id: userId,
-            //     },
-            //   },
-            // ],
           },
         ],
         raw: true,
@@ -185,7 +240,7 @@ export class ChatGateway {
     bid.chatId = chat.id;
     await bid.save();
 
-    const userGroup = await this.communityUsersRepository.bulkCreate([
+    await this.communityUsersRepository.bulkCreate([
       {
         userId: bid.userId,
         communityId: community.id,

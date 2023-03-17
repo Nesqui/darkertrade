@@ -161,6 +161,39 @@ button:hover {
     --el-button-outline-color: var(--el-border-color)
 }
 
+
+.settings {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: space-between;
+    gap: 15px;
+
+    span {
+        margin-bottom: 0;
+    }
+
+    width: 100%;
+}
+
+
+.settings__discord {
+    .el-switch {
+      .el-switch__action {
+        background: url(/src/assets/svg/discord-icon.svg) no-repeat;
+        background-size: contain;
+        filter: invert(100%) sepia(100%) saturate(151%) hue-rotate(345deg) brightness(119%) contrast(0%);
+      }
+    }
+
+
+    .el-switch.is-checked {
+      .el-switch__action {
+        filter: unset;
+      }
+    }
+  }
+
 .counter {
     border-radius: 50%;
     height: 27px;

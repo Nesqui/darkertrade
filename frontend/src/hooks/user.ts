@@ -54,6 +54,11 @@ export const initUserApi = () => {
         return res.data
     }
 
+    const changeDiscordNotification = async (bool: boolean) => {
+        const res = await axiosClient.patch(`user/discord/${bool ? 'true' : 'false'}`)
+        return res.data
+    }
+
     const update = async (user: UpdateUserDto) => {
         if (!user.hash) {
             ElNotification('Hash not provided')
@@ -66,6 +71,7 @@ export const initUserApi = () => {
     return {
         findByNickname,
         findOneByHash,
-        update
+        update,
+        changeDiscordNotification
     }
 }
