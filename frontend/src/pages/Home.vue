@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, onMounted, ref } from 'vue'
-import { Chat, initAttributesApi, initWs } from '../hooks'
-import { useUserStore, useAttributesStore, useChatStore } from '../store'
+import { onBeforeMount, onUnmounted, ref } from 'vue'
+import { initAttributesApi, initWs } from '../hooks'
+import { useAttributesStore, useChatStore } from '../store'
 import AllChats from "../components/AllChats.vue";
 import TopMenu from '../components/TopMenu.vue'
 import { ElNotification } from 'element-plus';
 
-const { sendWS, init, connected, close } = initWs()
+const { sendWS, init, connected, close, socket } = initWs()
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
 const reconnecting = ref(false)
@@ -19,10 +19,22 @@ const changeActiveTab = async () => {
   }
 }
 
+const onNotifyError = (message: string) => {
+  if (message)
+    ElNotification({
+      message
+    })
+}
+
 onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)
   document.addEventListener("visibilitychange", changeActiveTab);
+  socket.value.on('notifyError', onNotifyError)
+})
+
+onUnmounted(() => {
+  socket.value.off('notifyError', onNotifyError)
 })
 
 const chatStore = useChatStore()
@@ -41,7 +53,7 @@ const reconnect = async () => {
   }
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   await init()
 });
 

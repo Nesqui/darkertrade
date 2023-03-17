@@ -1,6 +1,6 @@
 <template>
   <el-tooltip v-if="count" class="box-item" effect="dark" content="New messages count" placement="top-start">
-    <div class="unread-count">{{ count }}</div>
+    <div class="counter">{{ count > 9 ? '9+' : count }}</div>
   </el-tooltip>
 </template>
 

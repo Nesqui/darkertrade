@@ -43,7 +43,7 @@ const props = defineProps({
     type: String as PropType<'sentOffers' | 'receivedOffers'>,
     required: true
   },
-  unreadMessagesCount : {
+  unreadMessagesCount: {
     type: Object as PropType<UnreadMessagesCount[]>,
     required: true
   }
@@ -96,46 +96,80 @@ const unreadMessagesCountByChatId = (chatId: number) => {
   return 0
 }
 
+const unreadMessagesCountByExistingItem = (existingItem: ExistingItem) => {
+  if (!existingItem.bids?.length) return 0
+  return existingItem.bids.reduce((pv, cv) => pv + unreadMessagesCountByChatId(cv.chatId!), 0)
+}
+
+const unreadedMessagesCountByOffer = () => {
+  if (!props.offers.length) return 0
+  return props.offers.reduce((pv, cv) => pv + unreadMessagesCountByExistingItem(cv), 0)
+}
+
 </script>
 
 <template>
   <!-- OFFER TYPES - RECEIVED OFFERS -->
   <el-collapse class="chat-items" v-model="expand.offerType" accordion @change="loadChats">
-    <el-collapse-item class="" :title="offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers'" :name="offerType">
+    <el-collapse-item class="" :name="offerType">
+      <template #title>
+        <div class="chat-items__title">
+          <span>
+            {{ offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers' }}</span>
+          <UnreadCount :count="unreadedMessagesCountByOffer()" />
+        </div>
+      </template>
       <div v-for="(existingItem, index) in offers" :key="index">
-
         <!-- EXISTING ITEMS  -->
-        <el-collapse v-model="expand[offerType]" accordion>
-          <el-collapse-item v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" :name="index" class="item">
+        <el-collapse v-model="expand.existingItem" accordion>
+          <el-collapse-item class="item">
             <template #title>
               <div class="item-name">
-                <span class="darker-title">
-                  {{ existingItem.item?.name }} | {{ existingItem.offerType }} | {{ existingItem.wantedPrice }}g
-                </span>
-                <el-button v-if="offerType === 'receivedOffers'"
-                  :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${existingItem.id}` }"
-                  @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${existingItem.id}`)" circle><el-icon>
-                    <View />
-                  </el-icon></el-button>
-                <el-button v-else
-                  :class="{ 'icon-active': route.path === `/user/${existingItem.user?.nickname}/items/${existingItem.id}` }"
-                  @click.stop="push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" circle><el-icon>
-                    <View />
-                  </el-icon></el-button>
+                <div class="item-name__li">
+                  <el-button v-if="offerType === 'receivedOffers'"
+                    :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${existingItem.id}` }"
+                    @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${existingItem.id}`)"
+                    circle><el-icon>
+                      <View />
+                    </el-icon></el-button>
+                  <el-button v-else
+                    :class="{ 'icon-active': route.path === `/user/${existingItem.user?.nickname}/items/${existingItem.id}` }"
+                    @click.stop="push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" circle><el-icon>
+                      <View />
+                    </el-icon></el-button>
+                </div>
+                <div class="item-name__li">
+                  <span class="darker-title">
+                    {{ existingItem.item?.name }}
+                  </span>
+                </div>
+                <div class="item-name__li">
+                  <strong>
+                    {{ existingItem.offerType }}
+                  </strong>
+                </div>
+                <div class="item-name__li">
+                  <strong>{{ existingItem.wantedPrice }}g</strong>
+                </div>
+                <div class="item-name__li">
+                  <UnreadCount :count="unreadMessagesCountByExistingItem(existingItem)" />
+                </div>
               </div>
             </template>
 
             <!-- CHATS  -->
-            <div class="bid" v-if="offerType === 'receivedOffers'" @click="initChat(bid.chatId || 0)">
-              <div>
-                <strong>{{ bid.user.nickname }} - </strong>
-                <span class="gold">{{ bid.price }}g</span>
+            <div v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" :name="index">
+              <div class="bid" v-if="offerType === 'receivedOffers'" @click="initChat(bid.chatId || 0)">
+                <div>
+                  <strong>{{ bid.user.nickname }} - </strong>
+                  <span class="gold">{{ bid.price }}g</span>
+                </div>
+                <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)" />
               </div>
-              <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)"/>
-            </div>
 
-            <div v-else class="bid" @click="initChat(bid.chatId || 0)">
-              <strong>{{ existingItem.user?.nickname }}</strong> <span>{{ bid.price }}g</span>
+              <div v-else class="bid" @click="initChat(bid.chatId || 0)">
+                <strong>{{ existingItem.user?.nickname }}</strong> <span>{{ bid.price }}g</span>
+              </div>
             </div>
           </el-collapse-item>
         </el-collapse>
@@ -146,6 +180,14 @@ const unreadMessagesCountByChatId = (chatId: number) => {
 
 <style scoped lang="scss">
 .chat-items {
+
+  &__title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
   .item {
     margin-bottom: .1rem;
     background-color: #0000004a;
@@ -153,11 +195,19 @@ const unreadMessagesCountByChatId = (chatId: number) => {
   }
 
   .item-name {
-    display: flex;
+    display: grid;
+    grid-template-columns: 40px 3fr 1fr 1fr 27px;
     align-items: center;
-    justify-content: space-between;
+    // justify-content: space-between;
+    // gap: .5rem;
     width: 100%;
-    padding-right: 1rem;
+
+    &__li {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-start;
+    }
 
     .darker-title {
       font-size: 14px;
@@ -166,7 +216,7 @@ const unreadMessagesCountByChatId = (chatId: number) => {
   }
 
   .bid {
-    padding: 1rem 2rem 1rem 2rem;
+    padding: 1rem;
     cursor: pointer;
     font-size: 14px;
     display: flex;

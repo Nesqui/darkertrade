@@ -29,7 +29,8 @@ type EmitTypes =
   | 'chatsCountsReceived'
   | 'receiveChatMessages'
   | 'receiveMessage'
-  | 'countMessages';
+  | 'countMessages'
+  | 'notifyError';
 
 @WebSocketGateway({
   cors: {
@@ -74,7 +75,9 @@ export class ChatGateway {
     );
   }
 
-  async notifyError(err: string, userId: number) {}
+  async notifyError(err: string, userId: number) {
+    this.notifyUser(userId, 'notifyError', err);
+  }
 
   // handleConnection(client: Socket, ...args: any[]) {}
 
@@ -87,46 +90,6 @@ export class ChatGateway {
     } catch (error) {
       console.log('notify err', error);
     }
-  }
-
-  onBidDeclined = async (bid: Bid) => {};
-
-  onBidAccepted = async (bid: Bid) => {
-    const community = await this.communityRepository.create();
-
-    const chat = await this.chatRepository.create({
-      name: 'onBidAccepted',
-      communityId: community.id,
-    });
-
-    bid.chatId = chat.id;
-    await bid.save();
-
-    const userGroup = await this.communityUsersRepository.bulkCreate([
-      {
-        userId: bid.userId,
-        communityId: community.id,
-      },
-      {
-        userId: bid.existingItem.user.id,
-        communityId: community.id,
-      },
-    ]);
-
-    const res = await this.chatRepository.findByPk(chat.id);
-    return res;
-  };
-
-  @SubscribeMessage('auth')
-  @UseGuards(JwtWSAuthGuard)
-  async auth(@MessageBody() auth: AuthDto, @ConnectedSocket() socket: Socket) {
-    this.users[auth.user.id] = socket;
-
-    console.log(
-      'CONNECT ---------------- Connected users -> ',
-      Object.keys(this.users),
-    );
-    await this.notifyUser(auth.user.id, 'authorized');
   }
 
   countMessages = async (userIds: number[]) => {
@@ -146,8 +109,6 @@ export class ChatGateway {
 
       const communityIds = communities.map((c) => c.id);
 
-      // const messages = this.messagesRepository.findAll()
-
       const counts = await this.chatRepository.findAll({
         attributes: [
           // 'id' as 'chatId',
@@ -159,6 +120,7 @@ export class ChatGateway {
           FROM "Messages"
           WHERE "Messages"."chatId" = "Chat"."id"
             AND "Messages"."read" = false
+            AND "Messages"."userId" != ${userId}
         )`),
             'unreadMessages',
           ],
@@ -209,6 +171,46 @@ export class ChatGateway {
       this.notifyUser(+userId, 'countMessages', counts);
     });
   };
+
+  onBidDeclined = async (bid: Bid) => {};
+
+  onBidAccepted = async (bid: Bid) => {
+    const community = await this.communityRepository.create();
+
+    const chat = await this.chatRepository.create({
+      name: 'onBidAccepted',
+      communityId: community.id,
+    });
+
+    bid.chatId = chat.id;
+    await bid.save();
+
+    const userGroup = await this.communityUsersRepository.bulkCreate([
+      {
+        userId: bid.userId,
+        communityId: community.id,
+      },
+      {
+        userId: bid.existingItem.user.id,
+        communityId: community.id,
+      },
+    ]);
+
+    const res = await this.chatRepository.findByPk(chat.id);
+    return res;
+  };
+
+  @SubscribeMessage('auth')
+  @UseGuards(JwtWSAuthGuard)
+  async auth(@MessageBody() auth: AuthDto, @ConnectedSocket() socket: Socket) {
+    this.users[auth.user.id] = socket;
+
+    console.log(
+      'CONNECT ---------------- Connected users -> ',
+      Object.keys(this.users),
+    );
+    await this.notifyUser(auth.user.id, 'authorized');
+  }
 
   @SubscribeMessage('findAllChat')
   @UseGuards(JwtWSAuthGuard)
@@ -367,11 +369,11 @@ export class ChatGateway {
       chatId: query.chatId,
     });
 
-    // await this.notifyUser(query.user.id, 'receiveMessage', message);
-    await this.countMessages([1, 2]);
+    const relatedUsersIds = currentChat.community.users.map((u) => u.id);
+    await this.countMessages(relatedUsersIds);
     await Promise.all(
-      currentChat.community.users.map((u) =>
-        this.notifyUser(u.id, 'receiveMessage', message),
+      relatedUsersIds.map((id) =>
+        this.notifyUser(id, 'receiveMessage', message),
       ),
     );
     return;
@@ -413,7 +415,6 @@ export class ChatGateway {
       },
       limit: query.limit,
       offset: query.offset,
-      order: [['id', 'DESC']],
       include: [
         {
           model: this.userRepository,
@@ -421,6 +422,22 @@ export class ChatGateway {
         },
       ],
     });
+
+    await this.messagesRepository.update(
+      {
+        read: true,
+      },
+      {
+        where: {
+          chatId: query.chatId,
+          userId: {
+            [sequelize.Op.not]: query.user.id,
+          },
+        },
+      },
+    );
+
+    await this.countMessages([query.user.id]);
 
     await this.notifyUser(query.user.id, 'receiveChatMessages', {
       chatId: query.chatId,

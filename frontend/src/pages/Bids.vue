@@ -185,7 +185,8 @@ onBeforeMount(async () => {
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
                 <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
-                  class="item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' : existingItem.bids.length }}
+                  class="counter item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' :
+                    existingItem.bids.length }}
                 </div>
               </div>
               <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
@@ -322,20 +323,16 @@ $itemsListWidth: 300px;
 
     &__counter {
       position: absolute;
+      background-color: var(--el-color-danger);
       left: calc($itemsListWidth - 2rem - 23px);
       top: -13px;
-      background-color: var(--el-color-danger);
-      box-shadow: var(--wrapper-box-shadow);
-      color: var(--el-bg-color);
-      border-radius: 50%;
       height: 36px;
       width: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
       transition: all .5s;
       cursor: pointer;
+      color: var(--el-bg-color);
+      box-shadow: var(--el-box-shadow);
+
     }
 
     &__counter:hover {
