@@ -5,15 +5,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import sequelize from 'sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
+import { Bid } from 'src/bid/bid.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
 import { QueryItemDto } from 'src/item/dto/query-item.dto';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
-import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
 const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
@@ -24,6 +24,9 @@ const LIMITS = {
 @Injectable()
 export class ExistingItemService {
   constructor(
+    @Inject('BIDS_REPOSITORY')
+    private bidRepository: typeof Bid,
+    private chatGateway: ChatGateway,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
     @Inject('USERS_REPOSITORY')
@@ -145,88 +148,6 @@ export class ExistingItemService {
     return item;
   }
 
-  // async findAllByItemId(query: QueryItemDto, itemId: number, user: User) {
-  //   const existingItemWhere = {
-  //     archived: false,
-  //     itemId,
-  //   };
-
-  //   if (isNaN(query.limit) || isNaN(query.offset))
-  //     throw new ForbiddenException('You must paginate this query');
-
-  //   const itemWhere = {};
-
-  //   if (query.slot) {
-  //     itemWhere['slot'] = query.slot;
-  //   }
-
-  //   if (!query.published && query.hideMine) {
-  //     throw new ForbiddenException('You cant find not own private items');
-  //   }
-
-  //   if (query.published) existingItemWhere['published'] = query.published;
-  //   else {
-  //     existingItemWhere['published'] = query.published;
-  //     existingItemWhere['userId'] = user.id;
-  //   }
-
-  //   if (query.offerType) existingItemWhere['offerType'] = query.offerType;
-  //   if (query.hideMine)
-  //     existingItemWhere[sequelize.Op.not] = { userId: user.id };
-
-  //   const item = await this.existingItemRepository.findAndCountAll({
-  //     where: existingItemWhere,
-  //     include: [
-  //       this.statRepository,
-  //       {
-  //         model: this.itemRepository,
-  //         where: itemWhere,
-  //       },
-  //       {
-  //         model: this.userRepository,
-  //         attributes: {
-  //           exclude: ['password', 'discord', 'discordId'],
-  //         },
-  //       },
-  //     ],
-  //     limit: query.limit,
-  //     offset: query.offset,
-  //   });
-
-  //   if (!item) return [];
-  //   return item;
-  // }
-
-  // async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
-  //   const filter = { ...filterExistingItemDto, archived: false };
-  //   const itemWhere = {};
-
-  //   if (filter.slot) {
-  //     itemWhere['slot'] = filterExistingItemDto.slot;
-  //     delete filter.slot;
-  //   }
-
-  //   const item = await this.existingItemRepository.findAll({
-  //     where: { ...filter, userId: user.id },
-  //     include: [
-  //       this.statRepository,
-  //       {
-  //         model: this.itemRepository,
-  //         where: itemWhere,
-  //       },
-  //       {
-  //         model: this.userRepository,
-  //         attributes: {
-  //           exclude: ['password', 'discord', 'discordId'],
-  //         },
-  //       },
-  //     ],
-  //   });
-
-  //   if (!item) return [];
-  //   return item;
-  // }
-
   async findOne(id: number) {
     const existingItem = await this.existingItemRepository.findOne({
       where: {
@@ -342,11 +263,36 @@ export class ExistingItemService {
     return existingItems;
   }
 
+  // publish unpublish
   async update(
     id: number,
     updateExistingItemDto: UpdateExistingItemDto,
     user: User,
   ) {
+    const currentExistingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        userId: user.id,
+        archived: false,
+      },
+    });
+
+    if (!currentExistingItem)
+      throw new ForbiddenException('You cant update this item');
+
+    if (!updateExistingItemDto.published || !updateExistingItemDto.archived) {
+      await this.bidRepository.update(
+        {
+          status: 'deleted',
+        },
+        {
+          where: {
+            existingItemId: id,
+          },
+        },
+      );
+    }
+
     await this.existingItemRepository.update(updateExistingItemDto, {
       where: {
         id,
@@ -354,6 +300,11 @@ export class ExistingItemService {
         archived: false,
       },
     });
+
+    // this.chatGateway.
+
+    // try {
+    // } catch (error) {}
 
     return updateExistingItemDto.archived || (await this.findOne(id));
   }

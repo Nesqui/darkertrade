@@ -16,7 +16,6 @@ const selectedChat = computed(() => chatStore.selectedChat)
 const loading = ref(true)
 const unreadMessagesCount = ref<UnreadMessagesCount[]>([])
 
-
 const loadingMessages = ref(false)
 const push = async (url: string) => {
   await router.push({
@@ -80,9 +79,11 @@ const onCountMessages = async (data: UnreadMessagesCount[]) => {
 }
 
 const onMessagesReceive = async (data: Message) => {
-  console.log('onMessagesReceive', data);
-
   loadingMessageInput.value = false
+  if (data.userId !== userStore.currentUser.id) {
+    const audio = new Audio('/mf.mp3');
+    audio.play();
+  }
   if (selectedChat.value.chatId === data.chatId) {
     selectedChat.value.messages.push(data)
 
