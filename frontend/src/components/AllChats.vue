@@ -347,6 +347,7 @@ const unreadMessagesTotal = () => {
       border-radius: 15px;
       margin: 1rem 0;
       background-color: #0000005e;
+      scrollbar-width: none;
     }
   }
 
