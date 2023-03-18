@@ -50,7 +50,6 @@ export const initWs = () => {
           token: userStore.token
         })
 
-
         socket.value.on("disconnect", () => {
           connected.value = false
           console.log('disconnect');
@@ -62,6 +61,16 @@ export const initWs = () => {
           connected.value = true
         })
       })
+
+      
+      socket.value.on("error", (error: any) => {
+        console.log('error', error);
+      });
+
+      socket.value.on("connect_error", (error: any) => {
+        console.log('error connection', error);
+      })
+
     })
   }
 
