@@ -20,6 +20,7 @@ import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
 import { sendMessageDto } from './dto/create-message.dto';
 import { GetChatDto, QueryChatDto } from './dto/query-chat.dto';
+type ChatOfferType = 'receivedOffers' | 'sentOffers';
 
 type EmitTypes =
   | 'chatCreated'
@@ -140,8 +141,6 @@ export class ChatGateway {
     );
   }
 
-  // handleConnection(client: Socket, ...args: any[]) {}
-
   async notifyUser(userId: number, emitType: EmitTypes, payload?: any) {
     if (!this.users[userId]) {
       return;
@@ -251,8 +250,44 @@ export class ChatGateway {
       },
     ]);
 
-    const res = await this.chatRepository.findByPk(chat.id);
-    return res;
+    const existingItem = await this.existingItemRepository.findOne({
+      where: {
+        archived: false,
+        published: true,
+        id: bid.existingItemId,
+      },
+      include: [
+        {
+          model: this.bidRepository,
+          where: {
+            id: bid.id,
+          },
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
+        },
+        {
+          model: this.itemRepository,
+        },
+      ],
+    });
+
+    await this.notifyUser(bid.userId, 'chatCreated', {
+      offerType: 'sentOffers',
+      existingItem,
+    });
+
+    await this.notifyUser(bid.existingItem.user.id, 'chatCreated', {
+      offerType: 'receivedOffers',
+      existingItem,
+    });
   };
 
   @SubscribeMessage('auth')
@@ -273,7 +308,6 @@ export class ChatGateway {
     @MessageBody() query: QueryChatDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    // return
     const sentOffers = await this.existingItemRepository.findAll({
       where: {
         archived: false,
@@ -286,6 +320,12 @@ export class ChatGateway {
             status: 'accepted',
             userId: query.user.id,
           },
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
         },
         {
           model: this.userRepository,
@@ -321,6 +361,7 @@ export class ChatGateway {
         },
       ],
     });
+
     await this.notifyUser(query.user.id, 'chatsReceived', {
       sentOffers,
       receivedOffers,
@@ -446,12 +487,30 @@ export class ChatGateway {
       },
       include: [
         {
+          model: this.bidRepository,
+          include: [
+            {
+              model: this.existingItemRepository,
+              as: 'existingItem',
+              include: [
+                {
+                  model: this.itemRepository,
+                },
+              ],
+            },
+            {
+              model: this.existingItemRepository,
+              as: 'suggestedExistingItem',
+            },
+          ],
+        },
+        {
           model: this.communityRepository,
           include: [
             {
               model: this.userRepository,
               attributes: {
-                exclude: ['password', 'discord', 'discordId'],
+                exclude: ['password', 'discord', 'discordId', 'hash'],
               },
             },
           ],
@@ -496,6 +555,7 @@ export class ChatGateway {
 
     await this.notifyUser(query.user.id, 'receiveChatMessages', {
       chatId: query.chatId,
+      chat,
       messages: messages.rows || [],
       count: messages.count,
       users: chat.community.users,

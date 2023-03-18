@@ -302,7 +302,7 @@ export class BidService {
       ],
     });
 
-    if (user.id !== bid.existingItem.userId || bid.status !== 'created')
+    if (user.id !== bid.existingItem.userId && user.id !== bid.userId)
       throw new ConflictException('You cant decline this bid');
 
     bid.status = 'declined';

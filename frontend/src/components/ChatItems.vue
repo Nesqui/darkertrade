@@ -84,6 +84,7 @@ const pagination = ref({
 
 // Get chat by id and get Messages 
 const initChat = async (chatId: number) => {
+  chatStore.currentChatOfferType = props.offerType
   sendWS("getChat", { chatId, ...pagination.value })
 }
 

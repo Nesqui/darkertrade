@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Chat, ChatMessagesResponse, User } from '../hooks'
+import { Chat, ChatMessagesResponse, ChatOfferType, User } from '../hooks'
 import { useLocalStorage, useStorage } from '@vueuse/core'
 import { ref } from 'vue'
 
@@ -12,6 +12,8 @@ export const useChatStore = defineStore('chat', () => {
     count: 0,
     users: []
   })
+
+  const currentChatOfferType = useLocalStorage<ChatOfferType>('currentChatOfferType', 'receivedOffers')
 
   const messagePagination = useLocalStorage('messagePagination',{
     limit: 10,
@@ -46,6 +48,7 @@ export const useChatStore = defineStore('chat', () => {
     selectedChat,
     expand,
     changeSelectedChat,
-    messagePagination
+    messagePagination,
+    currentChatOfferType
   }
 })

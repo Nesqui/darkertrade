@@ -2,12 +2,12 @@
 import { ElNotification } from 'element-plus'
 import { onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import BidList from '../../../../components/BidList.vue';
-import CreateBid from '../../../../components/CreateBid.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, useMoment, User } from '../../../../hooks'
-import ItemPreview from "../../../../components/ItemPreview.vue"
-import { useUserStore } from '../../../../store';
-import { Bid } from '../../../../hooks/bid';
+import BidList from '@/components/BidList.vue';
+import CreateBid from '@/components/CreateBid.vue';
+import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, useMoment, User } from '@/hooks'
+import ItemPreview from "@/components/ItemPreview.vue"
+import { useUserStore } from '@/store';
+import { Bid, QueryBidDto } from '@/hooks/bid';
 
 const userStore = useUserStore()
 const itemApi = initItemApi()
@@ -24,9 +24,19 @@ const discordNotificationLoading = ref(false)
 const existingItemsApi = initExistingItemApi()
 const moment = useMoment()
 
+const selectedTab = ref('Info')
+
 const filterItem = ref<Item>({
   slot: "",
   name: ""
+})
+
+const filterBids = ref<QueryBidDto>({
+  mine: true,
+  sort: [['id', 'DESC']],
+  limit: 3,
+  offset: 0,
+  offerType: 'WTS'
 })
 
 const formatDate = (date: string) => {
@@ -136,7 +146,7 @@ onBeforeMount(async () => {
   <div class="item">
     <div class="wrapper">
       <div class="item-actions">
-        <h2>{{ showBidCreator ? 'CREATE BID' : 'ITEM' }}</h2>
+        <h2>{{ showBidCreator ? 'Bid creating' : item ? item.name : 'item' }}</h2>
         <div v-if="!loading" class="item-actions__list">
           <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All
             items</el-button>
@@ -168,29 +178,36 @@ onBeforeMount(async () => {
       </div>
       <p v-else-if="!item">Item not found or not related to this user</p>
       <CreateBid @bidCreated="bidCreatedHandler" v-else-if="showBidCreator" :item="item" />
-      <div v-else class="item-details">
-        <div class="item-info">
-          <h2>Info</h2>
-          <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{
-            moment.fromNow(item.existingItems[0].createdAt) }}</p>
-          <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
-          <div v-if="ownToUser() && item?.existingItems && item.existingItems[0].id" class="settings">
-            <el-divider />
-            <h2>Settings</h2>
-            <div class="settings__discord">
-              <span>Discord DM:</span>
-              <el-switch v-model="item.existingItems[0].discordNotification" :loading="discordNotificationLoading"
-                @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
+      <el-tabs v-else v-model="selectedTab">
+        <el-tab-pane label="Info" name="Info">
+          <div class="item-details">
+            <div class="item-info">
+              <h2>Info</h2>
+              <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{
+                moment.fromNow(item.existingItems[0].createdAt) }}</p>
+              <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
+              <div v-if="ownToUser() && item?.existingItems && item.existingItems[0].id" class="settings">
+                <el-divider />
+                <h2>Settings</h2>
+                <div class="settings__discord">
+                  <span>Notify on new bids</span>
+                  <el-switch v-model="item.existingItems[0].discordNotification" :loading="discordNotificationLoading"
+                    @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
+                </div>
+              </div>
             </div>
-            <pre>Notify on new bids</pre>
+            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item"
+              :wantedPrice="item.existingItems[0].wantedPrice" :offerType="item.existingItems[0].offerType"
+              :stats="item?.existingItems[0].stats" />
           </div>
-          <el-divider />
-          <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" />
-        </div>
-        <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item"
-          :wantedPrice="item.existingItems[0].wantedPrice" :offerType="item.existingItems[0].offerType"
-          :stats="item?.existingItems[0].stats" />
-      </div>
+        </el-tab-pane>
+        <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids" :label="`Bids (${item.existingItems[0].bids.length})`"
+          name="Bids">
+          <h2>Bids:</h2>
+          <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" :filter="filterBids"
+            :existing-item="item.existingItems[0]" :bids="item.existingItems[0].bids" />
+        </el-tab-pane>
+      </el-tabs>
     </div>
 
   </div>
@@ -240,6 +257,15 @@ onBeforeMount(async () => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+}
+</style>
+
+<style lang="scss">
+.item {
+
+  .el-tabs__content {
+    padding-top: 1rem;
   }
 }
 </style>

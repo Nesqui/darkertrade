@@ -1,26 +1,17 @@
 <script setup lang="ts">
-import { ExistingItem, useMoment } from '@/hooks'
+import { ExistingItem } from '@/hooks'
 import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid'
-import { nextTick, onBeforeMount, ref, watch } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import ItemPreview from '@/components/ItemPreview.vue';
-import { useUserStore } from '@/store';
-import { useRoute, useRouter } from 'vue-router';
-import { ElNotification } from 'element-plus';
-import { max } from 'moment';
+import BidList from '@/components/BidList.vue';
 
 const bidApi = initBidApi()
 const existingItems = ref<ExistingItem[]>()
-const userStore = useUserStore()
-const moment = useMoment()
 const loading = ref(true)
 const tabName = ref<'sentOffers' | 'receivedOffers'>('receivedOffers')
-const canDeleteBid = (bid: Bid) => bid.userId === userStore.currentUser.id
-const canAcceptBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
-const canDeclineBid = (bid: Bid) => bid.status === 'created' && bid.userId !== userStore.currentUser.id
 const maxCount = ref(6)
-const route = useRoute()
-const router = useRouter()
 const selectedExistingItem = ref<ExistingItem>()
+
 
 const filter = ref<QueryBidDto>({
   mine: true,
@@ -70,42 +61,6 @@ const loadMoreExistingItems = async () => {
   }
 }
 
-const deleteBid = async (bid: Bid) => {
-  try {
-    if (!bids.value || !existingItems.value || !selectedExistingItem.value)
-      return
-    loading.value = true
-    let success = false
-    const bidIndex = bids.value.findIndex(b => b.id === bid.id)
-    if (bidIndex !== -1) {
-      bids.value?.splice(bidIndex, 1)
-      if (!bids.value?.length) {
-        const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value?.id)
-        if (eiIndex !== -1) {
-          existingItems.value.splice(eiIndex, 1)
-          selectedExistingItem.value = undefined
-          await bidApi.deleteBid(bid.id)
-          success = true
-          pagination.value.offset--
-          await loadMoreExistingItems()
-        }
-      }
-    }
-    if (success) {
-      ElNotification({
-        message: 'Bid successfully deleted'
-      })
-      return
-    }
-    ElNotification({
-      message: 'Bid not found'
-    })
-  } catch (error) {
-  } finally {
-    loading.value = false
-  }
-}
-
 watch(filter.value, async () => {
   pagination.value.offset = 0
   bids.value = []
@@ -113,24 +68,26 @@ watch(filter.value, async () => {
 })
 
 const changeTab = () => {
+  clear()
   filter.value.mine = tabName.value === 'sentOffers' ? false : true
 }
 
-const push = async (url: string) => {
-  let redirect = false
-  if (route.path === url) {
-    redirect = true
+const onBidDeleted = async (bid: Bid) => {
+  if (!bids.value || !existingItems.value || !selectedExistingItem.value)
+    return
+  const bidIndex = bids.value.findIndex(b => b.id === bid.id)
+  if (bidIndex !== -1) {
+    bids.value.splice(bidIndex, 1)
+    if (!bids.value.length) {
+      const eiIndex = existingItems.value.findIndex(ei => ei.id === selectedExistingItem.value?.id)
+      if (eiIndex !== -1) {
+        existingItems.value.splice(eiIndex, 1)
+        selectedExistingItem.value = undefined
+        pagination.value.offset--
+        await loadMoreExistingItems()
+      }
+    }
   }
-  await router.push({
-    path: url,
-  })
-  if (redirect)
-    router.go(0)
-}
-
-const selectExistingItem = (existingItem: ExistingItem) => {
-  selectedExistingItem.value = existingItem
-  bids.value = existingItem.bids
 }
 
 const clear = () => {
@@ -143,26 +100,15 @@ const changeOfferType = (offerType: 'WTB' | 'WTS') => {
   clear()
 }
 
-const acceptBid = async (bid: Bid) => {
-  try {
-    await bidApi.accept(bid.id)
-    ElNotification({
-      message: 'Bid accepted'
-    })
-    bid.status = 'accepted'
-  } catch (error) {
-  }
+const selectExistingItem = (existingItem: ExistingItem) => {
+  selectedExistingItem.value = existingItem
+  bids.value = existingItem.bids
 }
 
-const declineBid = async (bid: Bid) => {
-  try {
-    await bidApi.decline(bid.id)
-    ElNotification({
-      message: 'Bid declined'
-    })
-    bid.status = 'declined'
-  } catch (error) {
-  }
+const newBidsCounter = (existingItem: ExistingItem) => {
+  if (!existingItem.bids) return ''
+  const filteredBids = existingItem.bids.filter(bid => bid.status === 'created')
+  return filteredBids.length > 9 ? '9+' : filteredBids.length
 }
 
 onBeforeMount(async () => {
@@ -177,114 +123,46 @@ onBeforeMount(async () => {
         <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
         <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
-      {{ existingItems?.length }} {{ JSON.stringify(pagination) }} {{ maxCount }}
+      <!-- {{ existingItems?.length }} {{ JSON.stringify(pagination) }} {{ maxCount }} -->
       <div class="bids-table">
         <div v-if="existingItems?.length">
-          <div class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
+          <div v-if="!selectedExistingItem" class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
             v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="300">
             <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
               <div class="item-preview__head">
-                <div v-if="existingItem.bids?.length" @click="() => selectExistingItem(existingItem)"
-                  class="counter item-preview__head__counter">{{ existingItem.bids.length > 9 ? '9+' :
-                    existingItem.bids.length }}
+                <div v-if="newBidsCounter(existingItem)" @click="() => selectExistingItem(existingItem)"
+                  class="counter item-preview__head__counter">{{ newBidsCounter(existingItem) }}
                 </div>
               </div>
-              <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
+              <ItemPreview :class="{ 'active': selectedExistingItem?.id === existingItem.id }"
+                @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
             </div>
           </div>
+          <div v-else>
+            <div class="selected-item__actions">
+              <el-button link @click="clear">Show all</el-button>
+            </div>
+            <ItemPreview :offer-type="selectedExistingItem.offerType" :wanted-price="selectedExistingItem.wantedPrice"
+              :item="selectedExistingItem.item" :stats="selectedExistingItem.stats" />
+          </div>
+
         </div>
-        <div class="bids-list">
+        <div class="bid-list">
           <el-button-group class="table-actions">
             <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
             <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
           </el-button-group>
-          <el-table empty-text="Please choose any item" v-if="existingItems?.length && !loading" :data="bids">
-            <el-table-column prop="user.nickname" label="From" width="120">
-              <template #default="scope">
-                <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
-              </template>
-            </el-table-column>
-            <el-table-column v-if="selectedExistingItem && selectedExistingItem.user" prop="To" label="To" width="120">
-              <template #default="scope">
-                <router-link :to="`/user/${selectedExistingItem.user.nickname}/items/${selectedExistingItem.id}`">{{
-                  selectedExistingItem.user.nickname }}</router-link>
-              </template>
-            </el-table-column>
-            <el-table-column prop="price" label="Price" width="80" />
-            <el-table-column prop="status" label="Status" width="100" />
-            <el-table-column v-if="filter.offerType === 'WTB'" prop="suggestedExistingItem" label="Suggest" width="85">
-              <!-- HAS SUGGESTED ITEM  -->
-              <template #default="scope">
-                <div v-if="scope.row.suggestedExistingItem">
-                  <el-popover placement="right-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
-                    <template #reference>
-                      <el-button circle class="m-2"><el-icon>
-                          <View />
-                        </el-icon></el-button>
-                    </template>
-                    <ItemPreview v-if="selectedExistingItem && selectedExistingItem.item"
-                      :item="selectedExistingItem.item"
-                      @click="push(`/user/${scope.row.user.nickname}/items/${scope.row.suggestedExistingItemId}`)"
-                      :wanted-price="scope.row.suggestedExistingItem.wantedPrice"
-                      :stats="scope.row.suggestedExistingItem?.stats" />
-                  </el-popover>
-                </div>
-                <div v-else>
-                  err
-                </div>
-              </template>
-
-            </el-table-column>
-            <el-table-column prop="createdAt" label="Created at" width="180">
-              <template #default="scope">
-                {{ moment.fromNow(scope.row.createdAt) }}
-              </template>
-            </el-table-column>
-            <el-table-column prop="actions" label="Actions">
-              <template #default="scope">
-                <div class="bid-actions">
-                  <el-tooltip class="box-item" effect="dark" content="Accept offer" placement="top-start">
-                    <div v-if="canAcceptBid(scope.row)" class="bid-action">
-                      <el-popconfirm width="350" @confirm="acceptBid(scope.row)" confirm-button-text="OK"
-                        cancel-button-text="No, Thanks" :title="`Are you sure to accept this bid?`">
-                        <template #reference>
-                          <el-button circle :loading="loading"><el-icon><Select /></el-icon></el-button>
-                        </template>
-                      </el-popconfirm>
-                    </div>
-                  </el-tooltip>
-                  <el-tooltip class="box-item" effect="dark" content="Decline offer" placement="top-start">
-                    <div class="bid-action">
-                      <el-popconfirm v-if="canDeclineBid(scope.row)" width="350" @confirm="declineBid(scope.row)"
-                        confirm-button-text="OK" cancel-button-text="No, Thanks"
-                        :title="`Are you sure to decline this bid?`">
-                        <template #reference>
-                          <el-button circle :loading="loading"><el-icon>
-                              <Close />
-                            </el-icon></el-button>
-                        </template>
-                      </el-popconfirm>
-                    </div>
-                  </el-tooltip>
-                  <el-popconfirm v-if="canDeleteBid(scope.row)" width="350" @confirm="() => deleteBid(scope.row)"
-                    confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
-                    <template #reference>
-                      <el-button circle :loading="loading"><el-icon>
-                          <Delete />
-                        </el-icon></el-button>
-                    </template>
-                  </el-popconfirm>
-                </div>
-              </template>
-            </el-table-column>
-          </el-table>
+          <div v-if="bids && selectedExistingItem">
+            <BidList :existing-item="selectedExistingItem" :bids="bids" @on-bid-deleted="onBidDeleted" @clear="clear"
+              :filter="filter" />
+          </div>
         </div>
       </div>
       <div v-if="loading">
         <el-skeleton :rows="6"></el-skeleton>
       </div>
-      <div v-else-if="!existingItems?.length">
+      <div class="empty-message" v-else-if="!existingItems?.length">
         <p>Currently no bids here</p>
       </div>
     </div>
@@ -301,6 +179,25 @@ $itemsListWidth: 300px;
     margin-bottom: 2rem;
   }
 
+  .selected-item__actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .bid-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+    .table-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 2rem;
+    }
+  }
+
   .wrapper {
     width: var(--wrapper-xxl-width);
   }
@@ -308,13 +205,6 @@ $itemsListWidth: 300px;
   a {
     color: var(--el-color-danger);
     font-weight: 600;
-  }
-
-  .bid-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: .25rem;
   }
 
   .item-preview__head {
@@ -340,25 +230,11 @@ $itemsListWidth: 300px;
     }
   }
 
-  .table-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 2rem;
-  }
 
   .bids-table {
     display: flex;
   }
 
-  .bids-items-list-title {
-    width: $itemsListWidth;
-    padding-bottom: 1rem;
-    text-align: center;
-  }
-
-  .bids-list {
-    width: 100%;
-  }
 
   .bids-items-list {
     margin-top: .25rem;
@@ -377,26 +253,11 @@ $itemsListWidth: 300px;
       border-bottom: 1px solid var(--el-border-color);
     }
   }
-}
-</style>
 
-
-<style lang="scss">
-.popup-tat-frame {
-  width: var(--frame-width) !important;
-}
-
-.bids {
-  .el-table {
-    width: 860px;
-  }
-
-  .el-table__cell {
+  .empty-message {
+    margin-left: 25px;
     text-align: center;
   }
-
-  .el-table__cell:last-child {
-    text-align: end;
-  }
 }
 </style>
+

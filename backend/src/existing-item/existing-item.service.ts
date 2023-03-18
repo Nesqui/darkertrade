@@ -136,7 +136,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -160,7 +160,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -185,7 +185,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -280,7 +280,7 @@ export class ExistingItemService {
     if (!currentExistingItem)
       throw new ForbiddenException('You cant update this item');
 
-    if (!updateExistingItemDto.published || !updateExistingItemDto.archived) {
+    if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
       await this.bidRepository.update(
         {
           status: 'deleted',

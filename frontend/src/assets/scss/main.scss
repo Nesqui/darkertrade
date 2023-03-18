@@ -274,6 +274,13 @@ button:hover {
 }
 
 
+.item-preview.active {
+    .tat-frame {
+        background-color: var(--el-color-primary-dark-2);
+    }
+}
+
+
 .restrictions {
     display: flex;
     flex-direction: column;

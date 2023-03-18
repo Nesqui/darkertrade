@@ -1,3 +1,4 @@
+import { Bid } from "./bid";
 import { ExistingItem } from "./existingItem";
 import { User } from "./user";
 
@@ -7,6 +8,7 @@ export interface Chat {
   messages: Message[];
   communityId: number;
   community: Community;
+  bid: Bid
 }
 
 export interface Community {
@@ -34,6 +36,7 @@ export interface CommunityUser {
 
 export interface ChatMessagesResponse {
   chatId: number,
+  chat?: Chat,
   messages: Message[],
   count: number,
   users: User[]
@@ -55,3 +58,8 @@ export interface ExistingItemUnpublishedChats {
 }
 
 export type ChatOfferType = "receivedOffers" | "sentOffers"
+
+export interface ChatCreatedDto {
+  offerType:ChatOfferType,
+  existingItem: ExistingItem
+}

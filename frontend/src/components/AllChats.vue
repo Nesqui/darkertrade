@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, initWs, Message, UnreadMessagesCount } from "@/hooks";
+import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, initWs, Message, UnreadMessagesCount } from "@/hooks";
 import { useChatStore, useUserStore } from "@/store";
 import { ElNotification } from "element-plus";
 import { computed, nextTick, onBeforeMount, onMounted, onUnmounted, ref, watch } from "vue";
@@ -13,6 +13,7 @@ const userStore = useUserStore()
 const chatStore = useChatStore()
 const expand = computed(() => chatStore.expand)
 const selectedChat = computed(() => chatStore.selectedChat)
+
 const loading = ref(true)
 const unreadMessagesCount = ref<UnreadMessagesCount[]>([])
 
@@ -36,7 +37,10 @@ const messagesRef = ref()
 
 const loadingMessageInput = ref(false)
 const counts = ref<ChatsCountsResponse>()
-const groups = ref<ChatsResponse>()
+const groups = ref<ChatsResponse>({
+  sentOffers: [],
+  receivedOffers: []
+})
 const message = ref('')
 const { sendWS, socket } = initWs()
 
@@ -69,6 +73,7 @@ const onChatsReceived = async (data: ChatsResponse) => {
   loading.value = false
 }
 
+// OPENS CHAT WITH USER!
 const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
   chatStore.changeSelectedChat(data)
   loadingMessages.value = false
@@ -81,16 +86,20 @@ const onCountMessages = async (data: UnreadMessagesCount[]) => {
 const onExistingItemUnpublish = async (data: ExistingItemUnpublishedChats) => {
   const keys: ChatOfferType[] = []
 
-  if (groups.value?.receivedOffers.length)
+  if (selectedChat.value.chat?.bid.existingItemId === data.existingItemId) {
+    chatStore.changeSelectedChat(undefined)
+    ElNotification({
+      message: 'Chat closed because item was unpublished'
+    })
+  }
+
+  if (groups.value.receivedOffers.length)
     keys.push('receivedOffers')
-  if (groups.value?.sentOffers.length)
+  if (groups.value.sentOffers.length)
     keys.push('sentOffers')
 
   if (keys.length) {
     keys.forEach(key => {
-      if (!groups.value)
-        return
-
       const currentIndex = groups.value[key].findIndex(existingItem => existingItem.id === data.existingItemId)
       if (currentIndex !== -1) {
         groups.value[key].splice(currentIndex, 1)
@@ -109,6 +118,19 @@ const onMessagesReceive = async (data: Message) => {
       scroll()
     })
   }
+}
+
+const onChatCreated = async (data: ChatCreatedDto) => {
+  console.log('onChatCreated', data);
+  const existingItem = groups.value[data.offerType].find(ei => ei.id === data.existingItem.id)
+  if (!existingItem) {
+    groups.value[data.offerType].push(data.existingItem)
+    return
+  }
+  if (!existingItem.bids)
+    existingItem.bids = []
+  if (data.existingItem.bids && data.existingItem.bids[0])
+    existingItem.bids.push(data.existingItem.bids[0])
 }
 
 const sendMessage = () => {
@@ -132,20 +154,6 @@ const sendMessage = () => {
   message.value = ''
 }
 
-// watchEffect(() => {
-//   if (props.connected) {
-//     console.log('WATCH PROPS');
-//     sendWS("countAllChat")
-//   }
-// })
-
-// watch(() => props.connected, () => {
-//   if (props.connected) {
-//     console.log('WATCH PROPS');
-//     sendWS("countAllChat")
-//   }
-// })
-
 watch(() => expand.value.chats, () => {
   if (expand.value.chats)
     sendWS("findAllChat")
@@ -163,6 +171,7 @@ onBeforeMount(() => {
   socket.value.on('receiveMessage', onMessagesReceive)
   socket.value.on('countMessages', onCountMessages)
   socket.value.on('existingItemUnpublish', onExistingItemUnpublish)
+  socket.value.on('chatCreated', onChatCreated)
 })
 
 onMounted(() => {
@@ -178,7 +187,8 @@ onUnmounted(() => {
   socket.value.off('receiveMessage', onMessagesReceive)
   socket.value.off('countMessages', onCountMessages)
   socket.value.off('existingItemUnpublish', onExistingItemUnpublish)
-  chatStore.changeSelectedChat(undefined)
+  socket.value.off('chatCreated', onChatCreated)
+  // chatStore.changeSelectedChat(undefined)
 })
 
 // FIND OPENED CHATS WITHOUT MESSAGES 
@@ -228,24 +238,46 @@ const unreadMessagesTotal = () => {
             <UnreadCount :count="unreadMessagesTotal()" />
           </div>
         </template>
-        <p v-if="!groups?.receivedOffers.length && !groups?.sentOffers.length">
+        <p v-if="!groups.receivedOffers.length && !groups.sentOffers.length">
           No active chats</p>
         <div v-if="selectedChat.chatId === 0">
           <!-- OFFER TYPES - RECEIVED OFFERS -->
-          <ChatItems v-if="groups?.receivedOffers.length" :connected="connected" :offer-type="'receivedOffers'"
+          <ChatItems v-if="groups.receivedOffers.length" :connected="connected" :offer-type="'receivedOffers'"
             :offers="groups.receivedOffers" :unread-messages-count="unreadMessagesCount" />
-          <ChatItems v-if="groups?.sentOffers.length" :connected="connected" :offers="groups.sentOffers"
+          <ChatItems v-if="groups.sentOffers.length" :connected="connected" :offers="groups.sentOffers"
             :offer-type="'sentOffers'" :unread-messages-count="unreadMessagesCount" />
         </div>
+
         <div class="selected-chat" v-else-if="selectedChat.chatId">
+
+          <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
             <span>Chat with: <router-link v-if="conversationContact" :to="'/'">{{ conversationContact.nickname
             }}</router-link></span>
             <el-button @click="clearActiveChat">Back</el-button>
           </div>
+
+          <el-divider />
+
+          <div class="selected-chat__info">
+            <div class="selected-chat__info__li">
+              <span>
+                Bid item: <strong>{{ selectedChat.chat?.bid.existingItem.item?.name }}</strong>
+              </span>
+              <el-button v-if="chatStore.currentChatOfferType === 'receivedOffers'"
+                :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
+                @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)" circle><el-icon>
+                  <View />
+                </el-icon></el-button>
+              <el-button v-else
+                :class="{ 'icon-active': route.path === `/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
+                @click.stop="push(`/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)" circle><el-icon>
+                  <View />
+                </el-icon></el-button>
+            </div>
+          </div>
+
           <div ref="messagesRef" class="selected-chat__messages">
-            length-{{ selectedChat.messages.length }} | maxCount-{{ selectedChat.count }} | offset-{{
-              chatStore.messagePagination.offset }} | limit-{{ chatStore.messagePagination.limit }}
             <el-button link v-if="selectedChat.messages.length < selectedChat.count" @click="loadMoreMessages"> READ MORE
             </el-button>
             <p v-if="!selectedChat.messages.length">Chat started</p>
@@ -255,7 +287,6 @@ const unreadMessagesTotal = () => {
               'left-message': userStore.currentUser.id !== message.userId,
               'right-message': userStore.currentUser.id === message.userId
             }" :key="index">{{ message.text }}</p>
-
           </div>
           <div class="message-input">
             <el-input @keyup.enter="sendMessage" :disabled="loadingMessageInput" v-model="message"
@@ -263,6 +294,8 @@ const unreadMessagesTotal = () => {
             </el-input>
           </div>
         </div>
+        <!-- {{ groups }} -->
+
       </el-collapse-item>
     </el-collapse>
   </div>
@@ -364,6 +397,15 @@ const unreadMessagesTotal = () => {
       align-items: center;
       padding-top: .8rem;
       gap: .25rem;
+      margin-bottom: .5rem;
+    }
+
+    &__info {
+      &__li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
     }
 
     &__messages {

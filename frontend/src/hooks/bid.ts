@@ -4,6 +4,7 @@ export interface Bid {
   id: number,
   price: number;
   existingItemId: number;
+  existingItem: ExistingItem,
   suggestedExistingItemId?: number;
   suggestedExistingItem?: ExistingItem;
   userId: number;
