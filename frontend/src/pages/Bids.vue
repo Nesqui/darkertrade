@@ -134,7 +134,7 @@ onBeforeMount(async () => {
                   class="counter item-preview__head__counter">{{ newBidsCounter(existingItem) }}
                 </div>
               </div>
-              <ItemPreview :class="{ 'active': selectedExistingItem?.id === existingItem.id }"
+              <ItemPreview
                 @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
             </div>
