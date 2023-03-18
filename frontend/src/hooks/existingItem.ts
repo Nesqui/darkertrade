@@ -13,7 +13,8 @@ export interface ExistingItem {
     offerType: 'WTB' | 'WTS',
     bids?: Bid[],
     updatedAt?: string,
-    createdAt?: string
+    createdAt?: string,
+    discordNotification? : boolean
 }
 
 export interface UpdateExistingItemDto {
@@ -47,13 +48,6 @@ export interface CountedExistingItemsResponse {
 export const initExistingItemApi = () => {
     const { axiosClient } = useApi()
 
-    // const findAll = async (filterExistingItemDto: FilterExistingItemDto): Promise<ExistingItem[]> => {
-    //     const res = await axiosClient('existing-item', {
-    //         params: filterExistingItemDto
-    //     })
-    //     return res.data
-    // }
-
     const findAllByItemId = async (itemId: number, filterExistingItemDto: QueryItemDto): Promise<CountedExistingItemsResponse> => {
         const res = await axiosClient(`existing-item/item/${itemId}`, {
             params: filterExistingItemDto
@@ -72,6 +66,11 @@ export const initExistingItemApi = () => {
         })
         return res.data
     }
+    
+    const changeDiscordNotification = async (id: number, bool: boolean) => {
+        const res = await axiosClient.patch(`existing-item/${id}/discord/${bool ? 'true' : 'false'}`)
+        return res.data
+    }
 
     const create = async (item: ExistingItem): Promise<ExistingItem> => {
         const res = await axiosClient.post('existing-item', item)
@@ -84,11 +83,11 @@ export const initExistingItemApi = () => {
     }
 
     return {
-        // findAll,
         count,
         findAllByItemId,
         create,
         patch,
-        findAllByItemIdAndUserId
+        findAllByItemIdAndUserId,
+        changeDiscordNotification
     }
 }

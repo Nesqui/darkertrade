@@ -6,7 +6,10 @@ import {
   ForeignKey,
   AllowNull,
   BelongsTo,
+  Default,
+  HasOne,
 } from 'sequelize-typescript';
+import { Bid } from 'src/bid/bid.entity';
 import { Community } from 'src/community/community.entity';
 import { Message } from 'src/messages/messages.entity';
 
@@ -17,7 +20,7 @@ export class Chat extends Model {
 
   @HasMany(() => Message)
   messages: Message[];
-  
+
   @ForeignKey(() => Community)
   @AllowNull(false)
   @Column
@@ -25,4 +28,11 @@ export class Chat extends Model {
 
   @BelongsTo(() => Community)
   community: Community;
+
+  @Default(true)
+  @Column
+  active: boolean;
+
+  @HasOne(() => Bid)
+  bid: Bid;
 }

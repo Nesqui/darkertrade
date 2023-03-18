@@ -1,11 +1,12 @@
-import { Inject, UseGuards } from '@nestjs/common';
+import { ForbiddenException, Inject, UseGuards } from '@nestjs/common';
 import { ConnectedSocket } from '@nestjs/websockets';
 import {
   WebSocketGateway,
   SubscribeMessage,
   MessageBody,
 } from '@nestjs/websockets';
-import { async } from 'rxjs';
+import { groupBy } from 'lodash';
+import sequelize from 'sequelize';
 import { Server, Socket } from 'socket.io';
 import { JwtWSAuthGuard } from 'src/auth/guards/ws-jwt-auth.guard';
 import { Bid } from 'src/bid/bid.entity';
@@ -17,16 +18,21 @@ import { Message } from 'src/messages/messages.entity';
 import { User } from 'src/user/user.entity';
 import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
-import { CreateChatDto } from './dto/create-chat.dto';
-import { QueryChatDto } from './dto/query-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { sendMessageDto } from './dto/create-message.dto';
+import { GetChatDto, QueryChatDto } from './dto/query-chat.dto';
+type ChatOfferType = 'receivedOffers' | 'sentOffers';
 
 type EmitTypes =
   | 'chatCreated'
   | 'authRequired'
   | 'authorized'
   | 'chatsReceived'
-  | 'chatsCountsReceived';
+  | 'chatsCountsReceived'
+  | 'receiveChatMessages'
+  | 'receiveMessage'
+  | 'countMessages'
+  | 'notifyError'
+  | 'existingItemUnpublish';
 
 @WebSocketGateway({
   cors: {
@@ -58,37 +64,167 @@ export class ChatGateway {
   }
 
   handleDisconnect(client: Socket) {
+    console.log(client.id);
     for (const key in this.users) {
-      if (Object.prototype.hasOwnProperty.call(this.users, key)) {
-        this.users[key] = this.users[key].filter((ws) => ws.id !== client.id);
-        if (!this.users[key].length) delete this.users[key];
+      if (this.users[key].id === client.id) {
+        delete this.users[key];
+        break;
       }
     }
     console.log(
-      'DISCONNECT ---------------- USERS',
-      Object.keys(this.users).length,
+      'DISCONNECT ---------------- Current Users ->',
+      Object.keys(this.users),
     );
-
-    for (const key in this.users) {
-      console.log('key', key, 'length', this.users[key].length);
-    }
   }
 
-  handleConnection(client: Socket, ...args: any[]) {}
+  async notifyError(err: string, userId: number) {
+    this.notifyUser(userId, 'notifyError', err);
+  }
+
+  async onExistingItemUnpublish(id: number) {
+    const chats = await this.chatRepository.findAll({
+      include: [
+        {
+          model: this.bidRepository,
+          attributes: ['id'],
+          where: {
+            [sequelize.Op.or]: [
+              {
+                existingItemId: id,
+              },
+              {
+                suggestedExistingItemId: id,
+              },
+            ],
+          },
+        },
+        {
+          attributes: ['id'],
+          model: this.communityRepository,
+          include: [
+            {
+              attributes: ['id'],
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!chats) return;
+
+    await this.chatRepository.update(
+      {
+        active: false,
+      },
+      {
+        where: {
+          id: chats.map((chat) => chat.id),
+        },
+      },
+    );
+
+    const userIds = [
+      ...chats
+        .map((chat) => chat.community.users.map((user) => user.id))
+        .flat(),
+    ];
+
+    if (!userIds.length) return;
+
+    await Promise.all(
+      userIds.map((uId) =>
+        this.notifyUser(uId, 'existingItemUnpublish', {
+          existingItemId: id,
+        }),
+      ),
+    );
+  }
 
   async notifyUser(userId: number, emitType: EmitTypes, payload?: any) {
     if (!this.users[userId]) {
-      throw new Error('User not found');
+      return;
     }
-
     try {
-      await Promise.all(
-        this.users[userId].map((socket) => socket.emit(emitType, payload)),
-      );
+      this.users[userId].emit(emitType, payload);
     } catch (error) {
       console.log('notify err', error);
     }
   }
+
+  countMessages = async (userIds: number[]) => {
+    userIds.forEach(async (userId) => {
+      const communities = await this.communityRepository.findAll({
+        include: [
+          {
+            model: this.userRepository,
+            attributes: ['id'],
+            where: {
+              id: userId,
+            },
+          },
+        ],
+        raw: true,
+      });
+
+      const communityIds = communities.map((c) => c.id);
+
+      const counts = await this.chatRepository.findAll({
+        where: {
+          active: true,
+        },
+        attributes: [
+          // 'id' as 'chatId',
+          [sequelize.col('"Chat"."id"'), 'chatId'],
+          // [sequelize.col('"messages"."userId"'), 'userId'],
+          [
+            sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM "Messages"
+          WHERE "Messages"."chatId" = "Chat"."id"
+            AND "Messages"."read" = false
+            AND "Messages"."userId" != ${userId}
+        )`),
+            'unreadMessages',
+          ],
+        ],
+        include: [
+          {
+            model: this.messagesRepository,
+            required: true,
+            where: {
+              userId: {
+                [sequelize.Op.not]: userId,
+              },
+            },
+            as: 'messages',
+            attributes: [],
+          },
+          {
+            model: this.communityRepository,
+            attributes: [],
+            where: {
+              id: communityIds,
+            },
+          },
+        ],
+        raw: true,
+        nest: true,
+        group: [
+          'Chat.id',
+          'messages.userId',
+          'community.id',
+          // 'community.users.id',
+          // 'community.users.CommunityUser.id',
+          // 'community.users.CommunityUser.userId',
+          // 'community.users.CommunityUser.communityId',
+        ],
+      });
+
+      // const groupByUserCounts = groupBy(counts, 'userId');
+      this.notifyUser(+userId, 'countMessages', counts);
+    });
+  };
 
   onBidDeclined = async (bid: Bid) => {};
 
@@ -103,7 +239,7 @@ export class ChatGateway {
     bid.chatId = chat.id;
     await bid.save();
 
-    const userGroup = await this.communityUsersRepository.bulkCreate([
+    await this.communityUsersRepository.bulkCreate([
       {
         userId: bid.userId,
         communityId: community.id,
@@ -114,29 +250,57 @@ export class ChatGateway {
       },
     ]);
 
-    const res = await this.chatRepository.findByPk(chat.id);
-    return res;
+    const existingItem = await this.existingItemRepository.findOne({
+      where: {
+        archived: false,
+        published: true,
+        id: bid.existingItemId,
+      },
+      include: [
+        {
+          model: this.bidRepository,
+          where: {
+            id: bid.id,
+          },
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
+        },
+        {
+          model: this.itemRepository,
+        },
+      ],
+    });
+
+    await this.notifyUser(bid.userId, 'chatCreated', {
+      offerType: 'sentOffers',
+      existingItem,
+    });
+
+    await this.notifyUser(bid.existingItem.user.id, 'chatCreated', {
+      offerType: 'receivedOffers',
+      existingItem,
+    });
   };
 
   @SubscribeMessage('auth')
   @UseGuards(JwtWSAuthGuard)
   async auth(@MessageBody() auth: AuthDto, @ConnectedSocket() socket: Socket) {
-    if (!this.users[auth.user.id]) {
-      this.users[auth.user.id] = [socket];
-    } else this.users[auth.user.id] = [...this.users[auth.user.id], socket];
+    this.users[auth.user.id] = socket;
 
-    console.log('CONNECT ----------------');
-
-    for (const key in this.users) {
-      console.log('key', key, 'length', this.users[key].length);
-    }
+    console.log(
+      'CONNECT ---------------- Connected users -> ',
+      Object.keys(this.users),
+    );
     await this.notifyUser(auth.user.id, 'authorized');
   }
-
-  // @SubscribeMessage('createChat')
-  // create(@MessageBody() createChatDto: CreateChatDto) {
-  //   return this.chatService.create(createChatDto);
-  // }
 
   @SubscribeMessage('findAllChat')
   @UseGuards(JwtWSAuthGuard)
@@ -144,7 +308,6 @@ export class ChatGateway {
     @MessageBody() query: QueryChatDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    // return
     const sentOffers = await this.existingItemRepository.findAll({
       where: {
         archived: false,
@@ -157,6 +320,16 @@ export class ChatGateway {
             status: 'accepted',
             userId: query.user.id,
           },
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
         },
         {
           model: this.itemRepository,
@@ -173,6 +346,12 @@ export class ChatGateway {
       include: [
         {
           model: this.bidRepository,
+          include: [
+            {
+              model: this.userRepository,
+              attributes: ['nickname', 'id'],
+            },
+          ],
           where: {
             status: 'accepted',
           },
@@ -182,6 +361,7 @@ export class ChatGateway {
         },
       ],
     });
+
     await this.notifyUser(query.user.id, 'chatsReceived', {
       sentOffers,
       receivedOffers,
@@ -238,18 +418,147 @@ export class ChatGateway {
     });
   }
 
-  // @SubscribeMessage('findOneChat')
-  // findOne(@MessageBody() id: number) {
-  //   return this.chatService.findOne(id);
-  // }
+  @SubscribeMessage('countMessages')
+  @UseGuards(JwtWSAuthGuard)
+  async countMessagesReq(@MessageBody() query: QueryChatDto) {
+    await this.countMessages([query.user.id]);
+  }
 
-  // @SubscribeMessage('updateChat')
-  // update(@MessageBody() updateChatDto: UpdateChatDto) {
-  //   return this.chatService.update(updateChatDto.id, updateChatDto);
-  // }
+  @SubscribeMessage('sendMessage')
+  @UseGuards(JwtWSAuthGuard)
+  async sendMessage(
+    @MessageBody() query: sendMessageDto,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    if (query.text.length > 150) {
+      this.notifyError('Message too long, 150 letters max', query.user.id);
+      return;
+    }
 
-  // @SubscribeMessage('removeChat')
-  // remove(@MessageBody() id: number) {
-  //   return this.chatService.remove(id);
-  // }
+    const currentChat = await this.chatRepository.findOne({
+      where: { id: query.chatId },
+      include: [
+        {
+          model: this.communityRepository,
+          include: [
+            {
+              required: true,
+              attributes: ['nickname', 'id'],
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (
+      !currentChat ||
+      !currentChat.community.users.find((u) => u.id === query.user.id)
+    ) {
+      this.notifyError('You cant text to this chat', query.user.id);
+      return;
+    }
+
+    const message = await this.messagesRepository.create({
+      text: query.text,
+      userId: query.user.id,
+      chatId: query.chatId,
+    });
+
+    const relatedUsersIds = currentChat.community.users.map((u) => u.id);
+    await this.countMessages(relatedUsersIds);
+    await Promise.all(
+      relatedUsersIds.map((id) =>
+        this.notifyUser(id, 'receiveMessage', message),
+      ),
+    );
+    return;
+  }
+
+  @SubscribeMessage('getChat')
+  @UseGuards(JwtWSAuthGuard)
+  async getChat(
+    @MessageBody() query: GetChatDto,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const chat = await this.chatRepository.findOne({
+      where: {
+        id: query.chatId,
+      },
+      include: [
+        {
+          model: this.bidRepository,
+          include: [
+            {
+              model: this.existingItemRepository,
+              as: 'existingItem',
+              include: [
+                {
+                  model: this.itemRepository,
+                },
+              ],
+            },
+            {
+              model: this.existingItemRepository,
+              as: 'suggestedExistingItem',
+            },
+          ],
+        },
+        {
+          model: this.communityRepository,
+          include: [
+            {
+              model: this.userRepository,
+              attributes: {
+                exclude: ['password', 'discord', 'discordId', 'hash'],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!chat.community.users.find((user) => user.id === query.user.id)) {
+      this.notifyError('You cant read this chat', query.user.id);
+      return;
+    }
+
+    const messages = await this.messagesRepository.findAndCountAll({
+      where: {
+        chatId: query.chatId,
+      },
+      limit: query.limit,
+      offset: query.offset,
+      include: [
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id'],
+        },
+      ],
+    });
+
+    await this.messagesRepository.update(
+      {
+        read: true,
+      },
+      {
+        where: {
+          chatId: query.chatId,
+          userId: {
+            [sequelize.Op.not]: query.user.id,
+          },
+        },
+      },
+    );
+
+    await this.countMessages([query.user.id]);
+
+    await this.notifyUser(query.user.id, 'receiveChatMessages', {
+      chatId: query.chatId,
+      chat,
+      messages: messages.rows || [],
+      count: messages.count,
+      users: chat.community.users,
+    });
+  }
 }

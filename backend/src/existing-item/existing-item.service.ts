@@ -5,25 +5,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import sequelize from 'sequelize';
-import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
+import { Bid } from 'src/bid/bid.entity';
+import { ChatGateway } from 'src/chat/chat.gateway';
 import { QueryItemDto } from 'src/item/dto/query-item.dto';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
-import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
 const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
 const LIMITS = {
   WTB: 10,
-  WTS: 20
-}
+  WTS: 20,
+};
 @Injectable()
 export class ExistingItemService {
   constructor(
+    @Inject('BIDS_REPOSITORY')
+    private bidRepository: typeof Bid,
+    private chatGateway: ChatGateway,
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
     @Inject('USERS_REPOSITORY')
@@ -38,18 +41,23 @@ export class ExistingItemService {
     private attributeRepository: typeof Attribute,
     @Inject('SEQUELIZE')
     private db,
-  ) { }
+  ) {}
 
   async create(createExistingItemDto: CreateExistingItemDto, user: User) {
     const quantityOfExistingItems = await this.existingItemRepository.count({
       where: {
         userId: user.id,
-        offerType: createExistingItemDto.offerType
+        offerType: createExistingItemDto.offerType,
+        archived: false,
       },
-    })
+    });
 
-    if (quantityOfExistingItems >= LIMITS[createExistingItemDto.offerType])
-      throw new ForbiddenException(`You cant have more than ${LIMITS[createExistingItemDto.offerType]} ${createExistingItemDto.offerType} items`)
+    if (quantityOfExistingItems > LIMITS[createExistingItemDto.offerType])
+      throw new ForbiddenException(
+        `You cant have more than ${LIMITS[createExistingItemDto.offerType]} ${
+          createExistingItemDto.offerType
+        } items`,
+      );
 
     const item = await this.existingItemRepository.create(
       {
@@ -72,22 +80,26 @@ export class ExistingItemService {
       },
       attributes: [
         'offerType',
-        [sequelize.fn('COUNT', sequelize.col('offerType')), 'offerTypeCount']
+        [sequelize.fn('COUNT', sequelize.col('offerType')), 'offerTypeCount'],
       ],
-      group: ['offerType']
-    })
+      group: ['offerType'],
+    });
 
-    return { quantity: quantityOfExistingItems, limits: LIMITS }
+    return { quantity: quantityOfExistingItems, limits: LIMITS };
   }
 
-  async findAllByItemIdAndUserId(query: QueryItemDto, itemId: number, userId: number | null = null, user: User) {
+  async findAllByItemIdAndUserId(
+    query: QueryItemDto,
+    itemId: number,
+    userId: number | null = null,
+    user: User,
+  ) {
     const existingItemWhere = {
       archived: false,
       itemId,
     };
 
-    if (userId)
-      existingItemWhere['userId'] = userId
+    if (userId) existingItemWhere['userId'] = userId;
 
     if (isNaN(query.limit) || isNaN(query.offset))
       throw new ForbiddenException('You must paginate this query');
@@ -104,10 +116,9 @@ export class ExistingItemService {
 
     existingItemWhere['published'] = query.published;
 
-    if (!query.published)
-      existingItemWhere['userId'] = user.id;
+    if (!query.published) existingItemWhere['userId'] = user.id;
 
-    // ALL FILTER 
+    // ALL FILTER
     // if (query.offerType) existingItemWhere['offerType'] = query.offerType;
 
     existingItemWhere['offerType'] = query.offerType;
@@ -125,7 +136,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -136,88 +147,6 @@ export class ExistingItemService {
     if (!item) return [];
     return item;
   }
-
-  // async findAllByItemId(query: QueryItemDto, itemId: number, user: User) {
-  //   const existingItemWhere = {
-  //     archived: false,
-  //     itemId,
-  //   };
-
-  //   if (isNaN(query.limit) || isNaN(query.offset))
-  //     throw new ForbiddenException('You must paginate this query');
-
-  //   const itemWhere = {};
-
-  //   if (query.slot) {
-  //     itemWhere['slot'] = query.slot;
-  //   }
-
-  //   if (!query.published && query.hideMine) {
-  //     throw new ForbiddenException('You cant find not own private items');
-  //   }
-
-  //   if (query.published) existingItemWhere['published'] = query.published;
-  //   else {
-  //     existingItemWhere['published'] = query.published;
-  //     existingItemWhere['userId'] = user.id;
-  //   }
-
-  //   if (query.offerType) existingItemWhere['offerType'] = query.offerType;
-  //   if (query.hideMine)
-  //     existingItemWhere[sequelize.Op.not] = { userId: user.id };
-
-  //   const item = await this.existingItemRepository.findAndCountAll({
-  //     where: existingItemWhere,
-  //     include: [
-  //       this.statRepository,
-  //       {
-  //         model: this.itemRepository,
-  //         where: itemWhere,
-  //       },
-  //       {
-  //         model: this.userRepository,
-  //         attributes: {
-  //           exclude: ['password', 'discord', 'discordId'],
-  //         },
-  //       },
-  //     ],
-  //     limit: query.limit,
-  //     offset: query.offset,
-  //   });
-
-  //   if (!item) return [];
-  //   return item;
-  // }
-
-  // async findAll(filterExistingItemDto: FilterExistingItemDto, user: User) {
-  //   const filter = { ...filterExistingItemDto, archived: false };
-  //   const itemWhere = {};
-
-  //   if (filter.slot) {
-  //     itemWhere['slot'] = filterExistingItemDto.slot;
-  //     delete filter.slot;
-  //   }
-
-  //   const item = await this.existingItemRepository.findAll({
-  //     where: { ...filter, userId: user.id },
-  //     include: [
-  //       this.statRepository,
-  //       {
-  //         model: this.itemRepository,
-  //         where: itemWhere,
-  //       },
-  //       {
-  //         model: this.userRepository,
-  //         attributes: {
-  //           exclude: ['password', 'discord', 'discordId'],
-  //         },
-  //       },
-  //     ],
-  //   });
-
-  //   if (!item) return [];
-  //   return item;
-  // }
 
   async findOne(id: number) {
     const existingItem = await this.existingItemRepository.findOne({
@@ -231,7 +160,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -256,7 +185,7 @@ export class ExistingItemService {
         {
           model: this.userRepository,
           attributes: {
-            exclude: ['password', 'discord', 'discordId'],
+            exclude: ['password', 'discord', 'discordId', 'hash'],
           },
         },
       ],
@@ -276,8 +205,8 @@ export class ExistingItemService {
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
       : [6, 7, 8, 9].includes(baseExistingItem.item.id)
-        ? [6, 7, 8, 9]
-        : [baseExistingItem.item.id];
+      ? [6, 7, 8, 9]
+      : [baseExistingItem.item.id];
 
     const baseExistingItemAttributeIds = baseExistingItem.stats.map(
       (a) => a.attributeId,
@@ -301,10 +230,10 @@ export class ExistingItemService {
       SUM(
         CASE 
           WHEN "Stat"."attributeId" IN (${baseExistingItem.stats
-        .map((a) => a.attributeId)
-        .join(
-          ', ',
-        )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
+            .map((a) => a.attributeId)
+            .join(
+              ', ',
+            )}) THEN CAST("Stat"."value" AS INTEGER) * ${ATTRIBUTE_BASE_WEIGHT}
           ELSE CAST("Stat"."value" AS INTEGER) 
         END
       ) AS weight
@@ -334,11 +263,36 @@ export class ExistingItemService {
     return existingItems;
   }
 
+  // publish unpublish
   async update(
     id: number,
     updateExistingItemDto: UpdateExistingItemDto,
     user: User,
   ) {
+    const currentExistingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        userId: user.id,
+        archived: false,
+      },
+    });
+
+    if (!currentExistingItem)
+      throw new ForbiddenException('You cant update this item');
+
+    if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
+      await this.bidRepository.update(
+        {
+          status: 'deleted',
+        },
+        {
+          where: {
+            existingItemId: id,
+          },
+        },
+      );
+    }
+
     await this.existingItemRepository.update(updateExistingItemDto, {
       where: {
         id,
@@ -347,7 +301,30 @@ export class ExistingItemService {
       },
     });
 
+    try {
+      this.chatGateway.onExistingItemUnpublish(id);
+    } catch (error) {
+      console.log('unpublish err', error);
+    }
+
     return updateExistingItemDto.archived || (await this.findOne(id));
+  }
+
+  async changeDiscordNotification(id: number, bool: boolean, user: User) {
+    const currentExistingItem = await this.existingItemRepository.findOne({
+      where: {
+        id,
+        userId: user.id,
+        archived: false,
+      },
+    });
+
+    if (!currentExistingItem)
+      throw new ForbiddenException('You cant change this item');
+
+    currentExistingItem.discordNotification = bool;
+    await currentExistingItem.save();
+    return bool;
   }
 
   remove(id: number) {

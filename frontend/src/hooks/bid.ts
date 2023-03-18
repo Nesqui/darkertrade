@@ -1,15 +1,18 @@
-import { CountedExistingItemsResponse, ExistingItem, useApi, User } from "."
+import { Chat, CountedExistingItemsResponse, ExistingItem, useApi, User } from "."
 export type BidSortParam = [string, 'ABC' | 'DESC']
 export interface Bid {
   id: number,
   price: number;
   existingItemId: number;
+  existingItem: ExistingItem,
   suggestedExistingItemId?: number;
   suggestedExistingItem?: ExistingItem;
   userId: number;
   createdAt: string,
   updateAt: string,
   user: User,
+  chatId?: number;
+  chat?: Chat
   status: 'created' | 'accepted' | 'declined' | 'deleted'
 }
 

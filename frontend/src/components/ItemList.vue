@@ -263,7 +263,7 @@ $step: 1rem;
 .item-list-wrapper {
   overflow-y: auto;
   margin-bottom: 2rem;
-  height: 580px;
+  height: 570px;
 }
 
 .back {

@@ -193,12 +193,12 @@ export class RegisterCommand {
     }
 
     try {
-      await discUser.send(
-        this.configService.get('APP_URL') +
-          `/signup?hash=${hash}` +
-          `
-      Your link to complete registration on TaT`,
-      );
+      const discordMessage =
+        `__${this.configService.get('APP_URL')}/signup?hash=${hash}__` +
+        '\n' +
+        `Your link to complete registration on **TaT**`;
+
+      await discUser.send(discordMessage);
     } catch (error) {
       this.logger.log(`disc send ${error}`);
     }

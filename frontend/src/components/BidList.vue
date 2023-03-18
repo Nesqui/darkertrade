@@ -1,26 +1,74 @@
-
 <script setup lang="ts">
+import { useUserStore } from '@/store';
 import { useRoute, useRouter } from 'vue-router';
-import { PropType, ref } from 'vue';
-import { Item, useMoment } from '../hooks';
-import { Bid, initBidApi } from '../hooks/bid';
-import { useUserStore } from '../store';
-import ItemPreview from './ItemPreview.vue';
+import { ElNotification } from 'element-plus';
+import { ExistingItem, Item, useMoment } from '@/hooks';
+import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid';
 
+import ItemPreview from '@/components/ItemPreview.vue';
+import { PropType, ref } from 'vue';
+
+const loading = ref(false)
 const bidApi = initBidApi()
 const userStore = useUserStore()
-const emit = defineEmits(['bidDeleted'])
-const loading = ref(false)
 const moment = useMoment()
+
+const canDeleteBid = (bid: Bid) => {
+  if (bid.status !== 'created' || bid.userId !== userStore.currentUser.id)
+    return false
+  return true
+}
+
+const canAcceptBid = (bid: Bid) => {
+  if (bid.status !== 'created' || bid.userId !== userStore.currentUser.id)
+    return false
+  if (existingItem.userId === userStore.currentUser.id)
+    return true
+}
+
+const canDeclineBid = (bid: Bid) => {
+  if (bid.status !== 'created' && bid.status !== 'accepted')
+    return false
+  if (bid.userId === userStore.currentUser.id || existingItem.userId === userStore.currentUser.id)
+    return true
+}
+
 const route = useRoute()
 const router = useRouter()
-const canDeleteBid = (bid: Bid) => bid.userId === userStore.currentUser.id
-const props = defineProps({
-  item: {
-    type: Object as PropType<Item>,
-    required: true,
+const emit = defineEmits(['onBidDeleted'])
+
+const { existingItem, bids, filter } = defineProps({
+  filter: {
+    type: Object as PropType<QueryBidDto>,
+    required: true
   },
+  existingItem: {
+    type: Object as PropType<ExistingItem>,
+    required: true
+  },
+  bids: {
+    type: Object as PropType<Bid[]>,
+    required: true
+  }
 })
+
+const deleteBid = async (bid: Bid) => {
+  try {
+    loading.value = true
+    await bidApi.deleteBid(bid.id)
+    emit('onBidDeleted', bid)
+    ElNotification({
+      message: 'Bid successfully deleted'
+    })
+    return
+  } catch (error) {
+    ElNotification({
+      message: 'Bid not found'
+    })
+  } finally {
+    loading.value = false
+  }
+}
 
 const push = async (url: string) => {
   let redirect = false
@@ -34,93 +82,145 @@ const push = async (url: string) => {
     router.go(0)
 }
 
-const deleteBid = async (bid: Bid) => {
-  try {
-    loading.value = true
-    await bidApi.deleteBid(bid.id)
-    emit('bidDeleted', bid)
-  } catch (error) {
 
-  } finally {
-    loading.value = false
+const declineBid = async (bid: Bid) => {
+  try {
+    await bidApi.decline(bid.id)
+    ElNotification({
+      message: 'Bid declined'
+    })
+    bid.status = 'declined'
+  } catch (error) {
+  }
+}
+
+
+const acceptBid = async (bid: Bid) => {
+  try {
+    await bidApi.accept(bid.id)
+    ElNotification({
+      message: 'Bid accepted'
+    })
+    bid.status = 'accepted'
+  } catch (error) {
   }
 }
 </script>
 
 <template>
-  <div v-if="item?.existingItems?.length" class="bidding">
-    <div class="item-details">
-      <div class="item-bids">
-        <div class="item-bids__header">
-          <h2>Current Bids</h2>
-        </div>
-        <div class="item-bids__list">
-          <p v-if="item?.existingItems[0].bids && !item?.existingItems[0].bids.length">Currently no active bids</p>
-          <div v-for="(bid, index) in item.existingItems[0].bids" :key="index" class="item-bids__list__item">
-            <strong>{{ bid.user.nickname }}</strong>
-            <span>{{ moment.fromNow(bid.createdAt) }}</span>
-            <span>{{ bid.price }} Gold</span>
-            <div class="actions">
-              <el-popover v-if="bid.suggestedExistingItemId" placement="top-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
-                <template #reference>
-                  <el-button class="m-2">Item</el-button>
-                </template>
-                <ItemPreview :item="item" @click="push(`/user/${bid.user.nickname}/items/${bid.suggestedExistingItemId}`)" :wanted-price="bid.suggestedExistingItem?.wantedPrice" :stats="bid.suggestedExistingItem?.stats" />
-              </el-popover>
-              <el-popconfirm v-if="canDeleteBid(bid)" width="350" @confirm="deleteBid(bid)" confirm-button-text="OK"
-                cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
-                <template #reference>
-                  <el-button :loading="loading">Delete</el-button>
-                </template>
-              </el-popconfirm>
-            </div>
+  <div class="bids-list">
+    <el-table empty-text="Currently no items here" :data="bids">
+      <el-table-column prop="user.nickname" label="From" width="120">
+        <template #default="scope">
+          <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
+        </template>
+      </el-table-column>
+      <el-table-column v-if="existingItem.user" prop="To" label="To" width="120">
+        <template #default="scope">
+          <router-link :to="`/user/${existingItem.user.nickname}/items/${existingItem.id}`">{{
+            existingItem.user.nickname }}</router-link>
+        </template>
+      </el-table-column>
+      <el-table-column prop="price" label="Price" width="80" />
+      <el-table-column prop="status" label="Status" width="100" />
+      <el-table-column v-if="filter.offerType === 'WTB'" prop="suggestedExistingItem" label="Suggest" width="85">
+        <!-- HAS SUGGESTED ITEM  -->
+        <template #default="scope">
+          <div v-if="scope.row.suggestedExistingItem">
+            <el-popover placement="right-start" title="Item preview" popper-class="popup-tat-frame" trigger="hover">
+              <template #reference>
+                <el-button circle class="m-2"><el-icon>
+                    <View />
+                  </el-icon></el-button>
+              </template>
+              <ItemPreview v-if="existingItem.item" :item="existingItem.item"
+                @click="push(`/user/${scope.row.user.nickname}/items/${scope.row.suggestedExistingItemId}`)"
+                :wanted-price="scope.row.suggestedExistingItem.wantedPrice"
+                :stats="scope.row.suggestedExistingItem?.stats" />
+            </el-popover>
           </div>
-        </div>
-      </div>
-    </div>
+          <div v-else>
+            err
+          </div>
+        </template>
+
+      </el-table-column>
+      <el-table-column prop="createdAt" label="Created at" width="180">
+        <template #default="scope">
+          {{ moment.fromNow(scope.row.createdAt) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="actions" label="Actions" align="right">
+        <template #default="scope">
+          <div class="bid-actions">
+            <el-tooltip class="box-item" effect="dark" content="Accept offer" placement="top-start">
+              <div v-if="canAcceptBid(scope.row)" class="bid-action">
+                <el-popconfirm width="350" @confirm="acceptBid(scope.row)" confirm-button-text="OK"
+                  cancel-button-text="No, Thanks" :title="`Are you sure to accept this bid?`">
+                  <template #reference>
+                    <el-button circle :loading="loading"><el-icon><Select /></el-icon></el-button>
+                  </template>
+                </el-popconfirm>
+              </div>
+            </el-tooltip>
+            <el-tooltip class="box-item" effect="dark" content="Decline offer" placement="top-start">
+              <div class="bid-action">
+                <el-popconfirm v-if="canDeclineBid(scope.row)" width="350" @confirm="declineBid(scope.row)"
+                  confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to decline this bid?`">
+                  <template #reference>
+                    <el-button circle :loading="loading"><el-icon>
+                        <Close />
+                      </el-icon></el-button>
+                  </template>
+                </el-popconfirm>
+              </div>
+            </el-tooltip>
+            <el-popconfirm v-if="canDeleteBid(scope.row)" width="350" @confirm="() => deleteBid(scope.row)"
+              confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
+              <template #reference>
+                <el-button circle :loading="loading"><el-icon>
+                    <Delete />
+                  </el-icon></el-button>
+              </template>
+            </el-popconfirm>
+          </div>
+        </template>
+      </el-table-column>
+    </el-table>
   </div>
 </template>
 
-
-
 <style lang="scss" scoped>
-.bidding {
+.bids-list {
   width: 100%;
 
 
-  h2 {
-    margin-bottom: 0;
-  }
-
-  .item-details {
+  .bid-actions {
     display: flex;
-    justify-content: space-between;
-    align-items: start;
-    margin-bottom: 1rem;
-    gap: 1rem;
-    width: 100%;
-
-    .item-bids {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-
-      &__list {
-        padding: 1rem 0;
-      }
-
-      &__list__item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
+    align-items: center;
+    justify-content: flex-end;
+    gap: .25rem;
   }
 }
 </style>
 
+
 <style lang="scss">
 .popup-tat-frame {
   width: var(--frame-width) !important;
+}
+
+.bids {
+  .el-table {
+    width: 860px;
+  }
+
+  .el-table__cell {
+    text-align: center;
+  }
+
+  .el-table__cell:last-child {
+    text-align: end;
+  }
 }
 </style>

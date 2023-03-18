@@ -84,6 +84,19 @@ export class ExistingItemController {
   findOne(@Param('id') id: string) {
     return this.existingItemService.findOne(+id);
   }
+  @Patch('/:id/discord/:bool')
+  @UseGuards(JwtAuthGuard)
+  async changeDiscordNotification(
+    @ReqUser() user: User,
+    @Param('bool') bool: string,
+    @Param('id') id: string,
+  ) {
+    return await this.existingItemService.changeDiscordNotification(
+      +id,
+      bool === 'true' ? true : false,
+      user,
+    );
+  }
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard)

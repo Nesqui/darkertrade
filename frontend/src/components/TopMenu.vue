@@ -41,6 +41,9 @@ const push = async (url: string) => {
     </div>
     <div v-if="isAuth" class="logout">
       <div class="top-menu__item">
+        <el-button link @click="push(`/user/${userStore.currentUser.nickname}/items`)">{{ userStore.currentUser.nickname }}</el-button>
+      </div>
+      <div class="top-menu__item">
         <el-button link @click="userStore.logout">Logout</el-button>
       </div>
     </div>
@@ -76,6 +79,9 @@ $padding: 25px;
   }
 
   .logout {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
     margin-right: $padding;
     text-align: end;
   }

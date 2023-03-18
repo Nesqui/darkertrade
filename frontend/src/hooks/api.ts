@@ -56,9 +56,9 @@ export function initApi() {
             if (response.status === 401 || response.data.message === 'TokenExpiredError') {
                 const userStore = useUserStore()
                 userStore.logout()
-                ElNotification({
-                    message: "Session expired. Please login again"
-                })
+                // ElNotification({
+                //     message: "Session expired. Please login again"
+                // })
                 debug('error 401', response)
             }
             if (isHumanError(error)) {
