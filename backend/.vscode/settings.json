@@ -6,5 +6,8 @@
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
+  },
+  "[perl]": {
+    "editor.defaultFormatter": "zhiyuan-lin.simple-perl"
   }
 }

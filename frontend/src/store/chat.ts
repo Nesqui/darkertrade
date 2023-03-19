@@ -26,6 +26,7 @@ export const useChatStore = defineStore('chat', () => {
       selectedChat.value.messages = []
       selectedChat.value.count = 0
       selectedChat.value.users = []
+      selectedChat.value.chat = undefined
       messagePagination.value.limit = 10
       messagePagination.value.offset = 0
       return

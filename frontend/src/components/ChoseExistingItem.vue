@@ -84,7 +84,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
         :offerType="chosenExistingItem.offerType" :stats="chosenExistingItem.stats" />
       <div class="arrow-data">
         <div class="arrow left"></div>
-        <p>Please check stats</p>
+        <p>Check</p>
         <div class="arrow right"></div>
       </div>
     </div>
@@ -126,11 +126,12 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   }
 
   .arrow-data {
-    margin: 0 auto;
     display: flex;
+    margin: 0 auto;
+    justify-content: center;
     align-items: center;
     font-weight: 900;
-    color: rgba(0, 0, 0, 0.382);
+    color: var(--el-color-danger);
     padding-left: 1rem;
   }
 

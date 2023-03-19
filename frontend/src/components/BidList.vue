@@ -14,23 +14,27 @@ const userStore = useUserStore()
 const moment = useMoment()
 
 const canDeleteBid = (bid: Bid) => {
-  if (bid.status !== 'created' || bid.userId !== userStore.currentUser.id)
-    return false
-  return true
+  if (bid.status === 'created' && bid.userId === userStore.currentUser.id)
+    return true
+  if (bid.status === 'closed' && bid.userId === userStore.currentUser.id)
+    return true
+  return false
 }
 
 const canAcceptBid = (bid: Bid) => {
-  if (bid.status !== 'created' || bid.userId !== userStore.currentUser.id)
-    return false
-  if (existingItem.userId === userStore.currentUser.id)
+  if (existingItem.userId === userStore.currentUser.id && bid.status === 'created')
     return true
+  return false
 }
 
-const canDeclineBid = (bid: Bid) => {
-  if (bid.status !== 'created' && bid.status !== 'accepted')
-    return false
-  if (bid.userId === userStore.currentUser.id || existingItem.userId === userStore.currentUser.id)
+const canCloseBid = (bid: Bid) => {
+  // Твой бид и статус принят 
+  if (bid.userId === userStore.currentUser.id && bid.status === 'accepted')
     return true
+  // Твой итем и статус принят 
+  if (existingItem.userId === userStore.currentUser.id && bid.status === 'accepted')
+    return true
+  return false
 }
 
 const route = useRoute()
@@ -62,9 +66,6 @@ const deleteBid = async (bid: Bid) => {
     })
     return
   } catch (error) {
-    ElNotification({
-      message: 'Bid not found'
-    })
   } finally {
     loading.value = false
   }
@@ -83,13 +84,13 @@ const push = async (url: string) => {
 }
 
 
-const declineBid = async (bid: Bid) => {
+const closeBid = async (bid: Bid) => {
   try {
-    await bidApi.decline(bid.id)
+    await bidApi.close(bid.id)
     ElNotification({
-      message: 'Bid declined'
+      message: 'Bid closed'
     })
-    bid.status = 'declined'
+    bid.status = 'closed'
   } catch (error) {
   }
 }
@@ -109,13 +110,13 @@ const acceptBid = async (bid: Bid) => {
 
 <template>
   <div class="bids-list">
-    <el-table empty-text="Currently no items here" :data="bids">
-      <el-table-column prop="user.nickname" label="From" width="120">
+    <el-table max-height="500" empty-text="Currently no items here" :data="bids">
+      <el-table-column prop="user.nickname" label="From" width="150">
         <template #default="scope">
           <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
         </template>
       </el-table-column>
-      <el-table-column v-if="existingItem.user" prop="To" label="To" width="120">
+      <el-table-column v-if="existingItem.user" prop="To" label="To" width="150">
         <template #default="scope">
           <router-link :to="`/user/${existingItem.user.nickname}/items/${existingItem.id}`">{{
             existingItem.user.nickname }}</router-link>
@@ -153,8 +154,9 @@ const acceptBid = async (bid: Bid) => {
       <el-table-column prop="actions" label="Actions" align="right">
         <template #default="scope">
           <div class="bid-actions">
-            <el-tooltip class="box-item" effect="dark" content="Accept offer" placement="top-start">
-              <div v-if="canAcceptBid(scope.row)" class="bid-action">
+            <el-tooltip v-if="canAcceptBid(scope.row)" class="box-item" effect="dark" content="Accept offer"
+              placement="top-start">
+              <div class="bid-action">
                 <el-popconfirm width="350" @confirm="acceptBid(scope.row)" confirm-button-text="OK"
                   cancel-button-text="No, Thanks" :title="`Are you sure to accept this bid?`">
                   <template #reference>
@@ -163,10 +165,11 @@ const acceptBid = async (bid: Bid) => {
                 </el-popconfirm>
               </div>
             </el-tooltip>
-            <el-tooltip class="box-item" effect="dark" content="Decline offer" placement="top-start">
+            <el-tooltip v-if="canCloseBid(scope.row)" class="box-item" effect="dark" content="Close offer"
+              placement="top-start">
               <div class="bid-action">
-                <el-popconfirm v-if="canDeclineBid(scope.row)" width="350" @confirm="declineBid(scope.row)"
-                  confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to decline this bid?`">
+                <el-popconfirm width="350" @confirm="closeBid(scope.row)" confirm-button-text="OK"
+                  cancel-button-text="No, Thanks" :title="`Are you sure to close this bid?`">
                   <template #reference>
                     <el-button circle :loading="loading"><el-icon>
                         <Close />
@@ -175,14 +178,19 @@ const acceptBid = async (bid: Bid) => {
                 </el-popconfirm>
               </div>
             </el-tooltip>
-            <el-popconfirm v-if="canDeleteBid(scope.row)" width="350" @confirm="() => deleteBid(scope.row)"
-              confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
-              <template #reference>
-                <el-button circle :loading="loading"><el-icon>
-                    <Delete />
-                  </el-icon></el-button>
-              </template>
-            </el-popconfirm>
+            <el-tooltip v-if="canDeleteBid(scope.row)" class="box-item" effect="dark" content="Delete offer"
+              placement="top-start">
+              <div class="bid-action">
+                <el-popconfirm width="350" @confirm="() => deleteBid(scope.row)" confirm-button-text="OK"
+                  cancel-button-text="No, Thanks" :title="`Are you sure to delete this bid?`">
+                  <template #reference>
+                    <el-button circle :loading="loading"><el-icon>
+                        <Delete />
+                      </el-icon></el-button>
+                  </template>
+                </el-popconfirm>
+              </div>
+            </el-tooltip>
           </div>
         </template>
       </el-table-column>
@@ -199,7 +207,7 @@ const acceptBid = async (bid: Bid) => {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: .25rem;
+    gap: .75rem;
   }
 }
 </style>

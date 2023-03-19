@@ -13,7 +13,7 @@ export interface Bid {
   user: User,
   chatId?: number;
   chat?: Chat
-  status: 'created' | 'accepted' | 'declined' | 'deleted'
+  status: 'created' | 'accepted' | 'closed' | 'deleted'
 }
 
 export interface QueryBidDto {
@@ -43,8 +43,8 @@ export const initBidApi = () => {
     return res.data
   }
 
-  const decline = async (id: number): Promise<Bid> => {
-    const res = await axiosClient.patch(`bid/decline/${id}`)
+  const close = async (id: number): Promise<Bid> => {
+    const res = await axiosClient.patch(`bid/close/${id}`)
     return res.data
   }
   
@@ -66,6 +66,6 @@ export const initBidApi = () => {
     deleteBid,
     filter,
     accept,
-    decline
+    close
   }
 }

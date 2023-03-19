@@ -77,7 +77,7 @@ export class BidService {
     if (alreadyCreatedExistingItem?.bids.length) {
       if (
         alreadyCreatedExistingItem?.bids.find(
-          (bid) => !(bid.status === 'deleted' || bid.status === 'declined'),
+          (bid) => !(bid.status === 'deleted' || bid.status === 'closed'),
         )
       )
         throw new ForbiddenException(
@@ -183,6 +183,7 @@ export class BidService {
     const existingItemWhere = {
       offerType: query.offerType,
       published: true,
+      archived: false,
     };
 
     console.log(JSON.stringify(query));
@@ -286,7 +287,7 @@ export class BidService {
     return 'accepted';
   }
 
-  async decline(id: number, user: User) {
+  async close(id: number, user: User) {
     const bid = await this.bidRepository.findByPk(id, {
       include: [
         {
@@ -302,15 +303,18 @@ export class BidService {
       ],
     });
 
-    if (user.id !== bid.existingItem.userId && user.id !== bid.userId)
-      throw new ConflictException('You cant decline this bid');
+    if (bid.status !== 'accepted')
+      throw new ConflictException('You cant close this bid');
 
-    bid.status = 'declined';
+    if (user.id !== bid.existingItem.userId && user.id !== bid.userId)
+      throw new ConflictException('You cant close this bid');
+
+    bid.status = 'closed';
     try {
-      await this.chatGateway.onBidDeclined(bid);
+      await this.chatGateway.onBidClosed(bid);
     } catch (error) {}
     await bid.save();
-    return 'declined';
+    return 'closed';
   }
 
   async remove(id: number, user: User) {
@@ -322,6 +326,8 @@ export class BidService {
     });
 
     if (!userBid) throw new ForbiddenException('You cant delete this bid');
+    if (userBid.status !== 'created' && userBid.status !== 'closed')
+      throw new ForbiddenException('You cant delete this bid');
 
     userBid.status = 'deleted';
     userBid.save();

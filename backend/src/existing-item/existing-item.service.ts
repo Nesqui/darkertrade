@@ -280,6 +280,7 @@ export class ExistingItemService {
     if (!currentExistingItem)
       throw new ForbiddenException('You cant update this item');
 
+    // DELETE ALL BIDS
     if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
       await this.bidRepository.update(
         {
@@ -302,7 +303,10 @@ export class ExistingItemService {
     });
 
     try {
-      this.chatGateway.onExistingItemUnpublish(id);
+      // DELETE CHAT
+      if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
+        this.chatGateway.onExistingItemUnpublish(id);
+      }
     } catch (error) {
       console.log('unpublish err', error);
     }

@@ -37,10 +37,10 @@ export class BidController {
     return this.bidService.findOne(+id);
   }
 
-  @Patch('/decline/:id')
+  @Patch('/close/:id')
   @UseGuards(JwtAuthGuard)
-  decline(@Param('id') id: string, @ReqUser() user: User) {
-    return this.bidService.decline(+id, user);
+  close(@Param('id') id: string, @ReqUser() user: User) {
+    return this.bidService.close(+id, user);
   }
 
   @Patch(':id')

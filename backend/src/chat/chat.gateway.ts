@@ -19,7 +19,7 @@ import { User } from 'src/user/user.entity';
 import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
 import { sendMessageDto } from './dto/create-message.dto';
-import { GetChatDto, QueryChatDto } from './dto/query-chat.dto';
+import { GetChatDto, QueryChatDto, ReadChatDto } from './dto/query-chat.dto';
 type ChatOfferType = 'receivedOffers' | 'sentOffers';
 
 type EmitTypes =
@@ -32,7 +32,8 @@ type EmitTypes =
   | 'receiveMessage'
   | 'countMessages'
   | 'notifyError'
-  | 'existingItemUnpublish';
+  | 'existingItemUnpublish'
+  | 'bidClosed';
 
 @WebSocketGateway({
   cors: {
@@ -139,6 +140,8 @@ export class ChatGateway {
         }),
       ),
     );
+
+    this.countMessages(userIds);
   }
 
   async notifyUser(userId: number, emitType: EmitTypes, payload?: any) {
@@ -226,7 +229,48 @@ export class ChatGateway {
     });
   };
 
-  onBidDeclined = async (bid: Bid) => {};
+  onBidClosed = async (bid: Bid) => {
+    if (!bid.chatId) return;
+
+    const currentChat = await this.chatRepository.findOne({
+      include: [
+        {
+          model: this.bidRepository,
+          where: {
+            id: bid.id,
+          },
+        },
+        {
+          attributes: ['id'],
+          model: this.communityRepository,
+          include: [
+            {
+              attributes: ['id'],
+              model: this.userRepository,
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!currentChat) return;
+
+    currentChat.active = false;
+    await currentChat.save();
+
+    const userIds = currentChat.community.users.map((user) => user.id);
+
+    if (!userIds.length) return;
+
+    await Promise.all(
+      userIds.map((uId) =>
+        this.notifyUser(uId, 'bidClosed', {
+          bid,
+        }),
+      ),
+    );
+    this.countMessages(userIds);
+  };
 
   onBidAccepted = async (bid: Bid) => {
     const community = await this.communityRepository.create();
@@ -279,6 +323,28 @@ export class ChatGateway {
       ],
     });
 
+    await this.messagesRepository.bulkCreate([
+      {
+        chatId: chat.id,
+        read: false,
+        userId: bid.userId,
+        text: `Chat started.
+        Bid was created ${new Date(
+          bid.createdAt,
+        ).toLocaleDateString()} at ${new Date(
+          bid.createdAt,
+        ).toLocaleTimeString()}`,
+      },
+      {
+        chatId: chat.id,
+        read: false,
+        userId: bid.existingItem.user.id,
+        text: `Bid was accepted ${new Date().toLocaleDateString()} at ${new Date(
+          bid.createdAt,
+        ).toLocaleTimeString()}`,
+      },
+    ]);
+
     await this.notifyUser(bid.userId, 'chatCreated', {
       offerType: 'sentOffers',
       existingItem,
@@ -288,7 +354,27 @@ export class ChatGateway {
       offerType: 'receivedOffers',
       existingItem,
     });
+
+    await this.countMessages([bid.userId, bid.existingItem.user.id]);
   };
+
+  async _readMessagesOnChat(userId: number, chatId: number) {
+    await this.messagesRepository.update(
+      {
+        read: true,
+      },
+      {
+        where: {
+          chatId: chatId,
+          userId: {
+            [sequelize.Op.not]: userId,
+          },
+        },
+      },
+    );
+
+    await this.countMessages([userId]);
+  }
 
   @SubscribeMessage('auth')
   @UseGuards(JwtWSAuthGuard)
@@ -424,6 +510,13 @@ export class ChatGateway {
     await this.countMessages([query.user.id]);
   }
 
+  @SubscribeMessage('readMessagesOnChat')
+  @UseGuards(JwtWSAuthGuard)
+  async readMessagesOnChat(@MessageBody() query: ReadChatDto) {
+    if (!query.chatId) return;
+    return await this._readMessagesOnChat(query.user.id, query.chatId);
+  }
+
   @SubscribeMessage('sendMessage')
   @UseGuards(JwtWSAuthGuard)
   async sendMessage(
@@ -529,6 +622,7 @@ export class ChatGateway {
       },
       limit: query.limit,
       offset: query.offset,
+      order: [['id', 'ASC']],
       include: [
         {
           model: this.userRepository,
@@ -537,21 +631,7 @@ export class ChatGateway {
       ],
     });
 
-    await this.messagesRepository.update(
-      {
-        read: true,
-      },
-      {
-        where: {
-          chatId: query.chatId,
-          userId: {
-            [sequelize.Op.not]: query.user.id,
-          },
-        },
-      },
-    );
-
-    await this.countMessages([query.user.id]);
+    await this._readMessagesOnChat(query.user.id, query.chatId);
 
     await this.notifyUser(query.user.id, 'receiveChatMessages', {
       chatId: query.chatId,

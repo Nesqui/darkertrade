@@ -4,6 +4,7 @@ import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid'
 import { onBeforeMount, ref, watch } from 'vue'
 import ItemPreview from '@/components/ItemPreview.vue';
 import BidList from '@/components/BidList.vue';
+import { useRouter } from 'vue-router';
 
 const bidApi = initBidApi()
 const existingItems = ref<ExistingItem[]>()
@@ -11,7 +12,7 @@ const loading = ref(true)
 const tabName = ref<'sentOffers' | 'receivedOffers'>('receivedOffers')
 const maxCount = ref(6)
 const selectedExistingItem = ref<ExistingItem>()
-
+const router = useRouter()
 
 const filter = ref<QueryBidDto>({
   mine: true,
@@ -134,14 +135,14 @@ onBeforeMount(async () => {
                   class="counter item-preview__head__counter">{{ newBidsCounter(existingItem) }}
                 </div>
               </div>
-              <ItemPreview
-                @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
+              <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
                 :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
             </div>
           </div>
           <div v-else>
             <div class="selected-item__actions">
-              <el-button link @click="clear">Show all</el-button>
+              <el-button @click="router.push(`/user/${selectedExistingItem?.user?.nickname}/items/${selectedExistingItem?.id}`)">Show item</el-button>
+              <el-button @click="clear">Back</el-button>
             </div>
             <ItemPreview :offer-type="selectedExistingItem.offerType" :wanted-price="selectedExistingItem.wantedPrice"
               :item="selectedExistingItem.item" :stats="selectedExistingItem.stats" />
@@ -157,6 +158,7 @@ onBeforeMount(async () => {
             <BidList :existing-item="selectedExistingItem" :bids="bids" @on-bid-deleted="onBidDeleted" @clear="clear"
               :filter="filter" />
           </div>
+          <p v-else-if="existingItems?.length">Please select any item</p>
         </div>
       </div>
       <div v-if="loading">
@@ -181,15 +183,23 @@ $itemsListWidth: 300px;
 
   .selected-item__actions {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    // justify-content: center;
+    // align-items: center;
     margin-bottom: 1rem;
+
+    .el-button {
+      width: 100%;
+    }
   }
 
   .bid-list {
     display: flex;
     flex-direction: column;
     width: 100%;
+    padding-left: 1rem;
+    p {
+      text-align: center;
+    }
 
     .table-actions {
       display: flex;
