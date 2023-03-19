@@ -54,6 +54,8 @@ const bidCreatedHandler = (bid: Bid) => {
 
 const bidDeletedHandler = (bid: Bid) => {
   if (item.value?.existingItems) {
+    console.log('item.value?.existingItems');
+
     const index = item.value.existingItems[0].bids?.findIndex(currentBid => currentBid.id === bid.id)
     if (index !== undefined && index != -1)
       item.value.existingItems[0].bids?.splice(index, 1)
@@ -107,8 +109,10 @@ const initPageData = async () => {
       return
     }
     const res = await itemApi.findUserItem(user.value.id, +itemId)
-    if (res)
+    if (res && res.existingItems && res.existingItems[0]) {
       item.value = res
+      filterBids.value.offerType = res.existingItems[0].offerType
+    }
   }
 }
 
@@ -201,10 +205,10 @@ onBeforeMount(async () => {
               :stats="item?.existingItems[0].stats" />
           </div>
         </el-tab-pane>
-        <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids" :label="`Bids (${item.existingItems[0].bids.length})`"
-          name="Bids">
+        <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids"
+          :label="`Bids (${item.existingItems[0].bids.length})`" name="Bids">
           <h2>Bids:</h2>
-          <BidList @bidDeleted="bidDeletedHandler" v-if="item" :item="item" :filter="filterBids"
+          <BidList @on-bid-deleted="bidDeletedHandler" v-if="item" :item="item" :filter="filterBids"
             :existing-item="item.existingItems[0]" :bids="item.existingItems[0].bids" />
         </el-tab-pane>
       </el-tabs>
@@ -233,7 +237,7 @@ onBeforeMount(async () => {
 
   .item-details {
     display: flex;
-    gap: 1rem;
+    gap: 2rem;
 
     .item-info {
       width: 100%;

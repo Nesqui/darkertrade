@@ -20,7 +20,7 @@ export class QueryUserDto {
   })
   @IsOptional()
   @MinLength(0)
-  @MaxLength(50)
+  @MaxLength(16)
   @IsString()
   nickname?: string;
 

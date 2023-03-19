@@ -6,6 +6,20 @@
         url("../fonts/Solmoe.ttf") format("truetype");
 }
 
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+
 html,
 body {
     overflow: hidden;
@@ -279,6 +293,15 @@ button:hover {
         background-color: var(--el-color-primary-dark-2);
     }
 }
+
+  
+.warning {
+    .el-collapse-item__header {
+      background: linear-gradient(-45deg, #050505, #bdbabb);
+      background-size: 800% 800%;
+      animation: gradient 3s ease infinite;
+    }
+  }
 
 
 .restrictions {

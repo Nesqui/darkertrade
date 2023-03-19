@@ -127,10 +127,7 @@ h2 {
   }
 }
 
-// .place-bid {
-//   &__form {
-//     display: flex;
-//     gap: 1rem;
-//   }
-// }
+.place-bid {
+  width: 100%;
+}
 </style>

@@ -63,3 +63,7 @@ export interface ChatCreatedDto {
   offerType:ChatOfferType,
   existingItem: ExistingItem
 }
+
+export interface OnBidClosed {
+  bid: Bid
+}

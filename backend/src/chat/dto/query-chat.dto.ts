@@ -5,6 +5,10 @@ export class QueryChatDto extends AuthorizedWsDto {
   offset: number;
 }
 
+export class ReadChatDto extends AuthorizedWsDto {
+  chatId: number;
+}
+
 export class GetChatDto extends AuthorizedWsDto {
   chatId?: number;
   limit: number;

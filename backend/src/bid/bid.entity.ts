@@ -48,7 +48,7 @@ export class Bid extends Model {
 
   @Default('created')
   @Column
-  status: 'created' | 'accepted' | 'declined' | 'deleted';
+  status: 'created' | 'accepted' | 'closed' | 'deleted';
 
   @ForeignKey(() => Chat)
   @Column
