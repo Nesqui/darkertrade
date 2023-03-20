@@ -64,6 +64,7 @@ $human-height: 600px;
         width: $item-size;
         height: $item-size;
         font-size: 25px;
+        box-shadow: var(--tat-frame-box-shadow);
     }
 
     .active {

@@ -65,7 +65,6 @@ const prefillItem = computed((): PrefillItem => ({
 
 const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
   chosenExistingItem.value = currentExistingItem
-  console.log(currentExistingItem);
   showDialog.value = false
   emit('onItemChosen', currentExistingItem)
 }

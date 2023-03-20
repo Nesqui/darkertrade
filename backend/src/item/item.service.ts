@@ -131,6 +131,12 @@ export class ItemService {
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
+    if (query.searchItemString) {
+      itemWhere['name'] = {
+        [sequelize.Op.iLike]: `%${query.searchItemString}%`,
+      };
+    }
+
     const res = await this.itemsRepository.findAll({
       where: itemWhere,
       include: [

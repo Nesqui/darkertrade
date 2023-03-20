@@ -44,4 +44,5 @@
   --wrapper-small-width: 300px;
   --el-fill-color: #857047b0;
   --el-fill-color-darker: #8b6a35;
+  --tat-frame-box-shadow: inset rgb(0 0 0 / 55%) 0px 0px 1px 1px;
 }

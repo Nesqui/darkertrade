@@ -69,11 +69,24 @@ const clear = () => {
   existingItems.value = undefined
 }
 
-watch(() => props.filterItem.slot, (cv, pv) => {
+let searchDelayTimeout = 0
+
+watch(() => searchString.value, () => {
+  clearTimeout(searchDelayTimeout)
+  searchDelayTimeout = setTimeout(() => {
+    if (chosenItem.value) {
+      props.filterItem.searchExistingItemString = searchString.value
+      return
+    }
+    props.filterItem.searchItemString = searchString.value
+  }, 500);
+})
+
+watch(() => props.filterItem.slot, () => {
   chosenItem.value = undefined
 })
 
-watch(props.filterItem, async (cv, pv) => {
+watch(props.filterItem, async () => {
   if (!chosenItem.value?.id)
     return
 
@@ -81,11 +94,12 @@ watch(props.filterItem, async (cv, pv) => {
 
   const { rows, count } = await findExistingItemsById(chosenItem.value.id)
 
-  itemsRef.value.scroll({
-    top: 0,
-    left: 0,
-    behavior: "smooth",
-  })
+  if (itemsRef.value)
+    itemsRef.value.scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    })
 
   maxCount.value = count
   existingItems.value = rows
@@ -99,8 +113,8 @@ const filteredItems = computed(() => {
 
   filteredData = filteredData.filter(item => item.existingItems?.length)
 
-  if (searchString.value)
-    filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
+  // if (searchString.value)
+  //   filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
 
   return filteredData
 })
@@ -118,8 +132,8 @@ const filteredExistingItems = computed(() => {
 
   let filteredData = [...existingItems.value]
 
-  if (searchString.value)
-    filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
+  // if (searchString.value)
+  //   filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
 
   return filteredData
 })
@@ -184,8 +198,12 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
           inactive-text="Show all" />
         <el-button-group v-if="!disabledItemActions.offerType">
-          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">{{ isMarket? 'I want to sell' : 'WTB only'}}</el-button>
-          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">{{ isMarket? 'I want to buy' : 'WTS only'}}</el-button>
+          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">
+            {{ isMarket ? 'I want to sell' : 'WTB only' }}
+          </el-button>
+          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">
+            {{ isMarket ? 'I want to buy' : 'WTS only' }}
+          </el-button>
         </el-button-group>
       </div>
       <div class="search">
@@ -255,6 +273,7 @@ $step: 1rem;
   text-align: center;
   gap: calc($step * 3);
   grid-template-columns: 1fr 1fr 1fr;
+
   .el-skeleton {
     margin-bottom: 1rem;
   }
