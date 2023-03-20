@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ExistingItem } from '@/hooks'
 import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid'
-import { onBeforeMount, ref, watch } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import ItemPreview from '@/components/ItemPreview.vue';
 import BidList from '@/components/BidList.vue';
 import { useRouter } from 'vue-router';
@@ -17,13 +17,13 @@ const router = useRouter()
 const filter = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
-  limit: 3,
+  limit: 8,
   offset: 0,
   offerType: 'WTS'
 })
 
 const pagination = ref({
-  limit: 3,
+  limit: 8,
   offset: 0,
 })
 
@@ -108,9 +108,24 @@ const selectExistingItem = (existingItem: ExistingItem) => {
 
 const newBidsCounter = (existingItem: ExistingItem) => {
   if (!existingItem.bids) return ''
-  const filteredBids = existingItem.bids.filter(bid => bid.status === 'created')
-  return filteredBids.length > 9 ? '9+' : filteredBids.length
+  let count = 0
+  if (existingItem.offerType === 'WTB')
+    count = existingItem.bids.filter(bid => bid.status === 'accepted').length
+  else
+    count = existingItem.bids.filter(bid => bid.status === 'created').length
+
+  return count > 9 ? '9+' : count
 }
+
+const headerName = computed(() => {
+  if (!selectedExistingItem.value) {
+    if (tabName.value === 'receivedOffers')
+      return 'Your current received offers:'
+    else
+      return 'Your sent offers:'
+  }
+  return `Your placed bids for ${selectedExistingItem.value.item?.name}`
+})
 
 onBeforeMount(async () => {
   await init()
@@ -125,47 +140,48 @@ onBeforeMount(async () => {
         <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems?.length }} {{ JSON.stringify(pagination) }} {{ maxCount }} -->
-      <div class="bids-table">
-        <div v-if="existingItems?.length">
-          <div v-if="!selectedExistingItem" class="bids-items-list infinite-scroll" infinite-scroll-distance="200"
-            v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="300">
-            <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
-              <div class="item-preview__head">
-                <div v-if="newBidsCounter(existingItem)" @click="() => selectExistingItem(existingItem)"
-                  class="counter item-preview__head__counter">{{ newBidsCounter(existingItem) }}
-                </div>
-              </div>
-              <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
-                :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
-            </div>
-          </div>
-          <div v-else>
-            <div class="selected-item__actions">
-              <el-button @click="router.push(`/user/${selectedExistingItem?.user?.nickname}/items/${selectedExistingItem?.id}`)">Show item</el-button>
-              <el-button @click="clear">Back</el-button>
-            </div>
-            <ItemPreview :offer-type="selectedExistingItem.offerType" :wanted-price="selectedExistingItem.wantedPrice"
-              :item="selectedExistingItem.item" :stats="selectedExistingItem.stats" />
-          </div>
 
+      <div class="bids-header">
+        <h2>{{ headerName }}</h2>
+        <el-button-group class="table-actions">
+          <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
+          <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
+        </el-button-group>
+      </div>
+      <div class="bids-table">
+        <el-skeleton v-if="loading" :rows="4"></el-skeleton>
+        <div class="empty-message" v-else-if="!existingItems?.length">
+          <p>Currently no bids here</p>
         </div>
-        <div class="bid-list">
-          <el-button-group class="table-actions">
-            <el-button :disabled="filter.offerType === 'WTB'" @click="() => changeOfferType('WTB')">WTB only</el-button>
-            <el-button :disabled="filter.offerType === 'WTS'" @click="() => changeOfferType('WTS')">WTS only</el-button>
-          </el-button-group>
-          <div v-if="bids && selectedExistingItem">
+        <div v-if="!selectedExistingItem && existingItems?.length" class="bids-items-list infinite-scroll"
+          infinite-scroll-distance="200" v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="300">
+          <div class="bids-items-list__li" v-for="(existingItem, index) in existingItems" :key="index">
+            <div class="item-preview__head">
+              <div v-if="newBidsCounter(existingItem)" @click="() => selectExistingItem(existingItem)"
+                class="counter item-preview__head__counter">{{ newBidsCounter(existingItem) }}
+              </div>
+            </div>
+            <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
+              :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
+          </div>
+        </div>
+        <div v-if="selectedExistingItem">
+          <div class="selected-item__actions">
+            <el-button
+              @click="router.push(`/user/${selectedExistingItem?.user?.nickname}/items/${selectedExistingItem?.id}`)">Show
+              item</el-button>
+            <el-button @click="clear">Back</el-button>
+          </div>
+          <ItemPreview :offer-type="selectedExistingItem.offerType" :wanted-price="selectedExistingItem.wantedPrice"
+            :item="selectedExistingItem.item" :stats="selectedExistingItem.stats" />
+        </div>
+        <div v-if="selectedExistingItem" class="bid-list">
+          <div v-if="bids">
             <BidList :existing-item="selectedExistingItem" :bids="bids" @on-bid-deleted="onBidDeleted" @clear="clear"
               :filter="filter" />
           </div>
           <p v-else-if="existingItems?.length">Please select any item</p>
         </div>
-      </div>
-      <div v-if="loading">
-        <el-skeleton :rows="6"></el-skeleton>
-      </div>
-      <div class="empty-message" v-else-if="!existingItems?.length">
-        <p>Currently no bids here</p>
       </div>
     </div>
   </div>
@@ -176,15 +192,19 @@ onBeforeMount(async () => {
 $itemsListWidth: 300px;
 
 .bids {
-
-  .bids-tabs {
+  bid .bids-tabs {
     margin-bottom: 2rem;
+  }
+
+  .bids-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1rem;
   }
 
   .selected-item__actions {
     display: flex;
-    // justify-content: center;
-    // align-items: center;
     margin-bottom: 1rem;
 
     .el-button {
@@ -192,19 +212,20 @@ $itemsListWidth: 300px;
     }
   }
 
+  .table-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+  }
+
   .bid-list {
     display: flex;
     flex-direction: column;
     width: 100%;
     padding-left: 1rem;
+
     p {
       text-align: center;
-    }
-
-    .table-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-bottom: 2rem;
     }
   }
 
@@ -243,30 +264,29 @@ $itemsListWidth: 300px;
 
   .bids-table {
     display: flex;
+    height: 600px;
   }
 
 
   .bids-items-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-top: .25rem;
-    border-right: 1px solid var(--el-border-color);
-    overflow-y: visible;
+    overflow-y: auto;
     overflow-x: hidden;
-    width: $itemsListWidth;
-    max-height: 650px;
-    // border-left: 4px solid var(--el-border-color);
+    width: 100%;
 
     &__li {
-      padding: 1rem 0;
-    }
-
-    &__li:not(:last-child) {
-      border-bottom: 1px solid var(--el-border-color);
+      margin-top: 1rem;
     }
   }
 
   .empty-message {
-    margin-left: 25px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
   }
 }
 </style>

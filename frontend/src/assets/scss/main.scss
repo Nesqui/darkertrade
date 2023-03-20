@@ -112,6 +112,12 @@ input:-webkit-autofill:active {
 .el-button {
     // height: var(--el-component-size);
     padding: 8px 35px;
+    background-color: #0e0e0e;
+    box-shadow: inset rgba(0, 0, 0, 0.84) -1px -1px 1px 1px;
+}
+
+.el-button.is-disabled, .el-button.is-disabled:focus, .el-button.is-disabled:hover {
+    opacity: .5;
 }
 
 .el-button--large {

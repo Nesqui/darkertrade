@@ -26,11 +26,6 @@ const moment = useMoment()
 
 const selectedTab = ref('Info')
 
-const filterItem = ref<Item>({
-  slot: "",
-  name: ""
-})
-
 const filterBids = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
@@ -39,11 +34,8 @@ const filterBids = ref<QueryBidDto>({
   offerType: 'WTS'
 })
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US');
-};
 
-const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.find(bid => bid.userId === userStore.currentUser.id)
+const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.filter(bid => bid.status !== 'closed').find(bid => bid.userId === userStore.currentUser.id)
 const ownToUser = () => item.value?.existingItems?.length && item.value?.existingItems[0].userId === userStore.currentUser.id
 
 const bidCreatedHandler = (bid: Bid) => {

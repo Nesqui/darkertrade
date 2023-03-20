@@ -119,9 +119,6 @@ const filteredItems = computed(() => {
   return filteredData
 })
 
-const statFilter = (existingItem: ExistingItem, queryString: string) => {
-  return existingItem.stats.find(stat => getAttributeNameById(stat.attributeId).toLowerCase().indexOf(queryString.toLowerCase()) != -1)
-}
 
 const filteredExistingItems = computed(() => {
   if (!chosenItem.value)
@@ -131,9 +128,6 @@ const filteredExistingItems = computed(() => {
     return []
 
   let filteredData = [...existingItems.value]
-
-  // if (searchString.value)
-  //   filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
 
   return filteredData
 })

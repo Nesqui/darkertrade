@@ -101,11 +101,16 @@ export class ItemService {
 
     if (query.slot) itemWhere['slot'] = query.slot;
 
+    if (query.id) {
+      itemWhere['id'] = query.id;
+    }
+
     existingItemWhere['published'] = query.published;
     existingItemWhere['offerType'] = query.offerType;
     if (user.id !== userId) existingItemWhere['published'] = true;
 
     return await this.itemsRepository.findAll({
+      where: itemWhere,
       include: [
         {
           model: this.existingItemRepository,
