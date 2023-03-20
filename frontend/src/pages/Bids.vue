@@ -120,11 +120,11 @@ const newBidsCounter = (existingItem: ExistingItem) => {
 const headerName = computed(() => {
   if (!selectedExistingItem.value) {
     if (tabName.value === 'receivedOffers')
-      return 'Your current received offers:'
+      return 'Recieved Bids:'
     else
-      return 'Your sent offers:'
+      return 'Sent Bids:'
   }
-  return `Your placed bids for ${selectedExistingItem.value.item?.name}`
+  return `Bids for ${selectedExistingItem.value.item?.name}`
 })
 
 onBeforeMount(async () => {
@@ -136,8 +136,8 @@ onBeforeMount(async () => {
   <div class="bids">
     <div class="wrapper">
       <el-tabs v-model="tabName" class="bids-tabs" @tab-change="changeTab">
-        <el-tab-pane label="Received offers" name="receivedOffers"></el-tab-pane>
-        <el-tab-pane label="Sent offers" name="sentOffers"></el-tab-pane>
+        <el-tab-pane label="My items" name="receivedOffers"></el-tab-pane>
+        <el-tab-pane label="Others items" name="sentOffers"></el-tab-pane>
       </el-tabs>
       <!-- {{ existingItems?.length }} {{ JSON.stringify(pagination) }} {{ maxCount }} -->
 

@@ -238,24 +238,19 @@ onBeforeMount(async () => {
               placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
           </div>
           <!-- <div>
-                    <div class="sub-title">
-                        Offer type:
-                    </div>
-                    <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
-                        <el-option label="Want to sell" value="WTS" />
-                        <el-option label="Want to buy" value="WTB" />
-                    </el-select>
-                </div> -->
-          <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB"
-                      inactive-text="WTS" /> -->
+  <div class="sub-title">
+  Offer type:
+  </div>
+  <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
+  <el-option label="Want to sell" value="WTS" />
+  <el-option label="Want to buy" value="WTB" />
+  </el-select>
+  </div> -->
+          <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB" inactive-text="WTS" /> -->
           <!-- <el-button-group v-if="!prefillItem?.offerType">
-                  <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
-                      buy</el-button>
-                  <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
-                      Want to sell
-                  </el-button>
-              </el-button-group> -->
-
+  <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
+  <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">Want to sell</el-button>
+  </el-button-group> -->
         </div>
         <div class="item-creator__attributes__actions">
           <div>
