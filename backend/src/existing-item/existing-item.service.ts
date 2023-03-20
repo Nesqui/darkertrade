@@ -202,6 +202,7 @@ export class ExistingItemService {
     //   }
     // }
 
+    //tupeyshiy cancer udalit fast amuleti teper amuleti ringi teper ringi
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
       : [6, 7, 8, 9].includes(baseExistingItem.item.id)
