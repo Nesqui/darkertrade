@@ -31,10 +31,10 @@ const push = async (url: string, newWindow = false) => {
     </div>
     <div v-if="isAuth" class="top-menu">
       <div class="top-menu__item">
-        <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Public Items (Browse)</a>
+        <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Browse offers</a>
       </div>
       <div class="top-menu__item">
-        <a link @click="() => push('/creator')" @click.middle="() => push('/creator', true)">Item creator</a>
+        <a link @click="() => push('/creator')" @click.middle="() => push('/creator', true)">Create offer</a>
       </div>
       <div class="top-menu__item">
         <a link @click="() => push(`/user/${userStore.currentUser.nickname}/items`)"
@@ -100,6 +100,7 @@ $padding: 25px;
 
     &__item {
       padding: 0 $padding;
+
       a {
         cursor: pointer;
       }
@@ -117,4 +118,5 @@ $padding: 25px;
       border-right: 1px solid var(--el-border-color);
     }
   }
-}</style>
+}
+</style>
