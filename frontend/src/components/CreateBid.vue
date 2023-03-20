@@ -58,7 +58,7 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
         <ChoseExistingItem v-if="item.existingItems[0].offerType === 'WTB'" @onItemChosen="onItemChosen" :item="item" />
         <el-form :model="form" class="place-bid__form">
           <div class="confirm">
-            <p>After accepting bid you will able to chat with user.</p>
+            <p>After bidding seller has to accept your offer.</p>
             <el-form-item>
               <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
                 :title="`Are you sure to bid this item?`">
@@ -78,7 +78,7 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
               :max="9999" />
           </el-form-item>
           <div class="confirm">
-            <p>After accepting bid you will able to chat with user.</p>
+            <p>After bidding seller has to accept your offer.</p>
             <el-form-item>
               <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
                 :title="`Are you sure to bid this item?`">

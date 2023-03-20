@@ -211,8 +211,8 @@ onBeforeMount(async () => {
 <template>
   <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
     <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
-      <el-tab-pane label="Create item to sell" name="WTS"></el-tab-pane>
-      <el-tab-pane label="Create item to buy" name="WTB"></el-tab-pane>
+      <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
+      <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
     </el-tabs>
     <div class="restrictions">
       <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
@@ -222,7 +222,7 @@ onBeforeMount(async () => {
     <div class="item-creator__wrapper">
       <div class="item-creator__item">
         <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
-          @focus="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Item name"
+          @focus="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
           @select="handleSelectItem" />
         <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
           <div class="labeled-switch">
@@ -232,29 +232,29 @@ onBeforeMount(async () => {
         <div class="item-creator__attributes__line">
           <div>
             <div class="sub-title">
-              Wanted price (Optional):
+              {{ existingItem.offerType === 'WTB' ? `Declared maximum price:` : `Preferrable sell price:` }}
             </div>
             <el-input-number :step-strictly="true" :precision="0" :step="25" :min="25" :max="9999" type="number"
               placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
           </div>
           <!-- <div>
-                                                <div class="sub-title">
-                                                    Offer type:
-                                                </div>
-                                                <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
-                                                    <el-option label="Want to sell" value="WTS" />
-                                                    <el-option label="Want to buy" value="WTB" />
-                                                </el-select>
-                                            </div> -->
+                    <div class="sub-title">
+                        Offer type:
+                    </div>
+                    <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
+                        <el-option label="Want to sell" value="WTS" />
+                        <el-option label="Want to buy" value="WTB" />
+                    </el-select>
+                </div> -->
           <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB"
-                                                    inactive-text="WTS" /> -->
+                      inactive-text="WTS" /> -->
           <!-- <el-button-group v-if="!prefillItem?.offerType">
-                                                                                    <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
-                                                                                        buy</el-button>
-                                                                                    <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
-                                                                                        Want to sell
-                                                                                    </el-button>
-                                                                                </el-button-group> -->
+                  <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to
+                      buy</el-button>
+                  <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">
+                      Want to sell
+                  </el-button>
+              </el-button-group> -->
 
         </div>
         <div class="item-creator__attributes__actions">
@@ -263,7 +263,8 @@ onBeforeMount(async () => {
               Stat name:
             </div>
             <el-autocomplete @click="clearAttribute" value-key="name" v-model="attributeName"
-              :fetch-suggestions="attributeSearch" clearable placeholder="Stat name" @select="handleSelectAttribute" />
+              :fetch-suggestions="attributeSearch" clearable placeholder="Resourcefulness"
+              @select="handleSelectAttribute" />
           </div>
           <div>
             <div class="sub-title">
@@ -294,14 +295,12 @@ onBeforeMount(async () => {
       <div
         v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
         <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
-          size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create item and publish' }}</el-button>
+          size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button>
         <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
-          size="large">Create
-          item</el-button>
+          size="large">Create private item</el-button>
       </div>
       <div v-else>
-        <p>You cant create more {{ existingItem.offerType }} offers</p>
-        <p>Please delete not relevant {{ existingItem.offerType }} offers via profile</p>
+        <p>You can always delete some {{ existingItem.offerType }} offers via profile</p>
       </div>
       <el-button v-if="item.id || stats.length" @click="clear" size="large">
         Clear</el-button>

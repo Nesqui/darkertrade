@@ -208,7 +208,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
       </div>
       <div class="search">
         <el-input v-model="searchString"
-          :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
+          :placeholder="!chosenItem ? 'Hatchet (category)' : 'Action speed (stat)'"></el-input>
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
