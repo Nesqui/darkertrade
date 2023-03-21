@@ -186,8 +186,6 @@ export class BidService {
       archived: false,
     };
 
-    console.log(JSON.stringify(query));
-
     if (query.mine) existingItemWhere['userId'] = user.id;
     else {
       bidsWhere['userId'] = user.id;

@@ -18,8 +18,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.count-existing-item {
-}
 .limit:not(:last-child) {
   margin-right: 1rem;
 }

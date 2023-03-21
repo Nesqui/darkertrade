@@ -41,11 +41,9 @@ const onUserCreated = (user: UpdateUserDto) => {
 .bg {
     position: absolute;
     left: 0;
-    height: 100%;
-    top: 0;
+    width: 100%;
     opacity: 0.15;
     background-repeat: no-repeat;
-    background-size: contain;
 }
 
 .auth {
@@ -57,6 +55,7 @@ const onUserCreated = (user: UpdateUserDto) => {
     h2 {
         font-size: 34px;
         margin-bottom: 1.5rem;
+        text-transform: uppercase;
     }
 
     .el-input {
@@ -65,8 +64,8 @@ const onUserCreated = (user: UpdateUserDto) => {
 
     .wrapper {
         position: relative;
-        // width: var(--wrapper-regular-width);
-        // min-height: 400px;
+        min-width: 640px;
+        min-height: 300px;
         background: unset;
         text-align: center;
         padding-top: 2rem;
@@ -88,6 +87,5 @@ const onUserCreated = (user: UpdateUserDto) => {
 </style>
 
 <style lang="scss">
-.auth {
-}
+.auth {}
 </style>

@@ -258,11 +258,11 @@ $step: 1rem;
   position: relative;
 
   .bg {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    opacity: 0.135;
+    position: fixed;
+    right: 250px;
+    top: 0;
+    width: var(--wrapper-large-width);
+    opacity: 0.335;
     background-repeat: no-repeat;
     background-size: contain;
   }

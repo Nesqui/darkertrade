@@ -196,7 +196,7 @@ onBeforeMount(async () => {
   top: 90px;
   height: 100%;
   width: 100%;
-  opacity: 0.10;
+  opacity: 0.20;
   background-repeat: no-repeat;
   background-size: cover;
 }
