@@ -126,7 +126,7 @@ export class RegisterCommand {
     //     );
     //   }
     // }
-    if (siteUserNickname.length < 3) {
+    if (siteUserNickname.length < 4) {
       siteUserNickname = new Date().getTime().toString();
     }
 
