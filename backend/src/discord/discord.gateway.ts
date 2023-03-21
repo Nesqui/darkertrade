@@ -64,9 +64,7 @@ export class DiscordGateway {
     if (!userDbResponse.discordNotification) {
       return;
     }
-    if (!bid.existingItem.discordNotification) {
-      return;
-    }
+
     const itemUrl =
       this.configService.get('APP_URL') +
       '/user/' +
@@ -74,17 +72,23 @@ export class DiscordGateway {
       '/items/' +
       bid.existingItem.id;
 
+    console.log(JSON.stringify(bid));
     const discordMessage =
-      `${bid.existingItem.user.nickname} your bid on ${bid.existingItem.item.name}` +
+      `${bid.user.nickname} your bid` +
       '\n' +
-      `Was accepted by **${bid.user.nickname}**` +
+      `Was accepted by **${bid.existingItem.user.nickname}**` +
       '\n' +
       `__${itemUrl}__` +
       '\n' +
       `Agreed price of **${bid.price}**`;
 
+    console.log(itemUrl);
+    console.log(discordMessage);
+
     try {
       const discordUser = await this.client.users.fetch(discordId);
+      console.log(discordMessage);
+      console.log(discordUser);
       await discordUser.send(discordMessage);
     } catch (error) {
       this.logger.log(`disc send ${error}`);
