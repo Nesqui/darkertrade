@@ -287,6 +287,7 @@ $step: 1rem;
 }
 
 .item-list-wrapper {
+  position: relative;
   overflow-y: auto;
   margin-bottom: 2rem;
   height: 570px;
