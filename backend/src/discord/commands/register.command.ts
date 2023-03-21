@@ -115,7 +115,10 @@ export class RegisterCommand {
     const hash = uuidv4();
     let siteUserNickname = discUser.username
       .toLowerCase()
-      .replace(/[_\\\-/+=!@\[\]\{\}\s\:\;\‘\’\`\'\"]+/g, '');
+      .match(/[a-zA-Z0-9]+/g)
+      .toString()
+      .split(',')
+      .join('');
 
     // if (siteUserNickname.length < 3) {
     //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
