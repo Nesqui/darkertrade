@@ -113,12 +113,15 @@ export class RegisterCommand {
 
     const discUser = await this.client.users.fetch(modal.user.id);
     const hash = uuidv4();
-    let siteUserNickname = discUser.username
-      .toLowerCase()
-      .match(/[a-zA-Z0-9]+/g)
-      .toString()
-      .split(',')
-      .join('');
+    let siteUserNickname = '';
+
+    if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
+      siteUserNickname = discUser.username
+        .match(/[a-zA-Z0-9]+/g)
+        .toString()
+        .split(',')
+        .join('');
+    }
 
     // if (siteUserNickname.length < 3) {
     //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
