@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, onMounted, PropType, ref, watch } from 'vue'
-import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem, DisabledItemActions } from '../hooks'
+import { ExistingItem, initExistingItemApi, Item, QueryItemDto, initItemApi, PrefillItem, DisabledItemActions, CountedExistingItemsResponse } from '../hooks'
 import ItemPreview from './ItemPreview.vue';
 import { useUserStore } from '../store';
 import Creator from '../pages/Creator.vue';
@@ -12,6 +12,9 @@ const showDialog = ref(false)
 const showCreator = ref('selectExisting')
 const emit = defineEmits(['onItemChosen'])
 const userStore = useUserStore()
+const userItems = ref<Item[]>([])
+const itemApi = initItemApi()
+
 const props = defineProps({
   item: {
     type: Object as PropType<Item>,
@@ -20,19 +23,11 @@ const props = defineProps({
 })
 
 const initDialog = async () => {
+  showDialog.value = true
   try {
     loading.value = true
-    // const res = await existingItemApi.findAllByItemId(props.item.id!, {
-    //   slot: '',
-    //   limit: 6,
-    //   offset: 0,
-    //   published: true
-    // })
-    // if (!res) {
-    //   return
-    // }
-    // tempItem.value.existingItems = res.rows
-    showDialog.value = true
+    const res = await itemApi.findUserItems(userStore.currentUser.id, filterItem.value)
+    userItems.value = res
 
   } catch (error) {
   } finally {
@@ -45,7 +40,8 @@ const filterItem = ref<QueryItemDto>({
   name: "",
   offerType: "WTS",
   hideMine: false,
-  published: true
+  published: true,
+  id: props.item.id
 })
 
 const disabledItemActions = ref<DisabledItemActions>({
@@ -65,7 +61,6 @@ const prefillItem = computed((): PrefillItem => ({
 
 const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {
   chosenExistingItem.value = currentExistingItem
-  console.log(currentExistingItem);
   showDialog.value = false
   emit('onItemChosen', currentExistingItem)
 }
@@ -84,7 +79,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
         :offerType="chosenExistingItem.offerType" :stats="chosenExistingItem.stats" />
       <div class="arrow-data">
         <div class="arrow left"></div>
-        <p>Please check stats</p>
+        <p>Check</p>
         <div class="arrow right"></div>
       </div>
     </div>
@@ -97,7 +92,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
           </el-tab-pane>
           <el-tab-pane label="Select existing item" name="selectExisting">
             <ItemList :no-wrapper="true" :disabledItemActions="disabledItemActions"
-              :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="[props.item]"
+              :doAfterItemSelection="doAfterItemSelection" :filter-item="filterItem" :items="userItems"
               :existing-items-source="findAllByItemIdAndUserId" :loading="false">
             </ItemList>
           </el-tab-pane>
@@ -126,11 +121,12 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   }
 
   .arrow-data {
-    margin: 0 auto;
     display: flex;
+    margin: 0 auto;
+    justify-content: center;
     align-items: center;
     font-weight: 900;
-    color: rgba(0, 0, 0, 0.382);
+    color: var(--el-color-danger);
     padding-left: 1rem;
   }
 

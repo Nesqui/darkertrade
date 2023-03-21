@@ -1,16 +1,19 @@
-import { CountedExistingItemsResponse, ExistingItem, useApi, User } from "."
+import { Chat, CountedExistingItemsResponse, ExistingItem, useApi, User } from "."
 export type BidSortParam = [string, 'ABC' | 'DESC']
 export interface Bid {
   id: number,
   price: number;
   existingItemId: number;
+  existingItem: ExistingItem,
   suggestedExistingItemId?: number;
   suggestedExistingItem?: ExistingItem;
   userId: number;
   createdAt: string,
   updateAt: string,
   user: User,
-  status: 'created' | 'accepted' | 'declined' | 'deleted'
+  chatId?: number;
+  chat?: Chat
+  status: 'created' | 'accepted' | 'closed' | 'deleted'
 }
 
 export interface QueryBidDto {
@@ -40,8 +43,8 @@ export const initBidApi = () => {
     return res.data
   }
 
-  const decline = async (id: number): Promise<Bid> => {
-    const res = await axiosClient.patch(`bid/decline/${id}`)
+  const close = async (id: number): Promise<Bid> => {
+    const res = await axiosClient.patch(`bid/close/${id}`)
     return res.data
   }
   
@@ -63,6 +66,6 @@ export const initBidApi = () => {
     deleteBid,
     filter,
     accept,
-    decline
+    close
   }
 }

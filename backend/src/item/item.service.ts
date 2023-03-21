@@ -22,7 +22,7 @@ export class ItemService {
     private statRepository: typeof Stat,
     @Inject('SEQUELIZE')
     private db,
-  ) { }
+  ) {}
 
   create(createItemDto: CreateItemDto) {
     return 'This action adds a new item';
@@ -54,7 +54,7 @@ export class ItemService {
             {
               model: this.usersRepository,
               attributes: {
-                exclude: ['password', 'discord', 'discordId'],
+                exclude: ['password', 'discord', 'discordId', 'hash'],
               },
             },
             this.statRepository,
@@ -63,21 +63,21 @@ export class ItemService {
               required: false,
               where: {
                 [sequelize.Op.not]: {
-                  status: 'deleted'
-                }
+                  status: 'deleted',
+                },
               },
               include: [
                 {
                   model: this.usersRepository,
                   attributes: {
-                    exclude: ['password', 'discord', 'discordId'],
+                    exclude: ['password', 'discord', 'discordId', 'hash'],
                   },
                 },
                 {
                   model: this.existingItemRepository,
                   as: 'suggestedExistingItem',
-                  include: [this.statRepository]
-                }
+                  include: [this.statRepository],
+                },
               ],
             },
             this.itemsRepository,
@@ -97,16 +97,20 @@ export class ItemService {
       archived: false,
     };
 
-    const itemWhere = {}
+    const itemWhere = {};
 
-    if (query.slot)
-      itemWhere['slot'] = query.slot
+    if (query.slot) itemWhere['slot'] = query.slot;
 
-    existingItemWhere['published'] = query.published
-    existingItemWhere['offerType'] = query.offerType
+    if (query.id) {
+      itemWhere['id'] = query.id;
+    }
+
+    existingItemWhere['published'] = query.published;
+    existingItemWhere['offerType'] = query.offerType;
     if (user.id !== userId) existingItemWhere['published'] = true;
 
     return await this.itemsRepository.findAll({
+      where: itemWhere,
       include: [
         {
           model: this.existingItemRepository,
@@ -131,6 +135,12 @@ export class ItemService {
 
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
+
+    if (query.searchItemString) {
+      itemWhere['name'] = {
+        [sequelize.Op.iLike]: `%${query.searchItemString}%`,
+      };
+    }
 
     const res = await this.itemsRepository.findAll({
       where: itemWhere,

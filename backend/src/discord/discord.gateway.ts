@@ -68,10 +68,14 @@ export class DiscordGateway {
     if (!bid.existingItem.discordNotification) {
       return;
     }
+    const discordMessage =
+      `/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}` +
+      '\n' +
+      `Your bid was accepted`;
+
     try {
       const discordUser = await this.client.users.fetch(discordId);
-      await discordUser.send(`/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}]
-    Your bid was accepted`);
+      await discordUser.send(discordMessage);
     } catch (error) {
       this.logger.log(`disc send ${error}`);
     }
@@ -115,11 +119,17 @@ export class DiscordGateway {
       return;
     }
     try {
+      const discordMessage =
+        `${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at` +
+        '\n' +
+        `__${itemUrl}__` +
+        '\n' +
+        `has a new bid from **${bid.user.nickname}**` +
+        '\n' +
+        `${priceString}`;
+
       const discordUser = await this.client.users.fetch(discordId);
-      await discordUser.send(` ${bid.existingItem.user.nickname} your ${bid.existingItem.item.name} created at 
-        ${itemUrl}
-        has a new bid from ${bid.user.nickname}
-        ${priceString}`);
+      await discordUser.send(discordMessage);
     } catch (error) {
       this.logger.log(`disc send ${error}`);
     }

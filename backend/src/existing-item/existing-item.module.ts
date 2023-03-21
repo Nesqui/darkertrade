@@ -9,15 +9,19 @@ import { itemsProviders } from 'src/item/item.providers';
 import { attributesPairsProviders } from 'src/attribute/attribute-pair.providers';
 import { attributesProviders } from 'src/attribute/attribute.provider';
 import { pgProviders } from 'src/pg/pg.providers';
+import { ChatModule } from 'src/chat/chat.module';
+import { bidProviders } from 'src/bid/bid.providers';
 
 @Module({
   controllers: [ExistingItemController],
+  imports: [ChatModule],
   providers: [
     ExistingItemService,
     ...existingItemProviders,
     ...usersProviders,
     ...statsProviders,
     ...itemsProviders,
+    ...bidProviders,
     ...attributesPairsProviders,
     ...attributesProviders,
     ...pgProviders,
