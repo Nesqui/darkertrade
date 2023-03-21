@@ -12,7 +12,7 @@ const showDialog = ref(false)
 const showCreator = ref('selectExisting')
 const emit = defineEmits(['onItemChosen'])
 const userStore = useUserStore()
-const userItems = ref<Item[]>()
+const userItems = ref<Item[]>([])
 const itemApi = initItemApi()
 
 const props = defineProps({
