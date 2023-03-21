@@ -53,7 +53,6 @@ export class DiscordGateway {
   // }
 
   onBidAccepted = async (bid: Bid) => {
-    // TODO implement DiscordNotify
     const discordId = bid.user.discordId;
 
     const userDbResponse = await this.usersRepository.findOne({
@@ -68,10 +67,21 @@ export class DiscordGateway {
     if (!bid.existingItem.discordNotification) {
       return;
     }
+    const itemUrl =
+      this.configService.get('APP_URL') +
+      '/user/' +
+      bid.existingItem.user.nickname +
+      '/items/' +
+      bid.existingItem.id;
+
     const discordMessage =
-      `/user/${bid.existingItem.user.nickname}/items/${bid.existingItem.id}` +
+      `${bid.existingItem.user.nickname} your bid on ${bid.existingItem.item.name}` +
       '\n' +
-      `Your bid was accepted`;
+      `Was accepted by **${bid.user.nickname}**` +
+      '\n' +
+      `__${itemUrl}__` +
+      '\n' +
+      `Agreed price of **${bid.price}**`;
 
     try {
       const discordUser = await this.client.users.fetch(discordId);
@@ -87,7 +97,6 @@ export class DiscordGateway {
   };
 
   onBidCreated = async (bid: Bid) => {
-    // TODO implement DiscordNotify
     const discordId = bid.existingItem.user.discordId;
 
     // $name greet your $item created at
@@ -97,7 +106,7 @@ export class DiscordGateway {
     let priceString = '';
 
     if (bid.price > 0) {
-      priceString = `with an offer of ${bid.price}`;
+      priceString = `with an offer of **${bid.price}**`;
     }
     const itemUrl =
       this.configService.get('APP_URL') +
