@@ -262,7 +262,7 @@ $step: 1rem;
     right: 0;
     bottom: 0;
     width: 100%;
-    opacity: 0.12;
+    opacity: 0.135;
     background-repeat: no-repeat;
     background-size: contain;
   }
