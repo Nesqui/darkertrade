@@ -28,6 +28,8 @@ const limits = initLimits()
 const items = ref<Item[]>([])
 const itemAutoCompleteRef = ref()
 const requiredClear = ref(false)
+const discordNotification = ref(true)
+
 const props = defineProps({
   noWrapper: {
     type: Boolean,
@@ -73,7 +75,8 @@ const existingItem = computed((): ExistingItem => ({
   stats: stats.value,
   published: published.value,
   wantedPrice: wantedPrice.value,
-  offerType: offerType.value
+  offerType: offerType.value,
+  discordNotification: discordNotification.value
 }))
 
 const itemSearch = (queryString: string, cb: any) => {
@@ -217,10 +220,16 @@ onBeforeMount(async () => {
       <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
       <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
     </el-tabs>
-    <div class="restrictions">
-      <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
-      <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
-      <CountExistingItem />
+    <div class="header">
+      <div class="settings__discord">
+        <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
+        <span>discord DM</span>
+      </div>
+      <div class="restrictions">
+        <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
+        <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
+        <CountExistingItem />
+      </div>
     </div>
     <div class="item-creator__wrapper">
       <div class="item-creator__item">
@@ -240,20 +249,6 @@ onBeforeMount(async () => {
             <el-input-number :step-strictly="true" :precision="0" :step="25" :min="25" :max="9999" type="number"
               placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
           </div>
-          <!-- <div>
-                                <div class="sub-title">
-                                Offer type:
-                                </div>
-                                <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
-                                <el-option label="Want to sell" value="WTS" />
-                                <el-option label="Want to buy" value="WTB" />
-                                </el-select>
-                                </div> -->
-          <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB" inactive-text="WTS" /> -->
-          <!-- <el-button-group v-if="!prefillItem?.offerType">
-                                <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
-                                <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">Want to sell</el-button>
-                                </el-button-group> -->
         </div>
         <div class="item-creator__attributes__actions">
           <div>
@@ -316,6 +311,18 @@ onBeforeMount(async () => {
   opacity: 0.15;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.settings__discord {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .item-creator {
