@@ -41,8 +41,8 @@ const slots = ref<Slot[]>(['Amulet',
 </template>
 
 <style scoped lang="scss">
-$item-size: 50px;
-$human-height: 600px;
+$item-size: 43px;
+$human-height: 550px;
 
 .human {
   // height: 100%;
@@ -55,8 +55,8 @@ $human-height: 600px;
     position: absolute;
     left: 0;
     top: 0;
-    left: -35px;
-    height: 100%;
+    left: 0;
+    width: 100%;
     filter: brightness(25%);
     background-repeat: no-repeat;
     background-size: cover;
@@ -90,10 +90,11 @@ $human-height: 600px;
     left: 0px;
     bottom: 10px;
     min-width: 125px;
-    min-height: 125px;
+    min-height: 165px;
     font-size: 14px;
     display: flex;
     flex-direction: column;
+    gap: .2rem;
 
     span {
       width: 100%;
@@ -103,13 +104,13 @@ $human-height: 600px;
   }
 
   .head {
-    top: 50px;
-    left: 225px;
+    top: 40px;
+    left: 215px;
   }
 
   .chest {
-    top: 160px;
-    left: 225px;
+    top: 150px;
+    left: 215px;
   }
 
   .ring {
@@ -119,9 +120,8 @@ $human-height: 600px;
 
   .gloves {
     top: 285px;
-    left: 135px;
+    left: 150px;
   }
-
 
   .weapon {
     top: 100px;
@@ -136,13 +136,13 @@ $human-height: 600px;
   }
 
   .boots {
-    top: 496px;
-    left: 223px;
+    top: 456px;
+    left: 213px;
   }
 
   .legs {
-    top: 385px;
-    left: 223px;
+    top: 365px;
+    left: 213px;
   }
 
   // .img {
