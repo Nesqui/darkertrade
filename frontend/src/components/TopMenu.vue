@@ -63,17 +63,15 @@ $padding: 25px;
 
 .menu {
   display: flex;
-  // grid-template-columns: 1fr auto 1fr;
-  // justify-items: end;
-  // justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--el-border-color);
+  background-color: transparent;
   width: 100%;
   height: $menuHeight;
 
   .logo {
     cursor: pointer;
     margin-left: $padding;
+    z-index: 1;
 
     >img {
       height: calc($menuHeight - 15px);
@@ -98,13 +96,14 @@ $padding: 25px;
     display: flex;
     align-items: center;
     position: relative;
-    z-index: 1;
 
     &__item {
       padding: 0 $padding;
+      z-index: 1;
 
       a {
         cursor: pointer;
+        font-weight: 600;
       }
     }
 

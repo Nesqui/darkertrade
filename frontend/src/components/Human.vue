@@ -41,7 +41,7 @@ const slots = ref<Slot[]>(['Amulet',
 </template>
 
 <style scoped lang="scss">
-$item-size: 43px;
+$item-size: 41px;
 $human-height: 550px;
 
 .human {
@@ -57,7 +57,7 @@ $human-height: 550px;
     top: 0;
     left: 0;
     width: 100%;
-    filter: brightness(25%);
+    filter: brightness(50%);
     background-repeat: no-repeat;
     background-size: cover;
   }
