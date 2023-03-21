@@ -113,9 +113,15 @@ export class RegisterCommand {
 
     const discUser = await this.client.users.fetch(modal.user.id);
     const hash = uuidv4();
-    let siteUserNickname = discUser.username
-      .toLowerCase()
-      .replace(/[_\\\-/+=!@\[\]\{\}\s\:\;\‘\’\`\'\"]+/g, '');
+    let siteUserNickname = '';
+
+    if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
+      siteUserNickname = discUser.username
+        .match(/[a-zA-Z0-9]+/g)
+        .toString()
+        .split(',')
+        .join('');
+    }
 
     // if (siteUserNickname.length < 3) {
     //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
@@ -126,7 +132,7 @@ export class RegisterCommand {
     //     );
     //   }
     // }
-    if (siteUserNickname.length < 3) {
+    if (siteUserNickname.length < 4) {
       siteUserNickname = new Date().getTime().toString();
     }
 
