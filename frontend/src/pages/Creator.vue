@@ -305,9 +305,9 @@ onBeforeMount(async () => {
 <style scoped lang="scss">
 .bg {
   position: absolute;
-  left: 120px;
-  top: -50px;
-  width: 80%;
+  left: 0;
+  top: 0;
+  width: 100%;
   opacity: 0.15;
   background-repeat: no-repeat;
   background-size: cover;

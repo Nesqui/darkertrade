@@ -260,7 +260,7 @@ $step: 1rem;
   .bg {
     position: absolute;
     right: 0;
-    bottom: -95px;
+    bottom: 0;
     width: 100%;
     opacity: 0.12;
     background-repeat: no-repeat;
