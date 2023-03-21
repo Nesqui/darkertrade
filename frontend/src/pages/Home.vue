@@ -63,7 +63,7 @@ onBeforeMount(async () => {
   <div class="main">
     <TopMenu />
     <div class="main-wrapper" :class="{
-      'shifted': !!chatStore.expand.chats
+      'shifted': !!chatStore.expand.chats.length
     }">
       <router-view />
     </div>

@@ -173,7 +173,7 @@ const env = ref(import.meta.env.VITE_ENV)
     <div class="register-discord">
       <a class="tat-frame"
         :href="env === 'production' ? 'https://discord.gg/VT6grnfD6t' : 'https://discord.gg/rD9bgctHNr'">
-        <svg width="70px" height="70px" viewBox="0 -28.5 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+        <svg width="50px" height="50px" viewBox="0 -28.5 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
           xmlns:xlink="http://www.w3.org/1999/xlink" preserveAspectRatio="xMidYMid">
           <g>
             <path fill="#C69749"
@@ -216,7 +216,7 @@ p {
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 
   .el-button {
     margin: 1rem 0 2rem 0;

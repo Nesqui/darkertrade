@@ -14,7 +14,7 @@
   --el-color-danger: #C69749;
   --el-input-focus-border-color: #3F0071;
   --el-color-primary-light-3: #282A3A;
-  --el-color-primary-dark-2: #282a3a8a;
+  --el-color-primary-dark-2: #000000b8;
   --el-color-primary-light-9: #282A3A;
   --el-text-color-regular: #C69749;
   --el-color-info: #735F32;
@@ -43,6 +43,7 @@
   --wrapper-regular-width: 720px;
   --wrapper-small-width: 300px;
   --el-fill-color: #857047b0;
+  --el-dialog-background: rgb(23 23 23);
   --el-fill-color-darker: #8b6a35;
   --tat-frame-box-shadow: inset rgb(0 0 0 / 55%) 0px 0px 1px 1px;
 }
