@@ -140,6 +140,7 @@ onBeforeMount(async () => {
 
 <template>
   <div class="item">
+    <img src="@/assets/images/shop1.png" alt="" class="bg">
     <div class="wrapper">
       <div class="item-actions">
         <h2>{{ showBidCreator ? 'Bid creating' : item ? item.name : 'item' }}</h2>
@@ -213,6 +214,16 @@ onBeforeMount(async () => {
 .item {
   display: flex;
   flex-direction: column;
+  position: relative;
+  .bg {
+    position: absolute;
+    right: 200px;
+    top: 0;
+    width: 100%;
+    opacity: 0.10;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
 
   .settings {
     flex-direction: column;

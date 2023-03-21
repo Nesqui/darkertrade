@@ -97,6 +97,8 @@ $padding: 25px;
     margin: 0 auto;
     display: flex;
     align-items: center;
+    position: relative;
+    z-index: 1;
 
     &__item {
       padding: 0 $padding;

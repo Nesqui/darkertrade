@@ -209,7 +209,9 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <img src="@/assets/images/blacksmith3.png" alt="" class="bg" />
   <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
+
     <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
       <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
       <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
@@ -238,19 +240,19 @@ onBeforeMount(async () => {
               placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
           </div>
           <!-- <div>
-  <div class="sub-title">
-  Offer type:
-  </div>
-  <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
-  <el-option label="Want to sell" value="WTS" />
-  <el-option label="Want to buy" value="WTB" />
-  </el-select>
-  </div> -->
+                <div class="sub-title">
+                Offer type:
+                </div>
+                <el-select v-model="offerType" placeholder="OfferType" style="width: 240px">
+                <el-option label="Want to sell" value="WTS" />
+                <el-option label="Want to buy" value="WTB" />
+                </el-select>
+                </div> -->
           <!-- <el-switch v-model="offerType" size="large" active-value="WTB" inactive-value="WTS" active-text="WTB" inactive-text="WTS" /> -->
           <!-- <el-button-group v-if="!prefillItem?.offerType">
-  <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
-  <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">Want to sell</el-button>
-  </el-button-group> -->
+                <el-button size="large" :disabled="offerType === 'WTB'" @click="offerType = 'WTB'">Want to buy</el-button>
+                <el-button size="large" :disabled="offerType === 'WTS'" @click="offerType = 'WTS'">Want to sell</el-button>
+                </el-button-group> -->
         </div>
         <div class="item-creator__attributes__actions">
           <div>
@@ -305,14 +307,27 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
+.bg {
+  position: absolute;
+  left: 120px;
+  top: -50px;
+  width: 80%;
+  opacity: 0.15;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .item-creator {
-  min-height: 460px;
+  min-height: 520px;
   max-height: 750px;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
+  position: relative;
+  overflow: hidden;
 
   &__wrapper {
+    position: relative;
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
@@ -345,6 +360,7 @@ onBeforeMount(async () => {
 
   &__attributes__actions {
     align-items: flex-end;
+    position: relative;
     // justify-content: flex-end;
     display: flex;
     gap: .55rem;
@@ -356,6 +372,7 @@ onBeforeMount(async () => {
     justify-content: space-between;
     align-self: flex-end;
     width: 100%;
+    position: relative;
   }
 
   .stats {

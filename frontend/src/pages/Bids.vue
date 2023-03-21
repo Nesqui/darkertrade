@@ -133,6 +133,8 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <img src="@/assets/images/ruins.png" alt="" class="bg">
+
   <div class="bids">
     <div class="wrapper">
       <el-tabs v-model="tabName" class="bids-tabs" @tab-change="changeTab">
@@ -188,10 +190,23 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
+.bg {
+  position: absolute;
+  left: 200px;
+  top: 90px;
+  height: 100%;
+  width: 100%;
+  opacity: 0.10;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 // $liHeight: 270px;
 $itemsListWidth: 300px;
 
 .bids {
+  position: relative;
+
   bid .bids-tabs {
     margin-bottom: 2rem;
   }

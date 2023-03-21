@@ -185,6 +185,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
 <template>
   <div class="item-list-component">
     <!-- SEARCH FILTERS  -->
+    <img src="@/assets/images/market.png" alt="" class="bg">
     <div class="search-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <div class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
@@ -254,6 +255,18 @@ $step: 1rem;
 
 
 .item-list-component {
+  position: relative;
+
+  .bg {
+    position: absolute;
+    right: 0;
+    bottom: -95px;
+    width: 100%;
+    opacity: 0.12;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
   .wrapper {
     width: var(--wrapper-large-width);
   }

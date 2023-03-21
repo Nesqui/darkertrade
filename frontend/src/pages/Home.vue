@@ -65,7 +65,6 @@ onBeforeMount(async () => {
     <div class="main-wrapper" :class="{
       'shifted': !!chatStore.expand.chats
     }">
-      <div class="ws">connected: {{ connected }}</div>
       <router-view />
     </div>
     <AllChats v-if="connected" :connected="connected" />
@@ -106,6 +105,7 @@ onBeforeMount(async () => {
     justify-content: flex-start;
     align-items: center;
     transition: all .25s;
+    position: relative;
   }
 
   .shifted {

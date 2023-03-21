@@ -80,9 +80,11 @@ onBeforeMount(async () => {
           <h2 class="darker-title user-nickname">Loading</h2>
         </div>
         <div v-else class="profile__info">
+          <img src="@/assets/images/avatar.png" alt="" class="bg">
           <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
           <div class="avatar-wrapper">
-            <div class="img-avatar"></div>
+
+            <!-- <div class="img-avatar"></div> -->
           </div>
           <span v-if="user?.name">Name: {{ user.name }}</span>
           <span v-if="user?.lastName">Name: {{ user.lastName }}</span>
@@ -94,8 +96,8 @@ onBeforeMount(async () => {
       <div v-if="user && userStore.currentUser.id === user.id" class="settings">
         <span>Discord DM:</span>
         <div class="settings__discord">
-          <el-switch v-model="user.discordNotification" :loading="discordNotificationLoading" @change="onDiscordNotificationChange" size="large"
-            active-text="On" inactive-text="Off" />
+          <el-switch v-model="user.discordNotification" :loading="discordNotificationLoading"
+            @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
         </div>
       </div>
       <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
@@ -123,6 +125,19 @@ onBeforeMount(async () => {
     height: $frameHeight;
   }
 
+  .profile__info {
+  }
+
+  .bg {
+    position: absolute;
+    left: 0px;
+    top: 20px;
+    height: 250px;
+    opacity: 0.15;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
   .user-nickname {
     font-size: 24px;
     text-transform: uppercase;
@@ -146,17 +161,20 @@ onBeforeMount(async () => {
     margin-bottom: 2rem;
   }
 
-  .avatar-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2rem;
-  }
-
   .tat-frame {
     padding: 1rem 2rem;
     flex-shrink: 1;
     font-size: unset;
     width: 190px;
+    position: relative;
+
+  }
+
+
+  .avatar-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
   }
 
   &__info {

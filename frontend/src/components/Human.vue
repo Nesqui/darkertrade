@@ -15,8 +15,10 @@ const slots = ref<Slot[]>(['Amulet',
 
 <template>
   <div class="human">
+    <img src="@/assets/images/dummy.png" alt="" class="bg">
+
     <div class="wrapper">
-      <div class="img"></div>
+      <!-- <div class="img"></div> -->
       <div v-for="(slot, index) in slots" :key="index" :class="{
         'tat-frame': true,
         'darker-title': true,
@@ -44,16 +46,28 @@ $human-height: 600px;
 
 .human {
   // height: 100%;
-  // width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+
+  .bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    left: -35px;
+    height: 100%;
+    filter: brightness(25%);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
 
   .wrapper {
     width: var(--wrapper-medium-width);
     height: $human-height;
     padding: 0;
     overflow: hidden;
+    position: relative;
   }
 
   .tat-frame {
@@ -131,13 +145,12 @@ $human-height: 600px;
     left: 223px;
   }
 
-  .img {
-    background: url("../assets/human.png") no-repeat;
-    filter: brightness(0) invert(7%);
-    width: var(--wrapper-medium-width);
-    height: $human-height;
-    background-position-x: center;
-    background-position-y: center;
-  }
+  // .img {
+  //   background: url("../assets/images/dummy.png") no-repeat;
+  //   width: var(--wrapper-medium-width);
+  //   height: $human-height;
+  //   background-position-x: center;
+  //   background-position-y: center;
+  // }
 }
 </style>
