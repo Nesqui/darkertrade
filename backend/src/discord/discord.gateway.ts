@@ -97,7 +97,6 @@ export class DiscordGateway {
   };
 
   onBidCreated = async (bid: Bid) => {
-    // TODO implement DiscordNotify
     const discordId = bid.existingItem.user.discordId;
 
     // $name greet your $item created at
