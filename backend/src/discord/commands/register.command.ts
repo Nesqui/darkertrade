@@ -115,7 +115,20 @@ export class RegisterCommand {
     const hash = uuidv4();
     let siteUserNickname = discUser.username
       .toLowerCase()
-      .replace(/[_\\\-/+=!@\[\]\{\}\s\:\;]+/g, '');
+      .replace(/[_\\\-/+=!@\[\]\{\}\s\:\;\‘\’\`\'\"]+/g, '');
+
+    // if (siteUserNickname.length < 3) {
+    //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
+    //   siteUserNickname = '';
+    //   for (let index = 0; index < 10; index++) {
+    //     siteUserNickname += alphabet.charAt(
+    //       Math.floor(Math.random() * alphabet.length),
+    //     );
+    //   }
+    // }
+    if (siteUserNickname.length < 3) {
+      siteUserNickname = new Date().getTime().toString();
+    }
 
     const discCheck = await this.usersRepository.findOne({
       where: {
