@@ -25,6 +25,17 @@ export class CreateExistingItemDto {
     type: Boolean,
   })
   @IsBoolean()
+  @IsOptional()
+  @Transform(
+    ({ obj }) =>
+      obj.discordNotification === 'true' || obj.discordNotification === true,
+  )
+  readonly discordNotification: boolean = false;
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  @IsBoolean()
   @Transform(({ obj }) => obj.published === 'true' || obj.published === true)
   readonly published: boolean = false;
 

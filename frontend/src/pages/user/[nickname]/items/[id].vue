@@ -26,11 +26,6 @@ const moment = useMoment()
 
 const selectedTab = ref('Info')
 
-const filterItem = ref<Item>({
-  slot: "",
-  name: ""
-})
-
 const filterBids = ref<QueryBidDto>({
   mine: true,
   sort: [['id', 'DESC']],
@@ -39,11 +34,8 @@ const filterBids = ref<QueryBidDto>({
   offerType: 'WTS'
 })
 
-const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US');
-};
 
-const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.find(bid => bid.userId === userStore.currentUser.id)
+const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.filter(bid => bid.status !== 'closed').find(bid => bid.userId === userStore.currentUser.id)
 const ownToUser = () => item.value?.existingItems?.length && item.value?.existingItems[0].userId === userStore.currentUser.id
 
 const bidCreatedHandler = (bid: Bid) => {
@@ -148,6 +140,7 @@ onBeforeMount(async () => {
 
 <template>
   <div class="item">
+    <img src="@/assets/images/shop1.png" alt="" class="bg">
     <div class="wrapper">
       <div class="item-actions">
         <h2>{{ showBidCreator ? 'Bid creating' : item ? item.name : 'item' }}</h2>
@@ -221,6 +214,16 @@ onBeforeMount(async () => {
 .item {
   display: flex;
   flex-direction: column;
+  position: relative;
+  .bg {
+    position: absolute;
+    right: 200px;
+    top: 0;
+    width: 100%;
+    opacity: 0.10;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
 
   .settings {
     flex-direction: column;

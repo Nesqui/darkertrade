@@ -69,11 +69,24 @@ const clear = () => {
   existingItems.value = undefined
 }
 
-watch(() => props.filterItem.slot, (cv, pv) => {
+let searchDelayTimeout = 0
+
+watch(() => searchString.value, () => {
+  clearTimeout(searchDelayTimeout)
+  searchDelayTimeout = setTimeout(() => {
+    if (chosenItem.value) {
+      props.filterItem.searchExistingItemString = searchString.value
+      return
+    }
+    props.filterItem.searchItemString = searchString.value
+  }, 500);
+})
+
+watch(() => props.filterItem.slot, () => {
   chosenItem.value = undefined
 })
 
-watch(props.filterItem, async (cv, pv) => {
+watch(props.filterItem, async () => {
   if (!chosenItem.value?.id)
     return
 
@@ -81,11 +94,12 @@ watch(props.filterItem, async (cv, pv) => {
 
   const { rows, count } = await findExistingItemsById(chosenItem.value.id)
 
-  itemsRef.value.scroll({
-    top: 0,
-    left: 0,
-    behavior: "smooth",
-  })
+  if (itemsRef.value)
+    itemsRef.value.scroll({
+      top: 0,
+      left: 0,
+      behavior: "smooth",
+    })
 
   maxCount.value = count
   existingItems.value = rows
@@ -99,15 +113,12 @@ const filteredItems = computed(() => {
 
   filteredData = filteredData.filter(item => item.existingItems?.length)
 
-  if (searchString.value)
-    filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
+  // if (searchString.value)
+  //   filteredData = filteredData.filter(item => item.name.toLowerCase().indexOf(searchString.value.toLowerCase()) != -1)
 
   return filteredData
 })
 
-const statFilter = (existingItem: ExistingItem, queryString: string) => {
-  return existingItem.stats.find(stat => getAttributeNameById(stat.attributeId).toLowerCase().indexOf(queryString.toLowerCase()) != -1)
-}
 
 const filteredExistingItems = computed(() => {
   if (!chosenItem.value)
@@ -117,9 +128,6 @@ const filteredExistingItems = computed(() => {
     return []
 
   let filteredData = [...existingItems.value]
-
-  if (searchString.value)
-    filteredData = filteredData.filter((existingItem) => statFilter(existingItem, searchString.value))
 
   return filteredData
 })
@@ -177,6 +185,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
 <template>
   <div class="item-list-component">
     <!-- SEARCH FILTERS  -->
+    <img src="@/assets/images/market.png" alt="" class="bg">
     <div class="search-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <div class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
@@ -184,13 +193,17 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
           inactive-text="Show all" />
         <el-button-group v-if="!disabledItemActions.offerType">
-          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">{{ isMarket? 'I want to sell' : 'WTB only'}}</el-button>
-          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">{{ isMarket? 'I want to buy' : 'WTS only'}}</el-button>
+          <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">
+            {{ isMarket ? 'I want to sell' : 'WTB only' }}
+          </el-button>
+          <el-button :disabled="filterItem.offerType === 'WTS'" @click="changeOfferType('WTS')">
+            {{ isMarket ? 'I want to buy' : 'WTS only' }}
+          </el-button>
         </el-button-group>
       </div>
       <div class="search">
         <el-input v-model="searchString"
-          :placeholder="!chosenItem ? 'Search by name' : 'Search by attribute name'"></el-input>
+          :placeholder="!chosenItem ? 'Hatchet (category)' : 'Action speed (stat)'"></el-input>
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
@@ -242,6 +255,18 @@ $step: 1rem;
 
 
 .item-list-component {
+  position: relative;
+
+  .bg {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    opacity: 0.135;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
   .wrapper {
     width: var(--wrapper-large-width);
   }
@@ -255,12 +280,14 @@ $step: 1rem;
   text-align: center;
   gap: calc($step * 3);
   grid-template-columns: 1fr 1fr 1fr;
+
   .el-skeleton {
     margin-bottom: 1rem;
   }
 }
 
 .item-list-wrapper {
+  position: relative;
   overflow-y: auto;
   margin-bottom: 2rem;
   height: 570px;

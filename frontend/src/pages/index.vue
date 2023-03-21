@@ -5,6 +5,8 @@ const val = ref(+(Math.random() * 100).toFixed(0))
 </script>
 
 <template>
+  <img src="@/assets/images/cleric.png" class="bg" alt="">
+
   <div class="index">
     <div class="paper">
       <div class="logo">
@@ -36,6 +38,16 @@ const val = ref(+(Math.random() * 100).toFixed(0))
 </template>
 
 <style scoped lang="scss">
+.bg {
+  position: absolute;
+  left: 200px;
+  top: 0;
+  height: 100%;
+  opacity: 0.125;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .index {
   display: flex;
   align-items: center;
@@ -69,8 +81,9 @@ const val = ref(+(Math.random() * 100).toFixed(0))
     overflow-y: auto;
     max-height: 800px;
     outline: none;
+    box-shadow: var(--tat-frame-box-shadow);
     // box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
-    box-shadow: 2px 3px 20px rgba(181, 181, 180, 0.635), 0 0 125px #3d38346b inset;
+    // box-shadow: 1px 1px 15px rgba(181, 181, 180, 0.635), 0 0 125px #3d38346b inset;
   }
 
   .wrapper {

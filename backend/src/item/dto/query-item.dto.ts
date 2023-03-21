@@ -16,6 +16,13 @@ import { Transform } from 'class-transformer';
 
 export class QueryItemDto {
   @ApiProperty({
+    type: Number,
+  })
+  @IsOptional()
+  @IsNumber()
+  id: number;
+
+  @ApiProperty({
     type: String,
   })
   @IsString()

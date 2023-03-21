@@ -214,15 +214,16 @@ p {
   display: flex;
   align-items: center;
   flex-direction: column;
-  gap: 1.35rem;
-  width: 300px;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 1rem;
 
   .el-button {
     margin: 1rem 0 2rem 0;
   }
 
   a:hover {
-    transform: scale(1.05);
+    transform: scale(1.01);
   }
 
   a {

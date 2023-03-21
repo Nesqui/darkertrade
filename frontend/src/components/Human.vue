@@ -4,139 +4,153 @@ import { QueryItemDto, Slot } from "../hooks";
 
 defineProps<{ filterItem: QueryItemDto }>()
 const slots = ref<Slot[]>(['Amulet',
-    'Ring',
-    'Head',
-    'Chest',
-    'Gloves',
-    'Legs',
-    'Boots',
-    'Weapon',])
+  'Ring',
+  'Head',
+  'Chest',
+  'Gloves',
+  'Legs',
+  'Boots',
+  'Weapon',])
 </script>
 
 <template>
-    <div class="human">
-        <div class="wrapper">
-            <div class="img"></div>
-            <div v-for="(slot, index) in slots" :key="index" :class="{
-                'tat-frame': true,
-                'darker-title': true,
-                [slot.toLowerCase()]: true,
-                'active': filterItem.slot === slot
-            }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0, 1) }}</div>
+  <div class="human">
+    <img src="@/assets/images/dummy.png" alt="" class="bg">
 
-            <div class="tat-frame no-hover item-description">
-                <span><label class="darker-title">A</label>Amulet</span>
-                <span><label class="darker-title">R</label>Ring</span>
-                <span><label class="darker-title">H</label>Head</span>
-                <span><label class="darker-title">C</label>Chest</span>
-                <span><label class="darker-title">G</label>Gloves</span>
-                <span><label class="darker-title">L</label>Legs</span>
-                <span><label class="darker-title">B</label>Boots</span>
-                <span><label class="darker-title">W</label>Weapon</span>
-            </div>
-        </div>
+    <div class="wrapper">
+      <!-- <div class="img"></div> -->
+      <div v-for="(slot, index) in slots" :key="index" :class="{
+        'tat-frame': true,
+        'darker-title': true,
+        [slot.toLowerCase()]: true,
+        'active': filterItem.slot === slot
+      }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0, 1) }}</div>
+
+      <div class="tat-frame no-hover item-description">
+        <span><label class="darker-title">A</label>Amulet</span>
+        <span><label class="darker-title">B</label>Boots</span>
+        <span><label class="darker-title">C</label>Chest</span>
+        <span><label class="darker-title">G</label>Gloves</span>
+        <span><label class="darker-title">H</label>Head</span>
+        <span><label class="darker-title">L</label>Legs</span>
+        <span><label class="darker-title">R</label>Ring</span>
+        <span><label class="darker-title">W</label>Weapon</span>
+      </div>
     </div>
+  </div>
 </template>
 
 <style scoped lang="scss">
-$item-size: 50px;
-$human-height: 600px;
+$item-size: 43px;
+$human-height: 550px;
 
 .human {
-    // height: 100%;
-    // width: 100%;
+  // height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  .bg {
+    position: absolute;
+    left: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    filter: brightness(25%);
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .wrapper {
+    width: var(--wrapper-medium-width);
+    height: $human-height;
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .tat-frame {
+    position: absolute;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    width: $item-size;
+    height: $item-size;
+    font-size: 25px;
+    box-shadow: var(--tat-frame-box-shadow);
+  }
 
-    .wrapper {
-        width: var(--wrapper-medium-width);
-        height: $human-height;
-        padding: 0;
-        overflow: hidden;
+  .active {
+    background-color: var(--color-text);
+    color: var(--el-bg-color);
+  }
+
+  .item-description {
+    left: 0px;
+    bottom: 10px;
+    min-width: 125px;
+    min-height: 165px;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: .2rem;
+
+    span {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
     }
+  }
 
-    .tat-frame {
-        position: absolute;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: $item-size;
-        height: $item-size;
-        font-size: 25px;
-    }
+  .head {
+    top: 40px;
+    left: 215px;
+  }
 
-    .active {
-        background-color: var(--color-text);
-        color: var(--el-bg-color);
-    }
+  .chest {
+    top: 150px;
+    left: 215px;
+  }
 
-    .item-description {
-        left: 0px;
-        bottom: 10px;
-        min-width: 125px;
-        min-height: 125px;
-        font-size: 14px;
-        display: flex;
-        flex-direction: column;
+  .ring {
+    top: 150px;
+    left: 310px;
+  }
 
-        span {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-        }
-    }
+  .gloves {
+    top: 285px;
+    left: 150px;
+  }
 
-    .head {
-        top: 50px;
-        left: 225px;
-    }
+  .weapon {
+    top: 100px;
+    left: 70px;
+    height: 140px;
+    width: 75px;
+  }
 
-    .chest {
-        top: 160px;
-        left: 225px;
-    }
+  .amulet {
+    top: 77px;
+    left: 310px;
+  }
 
-    .ring {
-        top: 150px;
-        left: 300px;
-    }
+  .boots {
+    top: 456px;
+    left: 213px;
+  }
 
-    .gloves {
-        top: 285px;
-        left: 135px;
-    }
+  .legs {
+    top: 365px;
+    left: 213px;
+  }
 
-
-    .weapon {
-        top: 100px;
-        left: 70px;
-        height: 140px;
-        width: 75px;
-    }
-
-    .amulet {
-        top: 77px;
-        left: 300px;
-    }
-
-    .boots {
-        top: 496px;
-        left: 223px;
-    }
-
-    .legs {
-        top: 385px;
-        left: 223px;
-    }
-
-    .img {
-        background: url("../assets/human.png") no-repeat;
-        filter: brightness(0) invert(7%);
-        width: var(--wrapper-medium-width);
-        height: $human-height;
-        background-position-x: center;
-        background-position-y: center;
-    }
+  // .img {
+  //   background: url("../assets/images/dummy.png") no-repeat;
+  //   width: var(--wrapper-medium-width);
+  //   height: $human-height;
+  //   background-position-x: center;
+  //   background-position-y: center;
+  // }
 }
 </style>

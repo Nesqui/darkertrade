@@ -88,6 +88,7 @@ export class ExistingItemService {
     return { quantity: quantityOfExistingItems, limits: LIMITS };
   }
 
+  // ITEM LIST FILTER
   async findAllByItemIdAndUserId(
     query: QueryItemDto,
     itemId: number,
@@ -98,6 +99,9 @@ export class ExistingItemService {
       archived: false,
       itemId,
     };
+
+    const attributeWhere = {};
+    const statsWhere = {};
 
     if (userId) existingItemWhere['userId'] = userId;
 
@@ -118,17 +122,40 @@ export class ExistingItemService {
 
     if (!query.published) existingItemWhere['userId'] = user.id;
 
-    // ALL FILTER
-    // if (query.offerType) existingItemWhere['offerType'] = query.offerType;
-
     existingItemWhere['offerType'] = query.offerType;
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
+    if (query.searchExistingItemString) {
+      attributeWhere['name'] = {
+        [sequelize.Op.iLike]: `%${query.searchExistingItemString}%`,
+      };
+
+      const filteredItems = await this.existingItemRepository.findAndCountAll({
+        attributes: ['id'],
+        include: [
+          {
+            model: this.statRepository,
+            required: true,
+            include: [
+              {
+                model: this.attributeRepository,
+                where: attributeWhere,
+              },
+            ],
+          },
+        ],
+      });
+      if (!filteredItems.rows.length) return [];
+      existingItemWhere['id'] = filteredItems.rows.map((item) => item.id);
+    }
     const item = await this.existingItemRepository.findAndCountAll({
       where: existingItemWhere,
       include: [
-        this.statRepository,
+        {
+          model: this.statRepository,
+          required: true,
+        },
         {
           model: this.itemRepository,
           where: itemWhere,
@@ -143,6 +170,7 @@ export class ExistingItemService {
       limit: query.limit,
       offset: query.offset,
     });
+    console.log(item);
 
     if (!item) return [];
     return item;
@@ -202,6 +230,7 @@ export class ExistingItemService {
     //   }
     // }
 
+    //tupeyshiy cancer udalit fast amuleti teper amuleti ringi teper ringi
     const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
       ? [1, 2, 3, 4, 5]
       : [6, 7, 8, 9].includes(baseExistingItem.item.id)
