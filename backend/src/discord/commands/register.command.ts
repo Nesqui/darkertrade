@@ -133,7 +133,7 @@ export class RegisterCommand {
     //     );
     //   }
     // }
-    if (siteUserNickname.length < 4) {
+    if (siteUserNickname.length < 5) {
       siteUserNickname = new Date().getTime().toString();
     }
 
@@ -142,7 +142,7 @@ export class RegisterCommand {
         discordId: discUser.id,
       },
     });
-    if (discCheck?.discordId === discUser.id) {
+    if (discCheck) {
       await modal.reply({
         content: 'discord ID is already registered',
         ephemeral: true,
@@ -202,7 +202,7 @@ export class RegisterCommand {
         discUser.discriminator,
       active: true,
     });
-    //226347736
+
     try {
       modal.guild.members.cache
         .get(discUser.id)
