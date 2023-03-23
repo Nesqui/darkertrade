@@ -1,21 +1,37 @@
 name: CI
 on:
   push:
-    branches: [ master ]
-  workflow_dispatch:
+    branches:
+      - main
 jobs:
   deploy:
     runs-on: self-hosted
-    strategy: 
-      matrix:
-        node-version: [18.x]
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - name: update deps
-    - run: npm i
-    - name: start pm2 front
-    - run: pm2 start "pnpm run build" --name TaTFE
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: pull request
+      run: |
+           cd /
+           cd /opt/darkertrade/
+           git pull
+    - name: update FE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd frontend
+          pnpm i  
+    - name: update BE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd backend
+          pnpm i 
+    - name: build BE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd backend
+          nest build
+    - name: restart PM2
+      run: pm2 restart /opt/darkertrade/ecosystem.config.js
+    
