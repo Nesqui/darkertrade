@@ -1,18 +1,20 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, PropType, ref } from 'vue'
-import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits } from '../hooks'
+import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
 import { ElNotification } from 'element-plus';
 import CountExistingItem from '../components/CountExistingItems.vue'
 import { useRouter } from 'vue-router';
+import { useItemStore } from '@/store';
 const router = useRouter()
 
 const statPlaceHolder = ['Resourcefulness', 'Knowledge', 'Agility', 'Strength', 'Action Speed'][Math.floor(Math.random() * 5)]
 const attributeStore = useAttributesStore()
+const attributeAutoCompleteRef = ref()
 const attributes = attributeStore.attributes
 const existingItemApi = initExistingItemApi()
-const maxAttributes = 8
+const maxAttributes = 5
 const attributeName = ref('')
 const value = ref(1)
 const wantedPrice = ref(100)
@@ -29,7 +31,7 @@ const items = ref<Item[]>([])
 const itemAutoCompleteRef = ref()
 const requiredClear = ref(false)
 const discordNotification = ref(true)
-
+const itemStore = useItemStore()
 const props = defineProps({
   noWrapper: {
     type: Boolean,
@@ -47,12 +49,12 @@ const props = defineProps({
 const item = ref<Item>({
   id: 0,
   slot: '',
-  name: ''
+  name: '',
+  baseStats: []
 })
 
 const clearItem = () => {
   itemName.value = ''
-  itemAutoCompleteRef.value.inputRef.blur()
   requiredClear.value = true
 
   item.value = {
@@ -60,19 +62,18 @@ const clearItem = () => {
     slot: '',
     name: ''
   }
+
 }
 
 const clearAttribute = () => {
-  if (!itemAutoCompleteRef.value)
-    return
   attributeName.value = ''
-  itemAutoCompleteRef.value.inputRef.blur()
   requiredClear.value = true
+  attributeAutoCompleteRef.value.inputRef.blur()
 }
 
 const existingItem = computed((): ExistingItem => ({
   itemId: item.value.id!,
-  stats: stats.value,
+  stats: [...stats.value, ...virtualStats.value],
   published: published.value,
   wantedPrice: wantedPrice.value,
   offerType: offerType.value,
@@ -135,26 +136,43 @@ const addStatValidator = computed(() => {
   return true
 })
 
+const getMinRequiredStat = () => {
+  const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
+  if (!currentItem?.baseStats) {
+    return 0
+  }
+
+  const currentStatsLength = stats.value.length
+  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == currentStatsLength)
+  return requiredStats[0] ? requiredStats[0].min : 0
+}
+
 const addStat = () => {
   if (!addStatValidator.value) return
   stats.value.push({
     attributeId: attributeId.value,
     value: value.value,
+    isBaseStat: false
   })
   clearForm()
+
+  baseStatValue.value = getMinRequiredStat()
 }
 
 const handleSelectItem = (chosenItem: Item) => {
   item.value = chosenItem
+  itemAutoCompleteRef.value.inputRef.blur()
+  baseStatValue.value = getMinRequiredStat()
 }
 
 const handleSelectAttribute = (attribute: Attribute) => {
   attributeId.value = attribute.id
-  valueRef.value.focus()
+  valueRef.value.blur()
 }
 
 const deleteStat = (index: number) => {
   stats.value.splice(index, 1)
+  baseStatValue.value = getMinRequiredStat()
 }
 
 const createExistingItem = async () => {
@@ -198,6 +216,29 @@ const prefillData = () => {
   }
 }
 
+const baseStatValue = ref(0)
+
+const virtualStats = computed<Stat[] | []>(() => {
+  if (requiredBaseStats.value.length && stats.value.length)
+    return [{
+      attributeId: requiredBaseStats.value[0].attributeId,
+      value: baseStatValue.value,
+      isBaseStat: true
+    }]
+  return []
+})
+
+const requiredBaseStats = computed<BaseStat[]>(() => {
+  const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
+  if (!currentItem?.baseStats) {
+    return []
+  }
+
+  const currentStatsLength = stats.value.length
+  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == currentStatsLength)
+  return requiredStats
+})
+
 onBeforeMount(async () => {
   try {
     loading.value = true
@@ -234,7 +275,7 @@ onBeforeMount(async () => {
     <div class="item-creator__wrapper">
       <div class="item-creator__item">
         <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
-          @focus="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
+          @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
           @select="handleSelectItem" />
         <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
           <div class="labeled-switch">
@@ -255,8 +296,8 @@ onBeforeMount(async () => {
             <div class="sub-title">
               Stat name:
             </div>
-            <el-autocomplete @click="clearAttribute" value-key="name" v-model="attributeName"
-              :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
+            <el-autocomplete @click="clearAttribute" ref="attributeAutoCompleteRef" value-key="name"
+              v-model="attributeName" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
               @select="handleSelectAttribute" />
           </div>
           <div>
@@ -269,7 +310,7 @@ onBeforeMount(async () => {
           <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
         </div>
         <div class="stats">
-          <h3 v-if="stats.length">Selected stats:</h3>
+          <h3 v-if="stats.length">Selected additional stats:</h3>
           <div class="stats-item" v-for="(stat, index) in stats" :key="index">
             <span class="stats-details">
               {{ (attributes.find(a => a.id === stat.attributeId))?.name }}
@@ -278,9 +319,30 @@ onBeforeMount(async () => {
             <el-button @click="() => deleteStat(index)">Delete</el-button>
           </div>
         </div>
+
+        <div v-if="stats.length && requiredBaseStats.length" class="stats">
+          <h3>Base stats:</h3>
+          <div class="stats-item__base" v-for="(stat, index) in requiredBaseStats" :key="index">
+            <div>
+              <span>{{ (attributes.find(a => a.id === stat.attributeId))?.name }}</span>
+            </div>
+            <div v-if="stat.min !== stat.max">
+              <el-input-number :precision="1" :step="1" :min="stat.min" :max="stat.max" placeholder="Value" maxlength="3"
+                v-model="baseStatValue" />
+            </div>
+            <div>
+              <span v-if="stat.min !== stat.max">
+                min max: {{ stat.min }} | {{ stat.max }}
+              </span>
+              <span v-else>
+                {{ stat.min }}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
       <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true"
-        :stats="stats" />
+        :stats="[...stats, ...virtualStats]" />
     </div>
 
 
@@ -364,6 +426,11 @@ onBeforeMount(async () => {
       align-items: center;
       justify-content: space-between;
     }
+
+    &__base {
+      display: flex;
+      width: 100%;
+    }
   }
 
   &__attributes__actions {
@@ -384,7 +451,7 @@ onBeforeMount(async () => {
   }
 
   .stats {
-    padding: 1rem 0 2rem 0;
+    padding: 1rem 0 .5rem 0;
     flex-grow: 1;
   }
 
@@ -393,6 +460,12 @@ onBeforeMount(async () => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: .25rem;
+  }
+
+  .stats-item__base {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
   }
 
   .actions {
@@ -416,6 +489,12 @@ onBeforeMount(async () => {
 
   .el-input {
     height: var(--el-component-size);
+  }
+
+  .stats-item__base {
+    .el-input {
+      height: 35px;
+    }
   }
 }
 </style>

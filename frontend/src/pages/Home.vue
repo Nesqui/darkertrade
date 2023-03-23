@@ -1,48 +1,45 @@
 <script setup lang="ts">
-import { onBeforeMount, onUnmounted, ref } from 'vue'
-import { initAttributesApi, initWs } from '../hooks'
-import { useAttributesStore, useChatStore } from '../store'
+import { onBeforeMount, onBeforeUnmount, onUnmounted, ref } from 'vue'
+import { initAttributesApi, initItemApi } from '../hooks'
+import { useAttributesStore, useChatStore, useItemStore } from '../store'
 import AllChats from "../components/AllChats.vue";
 import TopMenu from '../components/TopMenu.vue'
 import { ElNotification } from 'element-plus';
-
-const { sendWS, init, connected, close, socket } = initWs()
+import useSocket from '@/hooks/ws';
+const { connect, disconnect, isConnected, reconnect } = useSocket()
 const attributeApi = initAttributesApi()
 const attributeStore = useAttributesStore()
 const reconnecting = ref(false)
-
-const changeActiveTab = async () => {
-  if (document.visibilityState == "hidden") {
-    close()
-  } else {
-    await init()
-  }
-}
-
-const onNotifyError = (message: string) => {
-  if (message)
-    ElNotification({
-      message
-    })
-}
+const itemApi = initItemApi()
+const itemStore = useItemStore()
 
 onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)
-  document.addEventListener("visibilitychange", changeActiveTab);
-  socket.value.on('notifyError', onNotifyError)
+  itemStore.saveAll(await itemApi.getBase())
+  connect()
 })
 
-onUnmounted(() => {
-  socket.value.off('notifyError', onNotifyError)
-})
+
+const changeActiveTab = async () => {
+  if (document.visibilityState !== "hidden") {
+    if (!isConnected.value)
+      reconnect()
+  }
+}
 
 const chatStore = useChatStore()
 
-const reconnect = async () => {
+onUnmounted(() => {
+  disconnect()
+  document.removeEventListener("visibilitychange", changeActiveTab)
+})
+
+const forceReconnect = async () => {
   reconnecting.value = true
   try {
-    await init()
+    if (!isConnected.value)
+      reconnect()
   } catch (error) {
     ElNotification({
       message: 'Unfortunately chat service not responding. Please contact with us via discord'
@@ -52,10 +49,6 @@ const reconnect = async () => {
     reconnecting.value = false
   }
 }
-
-onBeforeMount(async () => {
-  await init()
-});
 
 </script>
 
@@ -67,9 +60,9 @@ onBeforeMount(async () => {
     }">
       <router-view />
     </div>
-    <AllChats v-if="connected" :connected="connected" />
-    <div @click="reconnect" class="ws-error" v-else>{{ reconnecting ? 'Reconnecting ...' : 'Chat offine. Try reconnect?'
-    }}</div>
+    <AllChats v-if="isConnected" />
+    <div v-else @click="forceReconnect" class="ws-error">{{
+      reconnecting ? 'Reconnecting ...' : 'Chat offine. Try reconnect ? ' }}</div>
   </div>
 </template>
 

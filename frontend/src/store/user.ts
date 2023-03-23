@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
-import { initWs, User } from '../hooks'
+import { User } from '../hooks'
 import { useLocalStorage, useStorage } from '@vueuse/core'
 import { useRouter } from 'vue-router'
+import useSocket from '@/hooks/ws'
 
 export const useUserStore = defineStore('user', () => {
     const currentUser = useLocalStorage('currentUser', {} as User)
-    const { close } = initWs()
+    const { disconnect } = useSocket()
     const token = useLocalStorage('token', '')
     const isAuth = computed(() => !!token.value)
     const router = useRouter()
@@ -15,7 +16,6 @@ export const useUserStore = defineStore('user', () => {
     }
 
     const logout = () => {
-        close()
         localStorage.clear()
         currentUser.value = { id: 0, nickname: '', password: "", name: "", lastName: "", discord: '', active: false, discordNotification: true }
         token.value = ""

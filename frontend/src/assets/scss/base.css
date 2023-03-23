@@ -46,4 +46,10 @@
   --el-dialog-background: rgb(23 23 23);
   --el-fill-color-darker: #8b6a35;
   --tat-frame-box-shadow: inset rgb(0 0 0 / 55%) 0px 0px 1px 1px;
+  --rarity-0: rgb(222,222,222);
+  --rarity-1: rgb(98,190,11);
+  --rarity-2: rgb(74,155,209);
+  --rarity-3: rgb(173,90,255);
+  --rarity-4: rgb(247,162,45);
+  --rarity-5: rgb(227,216,140);
 }

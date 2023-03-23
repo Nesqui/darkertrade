@@ -37,6 +37,15 @@ export class ItemController {
     return this.itemService.findAll(itemQuery);
   }
 
+  @Get('base')
+  @ApiQuery({
+    type: QueryItemDto,
+  })
+  @UseGuards(JwtAuthGuard)
+  getBase() {
+    return this.itemService.getBase();
+  }
+
   @Get('market')
   @ApiQuery({
     type: QueryItemDto,
@@ -61,8 +70,12 @@ export class ItemController {
     type: QueryItemDto,
   })
   @UseGuards(JwtAuthGuard)
-  findUserItems(@Query() itemQuery: QueryItemDto, @Param('userId') userId: number, @ReqUser() user: User) {
-    return this.itemService.findUserItems(userId,itemQuery, user);
+  findUserItems(
+    @Query() itemQuery: QueryItemDto,
+    @Param('userId') userId: number,
+    @ReqUser() user: User,
+  ) {
+    return this.itemService.findUserItems(userId, itemQuery, user);
   }
 
   @Get(':id')

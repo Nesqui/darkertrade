@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, initWs, Message, OnBidClosed, UnreadMessagesCount } from "@/hooks";
+import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, Message, OnBidClosed, UnreadMessagesCount } from "@/hooks";
+import useSocket from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { ElNotification } from "element-plus";
-import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import ChatItems from "./ChatItems.vue";
-import UnreadCount from "./UnreadCount.vue";
 
+const { on, off, emit, isConnected } = useSocket()
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
@@ -42,14 +43,6 @@ const groups = ref<ChatsResponse>({
   receivedOffers: []
 })
 const message = ref('')
-const { sendWS, socket } = initWs()
-
-const props = defineProps({
-  connected: {
-    type: Boolean,
-    required: true,
-  }
-})
 
 const scroll = () => {
   if (!selectedChat.value.chatId)
@@ -63,8 +56,6 @@ const scroll = () => {
 }
 
 const onChatsCountsReceived = async (data: ChatsCountsResponse) => {
-  console.log('onChatsCountsReceived', data);
-
   counts.value = data
 }
 
@@ -80,8 +71,6 @@ const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
 }
 
 const onCountMessages = async (data: UnreadMessagesCount[]) => {
-  console.log('onCountMessages', data);
-
   unreadMessagesCount.value = data
 }
 
@@ -120,13 +109,9 @@ const onBidClosed = (data: OnBidClosed) => {
 
 const onMessagesReceive = async (data: Message) => {
   loadingMessageInput.value = false
-  console.log('onMessagesReceive', data);
-
   if (selectedChat.value.chatId === data.chatId) {
-    console.log('SAME CHAT');
-    
     selectedChat.value.messages.push(data)
-    sendWS('readMessagesOnChat', {
+    emit('readMessagesOnChat', {
       chatId: data.chatId
     })
     nextTick(() => {
@@ -136,10 +121,8 @@ const onMessagesReceive = async (data: Message) => {
 }
 
 const onChatCreated = async (data: ChatCreatedDto) => {
-  console.log('onChatCreated', data, groups.value);
   const existingItem = groups.value[data.offerType].find(ei => ei.id === data.existingItem.id)
   if (!existingItem) {
-    console.log('!NOT existingItem');
     groups.value[data.offerType].push(data.existingItem)
     return
   }
@@ -147,7 +130,6 @@ const onChatCreated = async (data: ChatCreatedDto) => {
     existingItem.bids = []
   if (data.existingItem.bids && data.existingItem.bids[0])
     existingItem.bids.push(data.existingItem.bids[0])
-  console.log('PUSH');
 }
 
 const sendMessage = () => {
@@ -164,34 +146,41 @@ const sendMessage = () => {
     return
   }
   loadingMessageInput.value = true
-  sendWS("sendMessage", {
+  emit("sendMessage", {
     text: message.value,
     chatId: selectedChat.value.chatId
   })
   message.value = ''
 }
 
+const onNotifyError = (message: string) => {
+  if (message)
+    ElNotification({
+      message
+    })
+}
+
 watch(() => expand.value.chats, () => {
   if (expand.value.chats)
-    sendWS("findAllChat")
+    emit("findAllChat")
 })
 
-onBeforeMount(() => {
-  sendWS("countAllChat")
+onBeforeMount(async () => {
+  on('notifyError', onNotifyError)
+
+  emit("countAllChat")
   if (expand.value.chats) {
-    sendWS("findAllChat")
-    sendWS("countMessages")
+    emit("findAllChat")
+    emit("countMessages")
   }
-  socket.value.on('chatsCountsReceived', onChatsCountsReceived)
-  socket.value.on('chatsReceived', onChatsReceived)
-  socket.value.on('receiveChatMessages', onChatMessagesReceive)
-  socket.value.on('receiveMessage', onMessagesReceive)
-  socket.value.on('countMessages', onCountMessages)
-  socket.value.on('existingItemUnpublish', onExistingItemUnpublish)
-  socket.value.on('chatCreated', onChatCreated)
-  socket.value.on('bidClosed', onBidClosed)
-  console.log('ALL NAMES', socket.value._callbacks)
-  console.log('onBeforeMount')
+  on('chatsCountsReceived', onChatsCountsReceived)
+  on('chatsReceived', onChatsReceived)
+  on('receiveChatMessages', onChatMessagesReceive)
+  on('receiveMessage', onMessagesReceive)
+  on('countMessages', onCountMessages)
+  on('existingItemUnpublish', onExistingItemUnpublish)
+  on('chatCreated', onChatCreated)
+  on('bidClosed', onBidClosed)
 })
 
 onMounted(() => {
@@ -201,27 +190,26 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
-  socket.value.off('chatsCountsReceived', onChatsCountsReceived)
-  socket.value.off('chatsReceived', onChatsReceived)
-  socket.value.off('receiveChatMessages', onChatMessagesReceive)
-  socket.value.off('receiveMessage', onMessagesReceive)
-  socket.value.off('countMessages', onCountMessages)
-  socket.value.off('existingItemUnpublish', onExistingItemUnpublish)
-  socket.value.off('chatCreated', onChatCreated)
-  socket.value.off('bidClosed', onBidClosed)
+  off('notifyError', onNotifyError)
+  off('chatsCountsReceived', onChatsCountsReceived)
+  off('chatsReceived', onChatsReceived)
+  off('receiveChatMessages', onChatMessagesReceive)
+  off('receiveMessage', onMessagesReceive)
+  off('countMessages', onCountMessages)
+  off('existingItemUnpublish', onExistingItemUnpublish)
+  off('chatCreated', onChatCreated)
+  off('bidClosed', onBidClosed)
   // chatStore.changeSelectedChat(undefined)
-  console.log('onBeforeUnmount')
 })
 
 
 
 // FIND OPENED CHATS WITHOUT MESSAGES 
 const loadChats = (opened: number) => {
-  console.log('loadChats');
-  sendWS("countAllChat")
+  emit("countAllChat")
   if (opened) {
     loadingMessages.value = true
-    sendWS("findAllChat")
+    emit("findAllChat")
   }
 }
 
@@ -229,7 +217,7 @@ const loadMoreMessages = () => {
   if (chatStore.messagePagination.offset + chatStore.messagePagination.limit > selectedChat.value.count)
     return
   chatStore.messagePagination.offset += chatStore.messagePagination.limit
-  sendWS("getChat", { chatId: selectedChat.value.chatId, ...chatStore.messagePagination })
+  emit("getChat", { chatId: selectedChat.value.chatId, ...chatStore.messagePagination })
 }
 
 const conversationContact = computed(() => {
@@ -239,13 +227,11 @@ const conversationContact = computed(() => {
 
 const clearActiveChat = async () => {
   chatStore.changeSelectedChat(undefined)
-  sendWS("countAllChat")
-  sendWS("findAllChat")
+  emit("countAllChat")
+  emit("findAllChat")
 }
 
 const unreadMessagesTotal = () => {
-  console.log(unreadMessagesCount.value);
-
   if (!unreadMessagesCount.value.length) return 0
   return unreadMessagesCount.value.reduce((pv, cv) => pv + Number(cv.unreadMessages), 0)
 }
@@ -258,17 +244,16 @@ const unreadMessagesTotal = () => {
       <el-collapse-item class="el-collapse-item__header__first" :class="{ 'warning': unreadMessagesTotal() }" name="1">
         <template #title>
           <div class="chat__title">
-            {{ counts ? `Chats | Sent - ${counts?.sentOffers} | Received - ${counts?.receivedOffers}` : 'Chats' }}
-            <!-- <UnreadCount :count="unreadMessagesTotal()" /> -->
+            {{ `Chats | Sent - ${counts?.sentOffers || 0} | Received - ${counts?.receivedOffers || 0}` }}
           </div>
         </template>
-        <p v-if="!groups.receivedOffers.length && !groups.sentOffers.length">
+        <p v-if="!groups.receivedOffers.length && !groups.sentOffers.length && !selectedChat.chatId">
           No active chats</p>
         <div v-if="selectedChat.chatId === 0">
           <!-- OFFER TYPES - RECEIVED OFFERS -->
-          <ChatItems v-if="groups.receivedOffers.length" :connected="connected" :offer-type="'receivedOffers'"
+          <ChatItems v-if="groups.receivedOffers.length" :isConnected="isConnected" :offer-type="'receivedOffers'"
             :offers="groups.receivedOffers" :unread-messages-count="unreadMessagesCount" />
-          <ChatItems v-if="groups.sentOffers.length" :connected="connected" :offers="groups.sentOffers"
+          <ChatItems v-if="groups.sentOffers.length" :isConnected="isConnected" :offers="groups.sentOffers"
             :offer-type="'sentOffers'" :unread-messages-count="unreadMessagesCount" />
         </div>
 
@@ -302,7 +287,7 @@ const unreadMessagesTotal = () => {
                   <View />
                 </el-icon></el-button>
             </div>
-            
+
             <div v-if="selectedChat.chat?.bid.suggestedExistingItemId" class="selected-chat__info__li">
               <span>
                 Suggested item
@@ -428,7 +413,7 @@ const unreadMessagesTotal = () => {
     right: -10px;
   }
 
-  
+
   .system-message {
     text-align: center;
     background-color: unset;
@@ -462,6 +447,7 @@ const unreadMessagesTotal = () => {
         align-items: center;
         justify-content: space-between;
       }
+
       &__li:not(:last-child) {
         margin-bottom: .45rem;
       }

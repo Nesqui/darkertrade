@@ -1,4 +1,4 @@
-import { ExistingItem, ItemName, Slot, useApi } from "."
+import { Attribute, ExistingItem, ItemName, Slot, useApi } from "."
 // const gallery = Object.values(import.meta.glob('@assets/images/items/*.{png,jpg,jpeg,PNG,JPEG}', { eager: true, as: 'url' }))
 // import g from '@/assets/images/items/'
 export interface QueryItemDto {
@@ -39,6 +39,11 @@ export const initItemApi = () => {
         return res.data
     }
 
+    const getBase = async (): Promise<Item[]> => {
+        const res = await axiosClient('item/base')
+        return res.data
+    }
+
     const getMarket = async (params: QueryItemDto): Promise<Item[]> => {
         const res = await axiosClient('item/market', {
             params
@@ -69,8 +74,28 @@ export const initItemApi = () => {
         findUserItem,
         findUserItems,
         getImg,
-        getMarket
+        getMarket,
+        getBase
     }
+}
+
+export interface BaseStat {
+  min: number;
+  max: number;
+  inputRequired: boolean;
+  itemId: number;
+  item: Item;
+  attributeId: number;
+  attribute: Attribute;
+  statsLength: number;
+}
+
+export interface VirtualStat {
+  min: number;
+  max: number;
+  inputRequired: boolean;
+  attributeId: number;
+  statsLength: number;
 }
 
 export interface Item {
@@ -78,5 +103,6 @@ export interface Item {
     name: ItemName;
     slot: Slot;
     existingItems?: ExistingItem[];
-    createdAt?: string
+    createdAt?: string,
+    baseStats: BaseStat[]
 }

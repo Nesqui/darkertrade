@@ -3,7 +3,8 @@ import { useApi } from "."
 export interface Stat {
     id?: number
     value: number
-    attributeId: number
+    attributeId: number,
+    isBaseStat: boolean
 }
 
 export const initStatApi = () => {

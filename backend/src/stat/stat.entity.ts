@@ -12,6 +12,7 @@ import {
   IsNumeric,
   IsDecimal,
   DataType,
+  Default,
 } from 'sequelize-typescript';
 import { Attribute } from 'src/attribute/attribute.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -40,4 +41,8 @@ export class Stat extends Model {
 
   @BelongsTo(() => ExistingItem)
   existingItem: ExistingItem;
+
+  @Default(false)
+  @Column
+  isBaseStat: boolean;
 }

@@ -9,6 +9,7 @@ import { statsProviders } from 'src/stat/stat.proviers';
 import { usersProviders } from 'src/user/user.providers';
 import { bidProviders } from 'src/bid/bid.providers';
 import { pgProviders } from 'src/pg/pg.providers';
+import { baseStatProvider } from 'src/base-stat/base-stat.provider';
 
 @Module({
   imports: [PgModule],
@@ -21,6 +22,7 @@ import { pgProviders } from 'src/pg/pg.providers';
     ...usersProviders,
     ...bidProviders,
     ...pgProviders,
+    ...baseStatProvider,
     JwtService,
   ],
 })

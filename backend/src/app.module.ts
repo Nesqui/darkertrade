@@ -14,6 +14,7 @@ import { DiscordBotModule } from './discord/discord.module';
 import { CommunityModule } from './community/community.module';
 import { ChatModule } from './chat/chat.module';
 import { MessagesModule } from './messages/messages.module';
+import { BaseStatModule } from './base-stat/base-stat.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { MessagesModule } from './messages/messages.module';
     CommunityModule,
     ChatModule,
     MessagesModule,
+    BaseStatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,6 +1,14 @@
 import { Type } from '@nestjs/common';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, MaxLength, Min, Max } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsNumber,
+  MaxLength,
+  Min,
+  Max,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateStatDto {
   @ApiProperty({
@@ -16,4 +24,12 @@ export class CreateStatDto {
     type: String,
   })
   readonly attributeId: string;
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Transform(({ obj }) => obj.isBaseStat === 'true' || obj.isBaseStat === true)
+  readonly isBaseStat: boolean = false;
 }

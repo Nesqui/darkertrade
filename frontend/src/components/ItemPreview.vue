@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { PropType } from 'vue'
-import { Item, Stat, truncate, initItemApi, useMoment } from '../hooks'
-import { useAttributesStore } from '../store'
+import { computed, PropType } from 'vue'
+import { Item, Stat, truncate, initItemApi, useMoment, BaseStat, VirtualStat } from '../hooks'
+import { useAttributesStore, useItemStore, useUserStore } from '../store'
 
 const itemApi = initItemApi()
+const itemStore = useItemStore()
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const moment = useMoment()
+const userStore = useUserStore()
 
-defineProps({
+const props = defineProps({
   item: {
     type: Object as PropType<Item>
   },
@@ -35,52 +37,99 @@ defineProps({
     type: String
   }
 });
+
+const baseStats = computed(() => {
+  const item = itemStore.items.find(item => item.id === props.item?.id)
+  const currentStatsLength = props.stats?.filter(item => !item.isBaseStat).length || 0
+  if (item?.baseStats) {
+    const flatStats = item.baseStats.filter(stat => !stat.inputRequired && stat.statsLength === 0)
+    let computedStats: VirtualStat[] = []
+    console.log(currentStatsLength);
+
+    const requiredStats = item.baseStats.filter(stat => stat.inputRequired && stat.statsLength === currentStatsLength)
+    console.log('REQ', requiredStats);
+
+    const virtualStats = requiredStats.map(stat => {
+      const foundStat = props.stats?.find(propStat => propStat.isBaseStat && propStat.attributeId === stat.attributeId)
+      console.log(foundStat || false);
+
+      if (foundStat)
+        return {
+          min: foundStat.value,
+          max: foundStat.value,
+          inputRequired: true,
+          attributeId: stat.attributeId,
+          statsLength: stat.statsLength,
+        }
+      return stat
+    })
+    computedStats = [...virtualStats]
+    return [...flatStats, ...computedStats]
+  }
+  return []
+})
+
 </script>
 
 <template>
   <div class="item-preview">
     <div class="tat-frame" :class="{ 'no-hover': noHover }">
-      <div class="offer-header" v-if="offerType">
-        <label class="darker-title">{{ offerType }}</label>
-        <div v-if="updatedAt" class="offer-header__item">
+      <div class="offer-header">
+        <div class="text-divider">
+          <span :class="`darker-title ${wantedPrice ? 'rarity-' + stats?.filter(stat => !stat.isBaseStat).length: ''}`">
+            {{ item?.name || 'Choose item type' }}</span>
+        </div>
+        <div v-if="offerType" class="offer-header__item">
           <span>Updated:</span>
-          <p class="offer-header__small"> {{ moment.fromNow(updatedAt) }}</p>
+          <p class="offer-header__small"> {{ moment.fromNow(updatedAt || new Date().toString()) }}</p>
         </div>
-        <div v-if="creatorNickname" class="offer-header__item">
+        <div v-if="offerType" class="offer-header__item">
           <span>{{ offerType === 'WTS' ? 'Seller:' : 'Buyer:' }}</span>
-          <span class="offer-header__small">{{ creatorNickname }}</span>
+          <p class="offer-header__small">{{ creatorNickname || userStore.currentUser.nickname }}</p>
         </div>
-      </div>
-      <div class="divider" v-if="offerType" />
-      <div class="item-header">
-        <label class="darker-title">{{ item?.name || 'Choose item type' }}</label>
+        <div v-if="offerType" class="offer-header__item">
+          <span>Market:</span>
+          <strong class="offer-header__small">{{ offerType }}</strong>
+        </div>
       </div>
       <div class="item-img">
         <img v-if="item?.id" :src="itemApi.getImg(item)" alt="">
         <div v-else class="img-avatar"></div>
       </div>
-      <div class="divider" v-if="stats?.length"></div>
       <div class="item-description">
-        <div v-for="(stat, index) in stats" :key="index" class="stat darker-title">
-          {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
-            truncate(getAttributeNameById(stat.attributeId), 35) }}
+        <div class="base-stats" v-if="wantedPrice && baseStats.length">
+          <div class="text-divider">base stats:</div>
+          <span v-for="(stat, index) in baseStats" :key="index" class="base-stat rarity-0">
+            {{ stat.min === stat.max ? stat.min : `${stat.min}-${stat.max}` }} {{
+              truncate(getAttributeNameById(stat.attributeId), 35) }}
+          </span>
         </div>
-        <div v-if="!wantedPrice">Category</div>
-        <div class="divider" v-if="wantedPrice"></div>
-        <div class="darker-title" v-if="wantedPrice">Price: {{ wantedPrice }} gold</div>
+        <div class="stats" v-if="stats?.length">
+          <div class="text-divider">Additional stats:</div>
+          <span v-for="(stat, index) in stats.filter(stat => !stat.isBaseStat)" :key="index" class="stat darker-title rarity-2">
+            {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
+              truncate(getAttributeNameById(stat.attributeId), 35) }}
+          </span>
+        </div>
+        <div class="text-divider" v-if="!wantedPrice">Category</div>
+        <div class="price" v-if="wantedPrice">
+          <div class="text-divider"> Price</div>
+          <span class="darker-title"> {{ wantedPrice }} gold</span>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-$frameHeight: 190px;
+$frameHeight: 160px;
 $item-description-padding: .7rem .5rem;
 
 .item-preview {
   .tat-frame {
     display: flex;
     flex-direction: column;
+    font-size: 14px;
     align-items: center;
     gap: 15px;
     min-height: $frameHeight;
@@ -88,16 +137,6 @@ $item-description-padding: .7rem .5rem;
     padding: var(--tat-frame-padding);
   }
 
-  .item-header {
-    padding-top: .45rem;
-    margin-bottom: 1rem;
-  }
-
-  .divider {
-    width: 85%;
-    border-bottom: 2px solid var(--el-border-color);
-    margin-bottom: .25rem;
-  }
 
   .item-img {
     display: flex;
@@ -109,6 +148,7 @@ $item-description-padding: .7rem .5rem;
     }
   }
 
+
   .darker-title {
     justify-content: center;
     display: flex;
@@ -116,11 +156,21 @@ $item-description-padding: .7rem .5rem;
 
   .offer-header {
     width: 100%;
+    font-size: 11px;
+
     text-align: center;
-    padding-top: .25rem;
+
+    p,
+    strong {
+      margin: .1rem 0;
+    }
+
+    .text-divider {
+      margin: .4rem 0;
+      display: flex;
+    }
 
     &__item {
-      font-size: 12px;
       align-items: center;
       display: flex;
       width: 100%;
@@ -128,19 +178,49 @@ $item-description-padding: .7rem .5rem;
     }
   }
 
+  .text-divider {
+    margin: .5rem 0;
+    font-size: 12px;
+  }
 
   .item-description {
     padding: unset;
     display: flex;
     flex-direction: column;
-    gap: .75rem;
-    font-size: 12px;
     width: 100%;
     align-items: center;
+    font-family: "Solmoe";
+    gap: .25rem;
+
+    .base-stats,
+    .stats {
+      flex-direction: column;
+      align-items: center;
+      display: flex;
+      width: 100%;
+      gap: .25rem;
+
+      .text-divider {
+        margin: 1rem 0 1rem 0;
+      }
+    }
+
+    .base-stat {
+      font-size: 11px;
+      opacity: 0.8;
+    }
 
     .stat {
-      font-size: 11px;
-      font-weight: 800;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .price {
+      width: 100%;
+
+      .text-divider {
+        margin: 1rem 0;
+      }
     }
 
     &__title {

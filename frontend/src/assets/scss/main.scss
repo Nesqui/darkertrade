@@ -21,6 +21,25 @@
     }
 }
 
+.rarity-0 {
+    color: var(--rarity-0)
+}
+
+.rarity-1 {
+    color: var(--rarity-1)
+}
+.rarity-2 {
+    color: var(--rarity-2)
+}
+.rarity-3 {
+    color: var(--rarity-3)
+}
+.rarity-4 {
+    color: var(--rarity-4)
+}
+.rarity-5 {
+    color: var(--rarity-5)
+}
 
 html,
 body {
@@ -373,6 +392,36 @@ button:hover {
     .bg {
         display: none;
     }
+}
+
+.text-divider {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: 10px;
+    margin: 1.2rem 0 1rem 0;
+    --text-divider-gap: 1rem; // set a customizable gap between label and lines
+}
+
+.text-divider::before,
+.text-divider::after {
+    content: '';
+    height: 1px;
+    background-color: var(--el-border-color);
+    flex-grow: 1;
+}
+
+.text-divider::before {
+    margin-right: var(--text-divider-gap);
+}
+
+.text-divider::after {
+    margin-left: var(--text-divider-gap);
+}
+
+.el-divider__text {
+    padding: 0 25px;
+    font-size: 10px;
 }
 
 .el-dialog.wrapper {

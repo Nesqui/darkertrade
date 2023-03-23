@@ -1,6 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { BeforeConnect, Sequelize } from 'sequelize-typescript';
-import db from 'sequelize';
+import { Sequelize } from 'sequelize-typescript';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
 import { Bid } from 'src/bid/bid.entity';
@@ -12,6 +11,7 @@ import { Community } from 'src/community/community.entity';
 import { Chat } from 'src/chat/chat.entity';
 import { Message } from 'src/messages/messages.entity';
 import { CommunityUser } from 'src/community/community-user.entity';
+import { BaseStat } from 'src/base-stat/base-stat.entity';
 
 const initData = async (sequelize: Sequelize, configService: ConfigService) => {
   await sequelize.model('User').findOrCreate({
@@ -66,9 +66,10 @@ export const pgProviders = [
         Chat,
         Message,
         CommunityUser,
+        BaseStat,
       ]);
       try {
-        await sequelize.sync({ alter: false });
+        await sequelize.sync({ alter: true });
         await initData(sequelize, ConfigService);
         return sequelize;
       } catch (error) {

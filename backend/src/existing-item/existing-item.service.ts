@@ -21,6 +21,10 @@ const LIMITS = {
   WTB: 10,
   WTS: 20,
 };
+
+const MAX_NOT_BASE_STATS_LENGTH = 5;
+const MAX_BASE_STATS_LENGTH = 1;
+
 @Injectable()
 export class ExistingItemService {
   constructor(
@@ -51,6 +55,21 @@ export class ExistingItemService {
         archived: false,
       },
     });
+
+    if (!createExistingItemDto.stats.length)
+      throw new ForbiddenException('You cant create item without stats');
+
+    if (
+      createExistingItemDto.stats.filter((stat) => !stat.isBaseStat).length >
+      MAX_NOT_BASE_STATS_LENGTH
+    )
+      throw new ForbiddenException('You cant create this item');
+
+    if (
+      createExistingItemDto.stats.filter((stat) => stat.isBaseStat).length >
+      MAX_BASE_STATS_LENGTH
+    )
+      throw new ForbiddenException('You cant create this item');
 
     if (quantityOfExistingItems > LIMITS[createExistingItemDto.offerType])
       throw new ForbiddenException(

@@ -1,6 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import sequelize from 'sequelize';
 import { QueryTypes, Includeable } from 'sequelize';
+import { BaseStat } from 'src/base-stat/base-stat.entity';
 import { Bid } from 'src/bid/bid.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Stat } from 'src/stat/stat.entity';
@@ -14,6 +15,7 @@ import { Item } from './item.entity';
 export class ItemService {
   constructor(
     @Inject('ITEMS_REPOSITORY') private itemsRepository: typeof Item,
+    @Inject('BASE_STAT_REPOSITORY') private baseStatRepository: typeof BaseStat,
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
     @Inject('BIDS_REPOSITORY') private bidsRepository: typeof Bid,
     @Inject('EXISTING_ITEM_REPOSITORY')
@@ -26,6 +28,16 @@ export class ItemService {
 
   create(createItemDto: CreateItemDto) {
     return 'This action adds a new item';
+  }
+
+  async getBase() {
+    return await this.itemsRepository.findAll({
+      include: [
+        {
+          model: this.baseStatRepository,
+        },
+      ],
+    });
   }
 
   async findAll(itemQuery: QueryItemDto) {

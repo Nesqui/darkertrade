@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi, initWs, Message, UnreadMessagesCount } from "@/hooks";
+import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi,  Message, UnreadMessagesCount } from "@/hooks";
+import useSocket from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, PropType, ref, watch, watchEffect } from "vue";
@@ -28,10 +29,10 @@ const push = async (url: string) => {
     router.go(0)
 }
 
-const { sendWS } = initWs()
+const { emit } = useSocket()
 
 const props = defineProps({
-  connected: {
+  isConnected: {
     type: Boolean,
     required: true,
   },
@@ -51,7 +52,7 @@ const props = defineProps({
 
 onBeforeMount(() => {
   // if (expand.value.chats) {
-  //   sendWS("countMessages")
+  //   emit("countMessages")
   // }
   // socket.value.on('chatsCountsReceived', onChatsCountsReceived)
   // socket.value.on('chatsReceived', onChatsReceived)
@@ -73,7 +74,7 @@ onBeforeMount(() => {
 const loadChats = (opened: number) => {
   if (opened) {
     loadingMessages.value = true
-    sendWS("findAllChat")
+    emit("findAllChat")
   }
 }
 
@@ -85,7 +86,7 @@ const pagination = ref({
 // Get chat by id and get Messages 
 const initChat = async (chatId: number) => {
   chatStore.currentChatOfferType = props.offerType
-  sendWS("getChat", { chatId, ...pagination.value })
+  emit("getChat", { chatId, ...pagination.value })
 }
 
 const unreadMessagesCountByChatId = (chatId: number) => {
