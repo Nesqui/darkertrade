@@ -56,7 +56,8 @@ const prefillItem = computed((): PrefillItem => ({
   id: props.item.id!,
   name: props.item.name!,
   slot: props.item.slot,
-  offerType: 'WTS'
+  offerType: 'WTS',
+  baseStats: []
 }))
 
 const doAfterItemSelection = async (currentExistingItem: ExistingItem) => {

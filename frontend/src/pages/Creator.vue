@@ -60,7 +60,8 @@ const clearItem = () => {
   item.value = {
     id: 0,
     slot: '',
-    name: ''
+    name: '',
+    baseStats: []
   }
 
 }
@@ -201,7 +202,8 @@ const clear = () => {
   item.value = {
     id: 0,
     slot: '',
-    name: ''
+    name: '',
+    baseStats: []
   }
   stats.value = []
   prefillData()

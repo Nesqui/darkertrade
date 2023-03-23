@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, Message, OnBidClosed, UnreadMessagesCount } from "@/hooks";
-import useSocket from "@/hooks/ws";
+import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, Message, OnBidClosed } from "@/hooks";
+import useSocket, { UnreadMessagesCount } from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { ElNotification } from "element-plus";
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -71,6 +71,8 @@ const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
 }
 
 const onCountMessages = async (data: UnreadMessagesCount[]) => {
+  console.log({data});
+  
   unreadMessagesCount.value = data
 }
 

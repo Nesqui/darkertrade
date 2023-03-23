@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi,  Message, UnreadMessagesCount } from "@/hooks";
-import useSocket from "@/hooks/ws";
+import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi,  Message } from "@/hooks";
+import useSocket, { UnreadMessagesCount } from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, PropType, ref, watch, watchEffect } from "vue";
@@ -103,7 +103,7 @@ const unreadMessagesCountByExistingItem = (existingItem: ExistingItem) => {
   return existingItem.bids.reduce((pv, cv) => pv + unreadMessagesCountByChatId(cv.chatId!), 0)
 }
 
-const unreadedMessagesCountByOffer = () => {
+const unreadMessagesCountByOffer = () => {
   if (!props.offers.length) return 0
   return props.offers.reduce((pv, cv) => pv + unreadMessagesCountByExistingItem(cv), 0)
 }
@@ -118,7 +118,7 @@ const unreadedMessagesCountByOffer = () => {
         <div class="chat-items__title">
           <span>
             {{ offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers' }}</span>
-          <UnreadCount :count="unreadedMessagesCountByOffer()" />
+          <UnreadCount :count="unreadMessagesCountByOffer()" />
         </div>
       </template>
       <div v-for="(existingItem, index) in offers" :key="index">

@@ -8,7 +8,11 @@ const socketId = Math.random().toString(36)
 const isConnected = ref(false);
 let token: string
 let socket: Socket | any
-
+export interface UnreadMessagesCount {
+  chatId: number
+  userId: number
+  unreadMessages: string
+}
 const createSocket = () => {
   // Create a new socket instance if one does not already exist
   if (!socket) {

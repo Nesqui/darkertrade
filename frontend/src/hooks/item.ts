@@ -18,7 +18,8 @@ export interface PrefillItem {
     id: number
     name: ItemName
     slot: Slot
-    offerType: 'WTB' | 'WTS'
+    offerType: 'WTB' | 'WTS',
+    baseStats: []
 }
 
 export interface DisabledItemActions {
