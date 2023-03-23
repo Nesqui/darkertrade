@@ -46,7 +46,6 @@ const bidCreatedHandler = (bid: Bid) => {
 
 const bidDeletedHandler = (bid: Bid) => {
   if (item.value?.existingItems) {
-    console.log('item.value?.existingItems');
 
     const index = item.value.existingItems[0].bids?.findIndex(currentBid => currentBid.id === bid.id)
     if (index !== undefined && index != -1)

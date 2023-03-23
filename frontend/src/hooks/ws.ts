@@ -31,12 +31,10 @@ const createSocket = () => {
 
   socket.on('authorized', () => {
     isConnected.value = true
-    console.log('Sock authorized');
   })
 
   socket.on('disconnect', () => {
     isConnected.value = false
-    console.log('Socket disconnected');
   });
 }
 
@@ -71,7 +69,6 @@ const off = (eventName: string, callback: any) => {
 
 const handleMessage = (event: any) => {
   const { data } = event;
-  console.log('handle message', data.type);
   
   // Check if the message is relevant to this socket instance
   if (data.type === 'connect' && data.socketId !== socketId) {

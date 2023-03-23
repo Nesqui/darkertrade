@@ -44,14 +44,11 @@ const baseStats = computed(() => {
   if (item?.baseStats) {
     const flatStats = item.baseStats.filter(stat => !stat.inputRequired && stat.statsLength === 0)
     let computedStats: VirtualStat[] = []
-    console.log(currentStatsLength);
 
     const requiredStats = item.baseStats.filter(stat => stat.inputRequired && stat.statsLength === currentStatsLength)
-    console.log('REQ', requiredStats);
 
     const virtualStats = requiredStats.map(stat => {
       const foundStat = props.stats?.find(propStat => propStat.isBaseStat && propStat.attributeId === stat.attributeId)
-      console.log(foundStat || false);
 
       if (foundStat)
         return {

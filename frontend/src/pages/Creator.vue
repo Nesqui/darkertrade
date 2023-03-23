@@ -69,7 +69,6 @@ const clearItem = () => {
 const clearAttribute = () => {
   attributeName.value = ''
   requiredClear.value = true
-  attributeAutoCompleteRef.value.inputRef.blur()
 }
 
 const existingItem = computed((): ExistingItem => ({
@@ -168,7 +167,8 @@ const handleSelectItem = (chosenItem: Item) => {
 
 const handleSelectAttribute = (attribute: Attribute) => {
   attributeId.value = attribute.id
-  valueRef.value.blur()
+  // valueRef.value.blur()
+  attributeAutoCompleteRef.value.blur()
 }
 
 const deleteStat = (index: number) => {

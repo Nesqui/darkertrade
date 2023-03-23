@@ -71,8 +71,6 @@ const onChatMessagesReceive = async (data: ChatMessagesResponse) => {
 }
 
 const onCountMessages = async (data: UnreadMessagesCount[]) => {
-  console.log({data});
-  
   unreadMessagesCount.value = data
 }
 
