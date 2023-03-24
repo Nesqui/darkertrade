@@ -31,6 +31,7 @@ export const useChatStore = defineStore('chat', () => {
       messagePagination.value.offset = 0
       return
     }
+    data.messages.reverse()
     if (selectedChat.value.chatId === data.chatId) {
       selectedChat.value.count = data.count
       selectedChat.value.messages = [...data.messages, ...selectedChat.value.messages]
