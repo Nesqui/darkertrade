@@ -109,7 +109,7 @@ const selectExistingItem = (existingItem: ExistingItem) => {
 const newBidsCounter = (existingItem: ExistingItem) => {
   if (!existingItem.bids) return ''
   let count = 0
-  if (existingItem.offerType === 'WTB')
+  if (tabName.value === 'sentOffers')
     count = existingItem.bids.filter(bid => bid.status === 'accepted').length
   else
     count = existingItem.bids.filter(bid => bid.status === 'created').length

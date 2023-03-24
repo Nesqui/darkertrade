@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi,  Message } from "@/hooks";
+import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi, Message } from "@/hooks";
 import useSocket, { UnreadMessagesCount } from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { storeToRefs } from "pinia";
@@ -209,6 +209,14 @@ const unreadMessagesCountByOffer = () => {
       align-items: center;
       height: 100%;
       justify-content: flex-start;
+
+      .darker-title {
+        white-space: nowrap;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 144px;
+        text-align: left;
+      }
     }
 
     .darker-title {
