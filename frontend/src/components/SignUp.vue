@@ -181,7 +181,7 @@ const env = ref(import.meta.env.VITE_ENV)
             </path>
           </g>
         </svg>
-        Signup via discord
+        Join discord server
       </a>
     </div>
   </el-form>
