@@ -31,8 +31,12 @@ jobs:
           cd /opt/darkertrade/
           cd backend
           nest build
-    - name: delete PM2
-      run: pm2 delete all
+    - name: build FE
+      run: |
+          cd /
+          cd /opt/darkertrade/
+          cd frontend
+          pnpm run build
     - name: restart PM2
-      run: pm2 start /opt/darkertrade/ecosystem.config.js
+      run: pm2 restart /opt/darkertrade/ecosystem.config.js
     
