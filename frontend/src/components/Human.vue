@@ -145,12 +145,90 @@ $human-height: 550px;
     left: 213px;
   }
 
-  // .img {
-  //   background: url("../assets/images/dummy.png") no-repeat;
-  //   width: var(--wrapper-medium-width);
-  //   height: $human-height;
-  //   background-position-x: center;
-  //   background-position-y: center;
-  // }
+}
+
+
+@media (max-width:420px) {
+  .human {
+    $item-mobile-size: 30px;
+    $human-mobile-height: 500px;
+    $x-mobile-offset: 35px;
+    $y-mobile-offset: 35px;
+
+    .wrapper {
+      height: $human-mobile-height;
+      width: var(--wrapper-mobile-width)
+    }
+
+    .tat-frame {
+      width: $item-mobile-size;
+      height: $item-mobile-size;
+      font-size: 14px;
+    }
+
+    .item-description {
+      left: 10px;
+      bottom: 10px;
+      min-width: 85px;
+      min-height: 110px;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: .1rem;
+
+      .darker-title {
+        font-size: 12px;
+      }
+
+      span {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+
+    .head {
+      top: $y-mobile-offset;
+      left: $x-mobile-offset + 130px;
+    }
+
+    .chest {
+      top: $y-mobile-offset + 100px;
+      left: $x-mobile-offset + 130px;
+    }
+
+    .ring {
+      top: $y-mobile-offset+ 140px;
+      left: $x-mobile-offset + 220px;
+    }
+
+    .amulet {
+      top: $y-mobile-offset + 50px;
+      left: $x-mobile-offset + 220px;
+    }
+
+    .gloves {
+      top: $y-mobile-offset + 250px;
+      left: $x-mobile-offset + 70px;
+    }
+
+    .weapon {
+      top: $y-mobile-offset + 70px;
+      left: $x-mobile-offset;
+      height: 70px;
+      width: 50px;
+    }
+
+    .boots {
+      top: $y-mobile-offset + 290px;
+      left: $x-mobile-offset + 130px;
+    }
+
+    .legs {
+      top: $y-mobile-offset + 200px;
+      left: $x-mobile-offset + 130px;
+    }
+
+  }
 }
 </style>

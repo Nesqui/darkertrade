@@ -70,9 +70,9 @@ onBeforeMount(async () => {
 
 <template>
   <div class="login">
-    <el-input readonly onfocus="this.removeAttribute('readonly');" @keyup.enter="login" v-model="formData.nickname"
+    <el-input @keyup.enter="login" v-model="formData.nickname"
       placeholder="Login"></el-input>
-    <el-input readonly onfocus="this.removeAttribute('readonly');" show-password type="password"
+    <el-input show-password type="password"
       v-model="formData.password" @keyup.enter="login" placeholder="Password"></el-input>
     <el-button :disabled="!valid" @click="login">Signin</el-button>
   </div>

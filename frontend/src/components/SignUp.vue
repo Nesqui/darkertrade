@@ -258,6 +258,15 @@ p {
     margin-bottom: 0;
   }
 }
+
+@media (max-width:420px) {
+    .register-discord {
+      p {
+        word-break: break-all;
+      }
+    }
+
+}
 </style>
 <style lang="scss">
 .register {

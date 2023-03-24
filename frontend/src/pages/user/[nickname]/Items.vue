@@ -88,7 +88,6 @@ onBeforeMount(async () => {
             :existing-items-source="findAllByItemIdAndUserId" :loading="loading"></ItemList>
     </div>
 </template>
- :loading=
 <style scoped lang="scss">
 .my-items {
     .wrapper {

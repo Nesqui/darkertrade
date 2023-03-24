@@ -351,4 +351,33 @@ $step: 1rem;
 .actions {
   margin-bottom: $step;
 }
+
+@media (max-width:420px) {
+  .item-list-component {
+    width: 100%;
+
+    .bg {
+      position: absolute;
+      left: -60%;
+    }
+
+    .actions-filter {
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 1rem;
+      height: unset;
+    }
+
+    .wrapper {
+      width: unset;
+    }
+
+    .item-list {
+      align-items: center;
+      justify-content: center;
+      grid-template-columns: auto;
+    }
+  }
+}
 </style>

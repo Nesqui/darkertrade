@@ -214,6 +214,7 @@ onBeforeMount(async () => {
   display: flex;
   flex-direction: column;
   position: relative;
+
   .bg {
     position: absolute;
     right: 200px;
@@ -263,6 +264,38 @@ onBeforeMount(async () => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+  }
+}
+
+@media (max-width:420px) {
+  .item {
+    .wrapper {
+      overflow: hidden;
+      max-height: unset;
+    }
+
+    .el-button {
+      height: 35px;
+      padding: 2px 12px;
+    };
+
+    .item-details {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .item-info {
+      order: 2;
+    }
+
+    .item-preview {
+      order: 1;
+    }
+
+    .item-actions {
+      flex-direction: column;
+      gap: 1rem;
+    }
   }
 }
 </style>

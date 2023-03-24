@@ -1,12 +1,32 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../store'
+const windowWidth = ref(400)
 
 const userStore = useUserStore()
 const isAuth = computed(() => userStore.isAuth)
 const router = useRouter()
 const route = useRoute()
+const activeIndex = ref('/')
+
+const onResize = () => {
+  nextTick(() => {
+    windowWidth.value = window.innerWidth
+  })
+}
+
+onMounted(() => {
+  window.addEventListener('resize', onResize);
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize);
+})
+
+const handleSelect = (key: string, keyPath: string[]) => {
+  console.log(key, keyPath)
+}
 const push = async (url: string, newWindow = false) => {
   if (newWindow && url) {
     window.open(url, '_blank')
@@ -26,10 +46,24 @@ const push = async (url: string, newWindow = false) => {
 
 <template>
   <div class="menu">
-    <div class="logo" @click="push('/')" @click.middle="() => push('/', true)">
-      <img src="../assets/logo.png" alt="">
-    </div>
-    <div v-if="isAuth" class="top-menu">
+    <el-menu router="true" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200" :default-active="activeIndex" mode="horizontal">
+      <el-menu-item index="/">
+        <div class="logo">
+          <img src="../assets/logo.png" alt="">
+        </div>
+      </el-menu-item>
+      <div class="flex-grow" />
+
+      <el-menu-item index="/market">Browse offers</el-menu-item>
+      <el-menu-item index="/creator">Create offer</el-menu-item>
+      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
+      <el-menu-item index="/bids/">My bids</el-menu-item>
+      <div class="flex-grow" />
+      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`"> {{ userStore.currentUser.nickname }}</el-menu-item>
+      <el-menu-item @click="userStore.logout" index="/">Logout</el-menu-item>
+    </el-menu>
+
+    <!-- <div class="top-menu">
       <div class="top-menu__item">
         <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Browse offers</a>
       </div>
@@ -53,71 +87,72 @@ const push = async (url: string, newWindow = false) => {
       <div class="top-menu__item">
         <a link @click="userStore.logout">Logout</a>
       </div>
-    </div>
+    </div> -->
   </div>
 </template>
 
 <style scoped lang="scss">
 $menuHeight: 50px;
-$padding: 25px;
+$menuMobileHeight: 30px;
 
 .menu {
-  display: flex;
-  align-items: center;
-  background-color: transparent;
-  width: 100%;
-  height: $menuHeight;
+  // display: flex;
+  // align-items: center;
+  // background-color: transparent;
+  // width: 100%;
 
   .logo {
     cursor: pointer;
-    margin-left: $padding;
-    z-index: 1;
+    min-width: 209px;
 
     >img {
       height: calc($menuHeight - 15px);
     }
   }
 
+
   .logout,
   .logo {
-    width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   .logout {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    margin-right: $padding;
     text-align: end;
   }
 
-  .top-menu {
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    position: relative;
+}
 
-    &__item {
-      padding: 0 $padding;
-      z-index: 1;
+@media (max-width:420px) {
 
-      a {
-        cursor: pointer;
-        font-weight: 600;
+  .menu {
+    .el-menu {
+      padding: .9rem 0;
+    }
+
+    .logo {
+      img {
+        height: $menuMobileHeight;
       }
     }
-
-    &__item:first-child {
-      padding-left: 0;
-    }
-
-    &__item:last-child {
-      padding-right: 0;
-    }
-
-    &__item:not(:last-child) {
-      border-right: 1px solid var(--el-border-color);
-    }
   }
+}
+</style>
+
+<style lang="scss">
+.el-menu--horizontal {
+  align-items: center;
+}
+
+.el-menu-item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+
 }
 </style>

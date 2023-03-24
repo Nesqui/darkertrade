@@ -8,7 +8,9 @@ import { TimeoutInterceptor } from './interceptors';
 const version = '0.0.1';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: console,
+  });
   const cfg = app.get(ConfigService);
   app.enableCors();
   app.enableShutdownHooks();

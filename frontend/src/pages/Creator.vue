@@ -349,7 +349,7 @@ onBeforeMount(async () => {
 
 
     <div class="item-creator__actions">
-      <div
+      <div class="create"
         v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
         <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
           size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button>
@@ -390,7 +390,6 @@ onBeforeMount(async () => {
 }
 
 .item-creator {
-  min-height: 520px;
   max-height: 750px;
   overflow-y: hidden;
   display: flex;
@@ -481,6 +480,68 @@ onBeforeMount(async () => {
     width: 100%;
   }
 }
+
+@media (max-width:420px) {
+  .item-creator {
+    overflow-y: auto;
+    max-height: unset;
+  }
+
+  .stats {
+    h3 {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .bg {
+    position: fixed;
+    left: -400px;
+    top: 0;
+    width: unset;
+    height: 100%;
+    opacity: 0.25;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .restrictions {
+    align-items: center;
+  }
+
+  .item-creator__wrapper {
+    flex-direction: column;
+    align-items: center;
+    max-height: unset;
+  }
+
+  // CREATE AND PUBLISH BUTTONS
+  .item-creator__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+
+    .create {
+      display: flex;
+      gap: 15px;
+      flex-direction: column;
+      align-self: unset;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .el-button+.el-button {
+      margin: 0;
+    }
+  }
+}
 </style>
 
 <style lang="scss">
@@ -491,6 +552,10 @@ onBeforeMount(async () => {
 
   .el-input {
     height: var(--el-component-size);
+  }
+
+  &__wrapper {
+    max-height: unset;
   }
 
   .stats-item__base {

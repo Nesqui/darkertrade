@@ -63,4 +63,12 @@ onBeforeMount(async () => {
     justify-content: center;
     gap: 2rem;
 }
+
+
+@media (max-width:420px) {
+    .market {
+        flex-direction: column;
+        align-items: center;
+    }
+}
 </style>

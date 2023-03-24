@@ -39,7 +39,7 @@ const onUserCreated = (user: UpdateUserDto) => {
 
 <style scoped lang="scss">
 .bg {
-    position: absolute;
+    position: fixed;
     left: 0;
     width: 100%;
     opacity: 0.15;
@@ -82,6 +82,27 @@ const onUserCreated = (user: UpdateUserDto) => {
             height: 100%;
             position: relative;
         }
+    }
+}
+
+@media (max-width:420px) {
+    .auth {
+        h2 {
+            font-size: 20px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .wrapper {
+            min-width: var(--wrapper-mobile-width);
+        }
+    }
+
+
+    .bg {
+        width: unset;
+        height: 100vh;
+        background-size: contain;
     }
 }
 </style>

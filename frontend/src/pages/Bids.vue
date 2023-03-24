@@ -196,7 +196,7 @@ onBeforeMount(async () => {
   top: 90px;
   height: 100%;
   width: 100%;
-  opacity: 0.20;
+  opacity: 0.15;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -302,6 +302,37 @@ $itemsListWidth: 300px;
     justify-content: center;
     height: 100%;
     width: 100%;
+  }
+}
+
+
+
+@media (max-width:420px) {
+
+  .bids {
+
+    .bids-header {
+      flex-direction: column;
+    }
+
+    .bids-items-list {
+      grid-template-columns: auto;
+      justify-content: center;
+    }
+
+    .bids-table {
+      flex-direction: column;
+
+      .item-preview {
+        display: none;
+      }
+
+      .bids-items-list {
+        .item-preview {
+          display: block;
+        }
+      }
+    }
   }
 }
 </style>

@@ -7,33 +7,33 @@
   --el-bg-color: #000000;
   --el-color-primary: #000000;
   --el-button-hover-border-color: unset;
-  --el-border: unset;
+  --el-border: 1px solid #36363673;
   --el-component-size: 52px;
   --el-border-radius-base: 6px;
-  --el-border-color: #282A3A;
+  --el-border-color: #36363673;
   --el-color-danger: #C69749;
   --el-input-focus-border-color: #3F0071;
-  --el-color-primary-light-3: #282A3A;
+  --el-color-primary-light-3: #36363673;
   --el-color-primary-dark-2: #000000b8;
-  --el-color-primary-light-9: #282A3A;
+  --el-color-primary-light-9: #36363673;
   --el-text-color-regular: #C69749;
   --el-color-info: #735F32;
   --el-text-color-primary: #C69749;
   --shadow-attention-transparent: rgb(198, 151, 73, 0.3);
   --el-fill-color-blank: rgb(0, 0, 0, 0.85);
-  --el-border-color-hover: #282A3A;
+  --el-border-color-hover: #36363673;
   --scroll-width: 16px;
   --button-hover-text-color: #C69749;
   --el-bg-color-overlay: rgb(0, 0, 0, 0.85);
-  --el-border-color-light: #282A3A;
+  --el-border-color-light: #36363673;
   --el-button-disabled-bg-color: #000000;
-  --el-fill-color-light: #282A3A;
-  --el-border-color-lighter: #282A3A;
+  --el-fill-color-light: #36363673;
+  --el-border-color-lighter: #36363673;
   --el-transition-duration: 0.15s;
   --el-border-radius-small: 5px;
   --el-box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 5px 1px;
   --wrapper-box-shadow: rgba(255, 255, 255, 0.25) 0px 0px 10px 6px;
-  --el-input-focus-border-color: #282A3A;
+  --el-input-focus-border-color: #36363673;
   --el-mask-color: rgb(0 0 0 / 15%);
   --tat-frame-width: 240px;
   --tat-frame-padding: 1rem .8rem;
@@ -42,6 +42,7 @@
   --wrapper-medium-width: 500px;
   --wrapper-regular-width: 720px;
   --wrapper-small-width: 300px;
+  --wrapper-mobile-width: 340px;
   --el-fill-color: #857047b0;
   --el-dialog-background: rgb(23 23 23);
   --el-fill-color-darker: #8b6a35;
@@ -52,4 +53,11 @@
   --rarity-3: rgb(173,90,255);
   --rarity-4: rgb(247,162,45);
   --rarity-5: rgb(227,216,140);
+  --el-menu-bg-color: transparent;
+}
+
+@media (max-width:420px) {
+  :root {
+   --el-component-size: 36px;
+  }
 }

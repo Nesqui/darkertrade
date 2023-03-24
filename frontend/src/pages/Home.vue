@@ -71,6 +71,7 @@ const forceReconnect = async () => {
   width: 100%;
   height: 100%;
   position: relative;
+  overflow-x: hidden;
 
   .ws-error {
     position: fixed;
@@ -109,6 +110,15 @@ const forceReconnect = async () => {
     position: absolute;
     top: 55px;
     font-weight: 900;
+  }
+
+  @media (max-width:420px) {
+
+    .main-wrapper {
+      padding-top: 1rem;
+      width: 100%;
+      margin-bottom:10rem;
+    }
   }
 }
 </style>

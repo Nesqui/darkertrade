@@ -55,7 +55,7 @@ const val = ref(+(Math.random() * 100).toFixed(0))
 
   .paper {
     position: relative;
-    padding: 4rem 4rem 4rem 4rem;
+    padding: 4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -99,6 +99,43 @@ const val = ref(+(Math.random() * 100).toFixed(0))
     }
 
     margin-bottom: 2rem;
+  }
+
+}
+
+@media (max-width:420px) {
+  .bg {
+    left: -100px;
+    opacity: 0.2;
+  }
+.logo {
+  display: none;
+}
+  .index {
+    .wrapper {
+      width: var(--wrapper-mobile-width);
+    }
+
+    .logo {
+      img {
+        width: var(--wrapper-mobile-width);
+      }
+
+      margin-bottom: 2rem;
+    }
+
+    .paper {
+      width: var(--wrapper-mobile-width);
+
+      p {
+        margin: 1rem;
+      }
+    }
+
+    .paper::before {
+      height: unset;
+      left: 0;
+    }
   }
 }
 </style>

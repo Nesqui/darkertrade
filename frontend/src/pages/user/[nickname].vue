@@ -125,8 +125,7 @@ onBeforeMount(async () => {
     height: $frameHeight;
   }
 
-  .profile__info {
-  }
+  .profile__info {}
 
   .bg {
     position: absolute;
@@ -167,7 +166,6 @@ onBeforeMount(async () => {
     font-size: unset;
     width: 190px;
     position: relative;
-
   }
 
 
@@ -212,6 +210,43 @@ onBeforeMount(async () => {
 
   .darker-title {
     text-transform: uppercase;
+  }
+}
+
+
+@media (max-width:420px) {
+  .profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    h2 {
+      margin: 0;
+    }
+
+    .loader,
+    .profile__info {
+      text-align: center;
+      padding: 0;
+      height: 85px;
+    }
+
+    .bg {
+      display: none;
+    }
+
+    .tat-frame {
+      padding: 2rem 0;
+      width: 100%;
+    }
+
+    .settings {
+      padding: 0rem;
+      width: unset;
+    }
+
+    .wrapper {
+      gap: .5rem;
+    }
   }
 }
 </style>
