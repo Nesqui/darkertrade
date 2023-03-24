@@ -6,6 +6,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env: {}
     steps:
     - name: pull request
       run: |
