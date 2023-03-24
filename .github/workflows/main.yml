@@ -32,5 +32,6 @@ jobs:
           cd backend
           nest build
     - name: restart PM2
+      env: {}
       run: pm2 restart /opt/darkertrade/ecosystem.config.js
     
