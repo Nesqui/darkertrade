@@ -339,9 +339,7 @@ export class ChatGateway {
         chatId: chat.id,
         read: false,
         userId: bid.existingItem.user.id,
-        text: `Bid was accepted ${new Date().toLocaleDateString()} at ${new Date(
-          bid.createdAt,
-        ).toLocaleTimeString()}`,
+        text: `Bid was accepted ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,
       },
     ]);
 
@@ -622,7 +620,7 @@ export class ChatGateway {
       },
       limit: query.limit,
       offset: query.offset,
-      order: [['id', 'ASC']],
+      order: [['id', 'DESC']],
       include: [
         {
           model: this.userRepository,

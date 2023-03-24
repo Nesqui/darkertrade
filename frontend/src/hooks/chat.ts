@@ -51,6 +51,8 @@ export interface Message {
   chat: Chat;
   existingItemId: number;
   existingItem: User;
+  createdAt: string,
+  updatedAt: string
 }
 
 export interface ExistingItemUnpublishedChats {
