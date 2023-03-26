@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Slot } from '../slot.entity';
 import {
+  ArrayMaxSize,
+  IsArray,
   IsBoolean,
   IsEnum,
   IsNumber,
@@ -12,7 +14,7 @@ import {
   MinLength,
 } from 'class-validator';
 import { OfferType } from 'src/existing-item/dto/create-existing-item.dto';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class QueryItemDto {
   @ApiProperty({
@@ -83,9 +85,12 @@ export class QueryItemDto {
   searchItemString: string;
 
   @ApiProperty({
-    type: String,
+    type: [Number],
+    isArray: true,
   })
+  @IsArray()
+  @ArrayMaxSize(5)
   @IsOptional()
-  @MaxLength(25)
-  searchExistingItemString: string;
+  @Type(() => Number)
+  readonly attributesId: number[];
 }

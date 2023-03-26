@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, PropType, ref, watch } from 'vue'
-import { ExistingItem, Item, QueryItemDto, DisabledItemActions } from '../hooks'
+import { ExistingItem, Item, QueryItemDto, DisabledItemActions, Attribute } from '../hooks'
 import ItemPreview from '../components/ItemPreview.vue';
 import { useAttributesStore, useUserStore } from '../store';
 import { useRouter } from 'vue-router';
@@ -10,6 +10,34 @@ const chosenItem = ref<Item>()
 const maxCount = ref(6)
 const pageLoading = ref(false)
 const existingItems = ref<ExistingItem[]>()
+const selectedAttributes = ref<Attribute[]>([])
+const attributeSearchString = ref('')
+const selectedAttributeRef = ref()
+const MAX_ATTRIBUTES = 5
+
+const handleSelectAttribute = (attribute: Attribute) => {
+  selectedAttributes.value.push(attribute)
+  attributeSearchString.value = ''
+  selectedAttributeRef.value.blur()
+  props.filterItem.attributesId = selectedAttributes.value.map(_attribute => _attribute.id)
+}
+
+const handleCloseAttribute = (attribute: Attribute) => {
+  selectedAttributes.value.splice(selectedAttributes.value.findIndex(_attribute => _attribute.id === attribute.id))
+  props.filterItem.attributesId = selectedAttributes.value.map(_attribute => _attribute.id)
+}
+
+const attributeSearch = (queryString: string, cb: any) => {
+  if (selectedAttributes.value.length >= MAX_ATTRIBUTES) {
+    cb([])
+    return
+  }
+  let results = attributeStore.attributes
+  results = queryString
+    ? results.filter(attribute => attribute.name.toLowerCase().indexOf(queryString.toLowerCase()) !== -1)
+    : results
+  cb(results)
+}
 
 const pagination = ref({
   limit: 6,
@@ -50,6 +78,10 @@ const router = useRouter()
 
 const searchString = ref<string>("")
 
+const clearAttributes = () => {
+  selectedAttributes.value = []
+  props.filterItem.attributesId = []
+}
 const clear = () => {
   searchString.value = ""
 
@@ -64,6 +96,8 @@ const clear = () => {
   if (!props.disabledItemActions.published)
     props.filterItem.published = true
 
+  props.filterItem.attributesId = []
+  selectedAttributes.value = []
   pagination.value.offset = 0
   chosenItem.value = undefined
   existingItems.value = undefined
@@ -74,10 +108,6 @@ let searchDelayTimeout = 0
 watch(() => searchString.value, () => {
   clearTimeout(searchDelayTimeout)
   searchDelayTimeout = setTimeout(() => {
-    if (chosenItem.value) {
-      props.filterItem.searchExistingItemString = searchString.value
-      return
-    }
     props.filterItem.searchItemString = searchString.value
   }, 500);
 })
@@ -202,8 +232,21 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         </el-button-group>
       </div>
       <div class="search">
-        <el-input v-model="searchString"
-          :placeholder="!chosenItem ? 'Hatchet (category)' : 'Action speed (stat)'"></el-input>
+        <el-input v-model="searchString" v-if="!chosenItem" :placeholder="'Hatchet (category)'"></el-input>
+        <div class="search-attribute w-100" v-else>
+          <el-autocomplete ref="selectedAttributeRef" v-model="attributeSearchString" value-key="name"
+            :fetch-suggestions="attributeSearch" clearable
+            :placeholder="selectedAttributes.length >= MAX_ATTRIBUTES ? 'Limit stats reached' : 'All attributes (Stat)'"
+            @select="handleSelectAttribute" />
+          <div class="tags">
+            <el-tag v-for="tag in selectedAttributes" :key="tag" class="mx-1" closable :disable-transitions="false"
+              @close="handleCloseAttribute(tag)">
+              {{ tag.name }}
+            </el-tag>
+            <el-button link v-if="selectedAttributes.length" @click="clearAttributes">Delete all</el-button>
+          </div>
+        </div>
+
         <el-button size="large" @click="clear">Clear</el-button>
       </div>
     </div>
@@ -253,9 +296,23 @@ $frameWidth: 100px;
 $frameHeight: 100px;
 $step: 1rem;
 
-
 .item-list-component {
   position: relative;
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+    gap: .25rem;
+  }
+
+  .search-attribute {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    align-items: flex-start;
+  }
 
   .bg {
     position: fixed;
@@ -325,7 +382,7 @@ $step: 1rem;
 
 .search {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: $step;
   width: 100%;
 }
@@ -377,6 +434,17 @@ $step: 1rem;
       align-items: center;
       justify-content: center;
       grid-template-columns: auto;
+    }
+  }
+}
+</style>
+
+<style lang="scss">
+.item-list-component {
+
+  .w-100 {
+    .el-autocomplete {
+      width: 100%;
     }
   }
 }

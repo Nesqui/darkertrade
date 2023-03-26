@@ -14,7 +14,7 @@ const filterItem = ref<QueryItemDto>({
     offerType: "WTS",
     hideMine: true,
     searchItemString: "",
-    searchExistingItemString: "",
+    attributesId: [],
     published: true
 })
 

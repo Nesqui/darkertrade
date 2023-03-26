@@ -82,14 +82,6 @@ onBeforeMount(async () => {
         <div v-else class="profile__info">
           <img src="@/assets/images/avatar.png" alt="" class="bg">
           <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
-          <div class="avatar-wrapper">
-
-            <!-- <div class="img-avatar"></div> -->
-          </div>
-          <span v-if="user?.name">Name: {{ user.name }}</span>
-          <span v-if="user?.lastName">Name: {{ user.lastName }}</span>
-          <span>Banned: {{ user?.active ? 'no' : 'yes' }}</span>
-          <span>Online: no</span>
         </div>
 
       </div>
@@ -121,8 +113,12 @@ onBeforeMount(async () => {
   .loader,
   .profile__info {
     text-align: center;
-    padding: 1rem 0 2rem 0;
+    padding: 1rem 0;
     height: $frameHeight;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .profile__info {}
