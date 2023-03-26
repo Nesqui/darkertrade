@@ -120,7 +120,6 @@ export class ExistingItemService {
     };
 
     const attributeWhere = {};
-    const statsWhere = {};
 
     if (userId) existingItemWhere['userId'] = userId;
 
@@ -145,28 +144,29 @@ export class ExistingItemService {
     if (query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
-    if (query.searchExistingItemString) {
-      attributeWhere['name'] = {
-        [sequelize.Op.iLike]: `%${query.searchExistingItemString}%`,
-      };
+    if (query.attributesId) {
+      attributeWhere['id'] = query.attributesId;
 
-      const filteredItems = await this.existingItemRepository.findAndCountAll({
+      const filteredItems = await this.existingItemRepository.findAll({
         attributes: ['id'],
         include: [
           {
             model: this.statRepository,
             required: true,
-            include: [
-              {
-                model: this.attributeRepository,
-                where: attributeWhere,
-              },
-            ],
+            where: {
+              attributeId: query.attributesId,
+            },
           },
         ],
       });
-      if (!filteredItems.rows.length) return [];
-      existingItemWhere['id'] = filteredItems.rows.map((item) => item.id);
+      existingItemWhere['id'] = [];
+      filteredItems.forEach((existingItem) => {
+        const findStats = existingItem.stats.filter((stat) =>
+          query.attributesId.find((id) => id === stat.attributeId),
+        );
+        if (findStats.length >= query.attributesId.length)
+          existingItemWhere['id'].push(existingItem.id);
+      });
     }
     const item = await this.existingItemRepository.findAndCountAll({
       where: existingItemWhere,
@@ -189,7 +189,6 @@ export class ExistingItemService {
       limit: query.limit,
       offset: query.offset,
     });
-    console.log(item);
 
     if (!item) return [];
     return item;

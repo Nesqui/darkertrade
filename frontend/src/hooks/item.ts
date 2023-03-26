@@ -8,7 +8,7 @@ export interface QueryItemDto {
     name?: ItemName,
     hideMine?: boolean,
     published?: boolean,
-    searchExistingItemString?: string,
+    attributesId?: number[],
     searchItemString?: string,
     limit?: number,
     offset?: number

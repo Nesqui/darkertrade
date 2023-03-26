@@ -13,7 +13,7 @@ import {
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 
-export type BidSortParam = [string, 'ABC' | 'DESC']
+export type BidSortParam = [string, 'ABC' | 'DESC'];
 
 export class QueryBidDto {
   @ApiProperty({
@@ -29,13 +29,13 @@ export class QueryBidDto {
   @Max(15)
   @Min(1)
   @IsNumber()
-  limit: number
+  limit: number;
 
   @ApiProperty({
     type: Number,
   })
   @IsNumber()
-  offset: number
+  offset: number;
 
   @ApiProperty({
     type: [[String, String]],
@@ -43,11 +43,11 @@ export class QueryBidDto {
   })
   // @IsArray()
   @IsOptional()
-  sort: BidSortParam[]
+  sort: BidSortParam[];
 
   @ApiProperty({
     type: String,
   })
   @IsString()
-  offerType: "WTS" | "WTB"
+  offerType: 'WTS' | 'WTB';
 }
