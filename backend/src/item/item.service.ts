@@ -119,6 +119,13 @@ export class ItemService {
 
     existingItemWhere['published'] = query.published;
     existingItemWhere['offerType'] = query.offerType;
+
+    if (query.searchItemString) {
+      itemWhere['name'] = {
+        [sequelize.Op.iLike]: `%${query.searchItemString}%`,
+      };
+    }
+
     if (user.id !== userId) existingItemWhere['published'] = true;
 
     return await this.itemsRepository.findAll({

@@ -613,7 +613,6 @@ export class ChatGateway {
       this.notifyError('You cant read this chat', query.user.id);
       return;
     }
-    console.log(query.limit, query.offset);
 
     const messages = await this.messagesRepository.findAndCountAll({
       where: {
