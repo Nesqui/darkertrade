@@ -163,6 +163,7 @@ export class ItemService {
 
     const res = await this.itemsRepository.findAll({
       where: itemWhere,
+      order: [['name', 'ASC']],
       include: [
         {
           model: this.existingItemRepository,

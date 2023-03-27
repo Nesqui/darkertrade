@@ -18,9 +18,18 @@ export const useAttributesStore = defineStore('attributes', () => {
     return currentAttribute.name
   }
 
+  
+  const getAttributeById = (attributeId: number) => {
+    const currentAttribute = attributes.value.find(a => a.id === attributeId)
+    if (!currentAttribute)
+      return null
+    return currentAttribute
+  }
+
   return {
     attributes,
     getAttributeNameById,
-    saveAll
+    saveAll,
+    getAttributeById
   }
 })

@@ -192,7 +192,7 @@ onBeforeMount(async () => {
                 </div>
               </div>
             </div>
-            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item"
+            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item" :creatorNickname="item.existingItems[0].user?.nickname" 
               :wantedPrice="item.existingItems[0].wantedPrice" :offerType="item.existingItems[0].offerType"
               :stats="item?.existingItems[0].stats" />
           </div>

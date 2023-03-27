@@ -137,4 +137,16 @@ h2 {
 .place-bid {
   width: 100%;
 }
+
+
+@media (max-width:420px) {
+  .item-details {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .place-bid {
+    order: 2;
+  }
+}
 </style>
