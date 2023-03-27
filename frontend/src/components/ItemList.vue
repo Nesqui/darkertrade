@@ -217,7 +217,8 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
     <!-- SEARCH FILTERS  -->
     <img src="@/assets/images/market.png" alt="" class="bg">
     <div class="search-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
-      <div class="actions-filter">
+      <!-- !!! HERE I NEED ALL CHECKS  -->
+      <div v-if="!disabledItemActions.published || !disabledItemActions.hideMine || !disabledItemActions.offerType" class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
           active-text="Published" inactive-text="Unpublished" />
         <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"

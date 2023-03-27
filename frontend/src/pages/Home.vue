@@ -113,11 +113,14 @@ const forceReconnect = async () => {
   }
 
   @media (max-width:420px) {
+    .shifted {
+      margin-left: 0;
+    }
 
     .main-wrapper {
       padding-top: 1rem;
       width: 100%;
-      margin-bottom:10rem;
+      margin-bottom: 10rem;
     }
   }
 }

@@ -20,8 +20,10 @@ const filterItem = ref<QueryItemDto>({
     slot: "",
     name: "",
     offerType: "WTS",
-    published: true
+    published: true,
+    searchItemString: ''
 })
+
 
 const disabledItemActions = ref<DisabledItemActions>({
     slot: false,
@@ -38,7 +40,6 @@ const initItems = async () => {
     const res = await itemApi.findUserItems(user.value.id, filterItem.value)
     if (res)
         items.value = res
-
 }
 
 watch(filterItem.value, async () => {

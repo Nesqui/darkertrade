@@ -306,7 +306,7 @@ onBeforeMount(async () => {
             <div class="sub-title">
               Stat value:
             </div>
-            <el-input-number :precision="1" :step="1" :min="-200" :max="200" placeholder="Value" maxlength="3"
+            <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1" :min="attributeStore.getAttributeById(attributeId)?.min || -200" :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
               ref="valueRef" v-model="value" />
           </div>
           <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>

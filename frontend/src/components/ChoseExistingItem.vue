@@ -80,7 +80,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
         :offerType="chosenExistingItem.offerType" :stats="chosenExistingItem.stats" />
       <div class="arrow-data">
         <div class="arrow left"></div>
-        <p>Check</p>
+        <p>Compare</p>
         <div class="arrow right"></div>
       </div>
     </div>
@@ -146,6 +146,28 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   .right {
     transform: rotate(-45deg);
     -webkit-transform: rotate(-45deg);
+  }
+}
+
+@media (max-width:420px) {
+  .chose-existing-item {
+    // .arrow-data {
+    //   display: none;
+    // }
+    
+    .arrow {
+      display: none;
+    }
+    .chosen-item {
+      justify-content: center;
+      flex-direction: column;
+      .arrow-data {
+        margin-bottom: 1rem;
+      }
+      .item-preview {
+        order: 2;
+      }
+    }
   }
 }
 </style>

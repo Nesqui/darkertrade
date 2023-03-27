@@ -242,6 +242,7 @@ onBeforeMount(async () => {
 
     .wrapper {
       gap: .5rem;
+      min-height: 100px;
     }
   }
 }

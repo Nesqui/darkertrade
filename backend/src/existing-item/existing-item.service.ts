@@ -170,6 +170,7 @@ export class ExistingItemService {
     }
     const item = await this.existingItemRepository.findAndCountAll({
       where: existingItemWhere,
+      order: [['id', 'DESC']],
       include: [
         {
           model: this.statRepository,
