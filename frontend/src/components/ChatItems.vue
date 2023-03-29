@@ -163,15 +163,24 @@ const unreadMessagesCountByOffer = () => {
             <!-- CHATS  -->
             <div v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" :name="index">
               <div class="bid" v-if="offerType === 'receivedOffers'" @click="initChat(bid.chatId || 0)">
-                <div>
-                  <strong><NicknameOnline :user="bid.user" /> - </strong>
-                  <span class="gold">{{ bid.price }}g</span>
+                <strong>
+                  <NicknameOnline :user="bid.user" />
+                </strong>
+
+                <div class="bid-info">
+                  <span>agreed on {{ bid.price }}g</span>
+                  <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)" />
                 </div>
-                <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)" />
               </div>
 
               <div v-else class="bid" @click="initChat(bid.chatId || 0)">
-                <strong v-if="existingItem.user"><NicknameOnline :user="existingItem.user" /></strong> <span>{{ bid.price }}g</span>
+                <strong v-if="existingItem.user">
+                  <NicknameOnline :user="existingItem.user" />
+                </strong>
+                <div class="bid-info">
+                  <span>agreed on {{ bid.price }}g</span>
+                  <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)" />
+                </div>
               </div>
             </div>
           </el-collapse-item>
@@ -233,6 +242,10 @@ const unreadMessagesCountByOffer = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
+
+    .bid-info {
+      display: flex;
+    }
   }
 
   .bid:hover {
