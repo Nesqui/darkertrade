@@ -16,13 +16,14 @@ defineProps<{ user: User }>()
 <style scoped lang="scss">
 .online {
   position: relative;
-padding-right: 6px;
+  padding-right: 10px;
+
   .on,
   .off {
     height: 6px;
-    width: 6px;
+    width: 5px;
     border-radius: 50%;
-    right: -5px;
+    right: 0px;
     top: 0px;
     position: absolute;
   }
