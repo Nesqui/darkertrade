@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElNotification } from 'element-plus';
 import { ExistingItem, Item, useMoment } from '@/hooks';
 import { Bid, initBidApi, QueryBidDto } from '@/hooks/bid';
-
+import NicknameOnline from './NicknameOnline.vue';
 import ItemPreview from '@/components/ItemPreview.vue';
 import { PropType, ref } from 'vue';
 
@@ -113,13 +113,13 @@ const acceptBid = async (bid: Bid) => {
     <el-table max-height="500" empty-text="Currently no items here" :data="bids">
       <el-table-column prop="user.nickname" label="From" width="150">
         <template #default="scope">
-          <router-link :to="`/user/${scope.row.user.nickname}/items`">{{ scope.row.user.nickname }}</router-link>
+          <router-link :to="`/user/${scope.row.user.nickname}/items`"><NicknameOnline :user="scope.row.user"/></router-link>
         </template>
       </el-table-column>
       <el-table-column v-if="existingItem.user" prop="To" label="To" width="150">
         <template #default="scope">
-          <router-link :to="`/user/${existingItem.user.nickname}/items/${existingItem.id}`">{{
-            existingItem.user.nickname }}</router-link>
+          <router-link :to="`/user/${existingItem.user.nickname}/items/${existingItem.id}`">
+            <NicknameOnline :user="existingItem.user"/></router-link>
         </template>
       </el-table-column>
       <el-table-column prop="price" label="Price" width="80" />
@@ -137,6 +137,8 @@ const acceptBid = async (bid: Bid) => {
               <ItemPreview v-if="existingItem.item" :item="existingItem.item"
                 @click="push(`/user/${scope.row.user.nickname}/items/${scope.row.suggestedExistingItemId}`)"
                 :wanted-price="scope.row.suggestedExistingItem.wantedPrice"
+                :creator="scope.row.user"
+                :offer-type="existingItem.offerType"
                 :stats="scope.row.suggestedExistingItem?.stats" />
             </el-popover>
           </div>

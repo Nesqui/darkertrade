@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { UserModule } from 'src/user/user.module';
 // import { DiscordGateway } from 'src/discord/discord.gateway';
 // import { DiscordBotModule } from 'src/discord/discord.module';
 import { usersProviders } from 'src/user/user.providers';

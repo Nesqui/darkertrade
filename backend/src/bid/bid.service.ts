@@ -222,13 +222,13 @@ export class BidService {
                 },
                 {
                   model: this.userRepository,
-                  attributes: ['nickname', 'id'],
+                  attributes: ['nickname', 'id', 'online'],
                 },
               ],
             },
             {
               model: this.userRepository,
-              attributes: ['nickname', 'id'],
+              attributes: ['nickname', 'id', 'online'],
             },
           ],
         },
@@ -237,7 +237,7 @@ export class BidService {
         },
         {
           model: this.userRepository,
-          attributes: ['nickname', 'id'],
+          attributes: ['nickname', 'id', 'online'],
         },
       ],
     };

@@ -442,6 +442,32 @@ export class UserService {
     });
   }
 
+  async makeOnline(id: number) {
+    return await this.usersRepository.update(
+      {
+        online: true,
+      },
+      {
+        where: {
+          id,
+        },
+      },
+    );
+  }
+
+  async clearOnline() {
+    return await this.usersRepository.update(
+      {
+        online: false,
+      },
+      {
+        where: {
+          online: true,
+        },
+      },
+    );
+  }
+
   async findOne(user: QueryUserDto): Promise<User> | null {
     return await this.usersRepository.findOne({
       attributes: {
@@ -476,6 +502,15 @@ export class UserService {
         exclude: ['password', 'discord', 'discordId'],
       },
     });
+  }
+
+  async banLift(userid: number) {
+    const response = await this.usersRepository.findByPk(userid);
+    if (!response) {
+      return;
+    }
+    response.bannedUntil = null;
+    await response.save();
   }
 
   async changeDiscordNotification(bool: boolean, user: User) {

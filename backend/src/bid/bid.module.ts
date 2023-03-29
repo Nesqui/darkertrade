@@ -11,12 +11,14 @@ import { ChatModule } from 'src/chat/chat.module';
 import { statsProviders } from 'src/stat/stat.proviers';
 import { itemsProviders } from 'src/item/item.providers';
 import { attributesProviders } from 'src/attribute/attribute.provider';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   controllers: [BidController],
   imports: [DiscordBotModule, ChatModule],
   providers: [
     BidService,
+    UserService,
     ...bidProviders,
     ...existingItemProviders,
     ...usersProviders,

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, PropType } from 'vue'
-import { Item, Stat, truncate, initItemApi, useMoment, BaseStat, VirtualStat } from '../hooks'
+import { Item, Stat, truncate, initItemApi, useMoment, BaseStat, VirtualStat, User } from '../hooks'
 import { useAttributesStore, useItemStore, useUserStore } from '../store'
+import NicknameOnline from './NicknameOnline.vue';
 
 const itemApi = initItemApi()
 const itemStore = useItemStore()
@@ -32,9 +33,8 @@ const props = defineProps({
     required: false,
     type: String
   },
-  creatorNickname: {
-    required: false,
-    type: String
+  creator: {
+    type: Object as PropType<User>
   }
 });
 
@@ -82,7 +82,8 @@ const baseStats = computed(() => {
         </div>
         <div v-if="offerType" class="offer-header__item">
           <span>{{ offerType === 'WTS' ? 'Seller:' : 'Buyer:' }}</span>
-          <p class="offer-header__small">{{ creatorNickname || userStore.currentUser.nickname }}</p>
+          <p class="offer-header__small">
+            <NicknameOnline :user="creator || userStore.currentUser"/></p>
         </div>
         <div v-if="offerType" class="offer-header__item">
           <span>Market:</span>

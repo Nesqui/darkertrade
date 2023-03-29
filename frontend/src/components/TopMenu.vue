@@ -2,6 +2,8 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '../store'
+import NicknameOnline from './NicknameOnline.vue';
+
 const windowWidth = ref(400)
 
 const userStore = useUserStore()
@@ -24,29 +26,30 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize);
 })
 
-const handleSelect = (key: string, keyPath: string[]) => {
-  console.log(key, keyPath)
-}
-const push = async (url: string, newWindow = false) => {
-  if (newWindow && url) {
-    window.open(url, '_blank')
-    return
-  }
-  let redirect = false
-  if (route.path === url) {
-    redirect = true
-  }
-  await router.push({
-    path: url,
-  })
-  if (redirect)
-    router.go(0)
-}
+// const handleSelect = (key: string, keyPath: string[]) => {
+//   console.log(key, keyPath)
+// }
+// const push = async (url: string, newWindow = false) => {
+//   if (newWindow && url) {
+//     window.open(url, '_blank')
+//     return
+//   }
+//   let redirect = false
+//   if (route.path === url) {
+//     redirect = true
+//   }
+//   await router.push({
+//     path: url,
+//   })
+//   if (redirect)
+//     router.go(0)
+// }
 </script>
 
 <template>
   <div class="menu">
-    <el-menu router="true" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200" :default-active="activeIndex" mode="horizontal">
+    <el-menu router="true" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200"
+      :default-active="activeIndex" mode="horizontal">
       <el-menu-item index="/">
         <div class="logo">
           <img src="../assets/logo.png" alt="">
@@ -59,35 +62,39 @@ const push = async (url: string, newWindow = false) => {
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
       <el-menu-item index="/bids/">My bids</el-menu-item>
       <div class="flex-grow" />
-      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`"> {{ userStore.currentUser.nickname }}</el-menu-item>
+      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">
+        <div>
+          <NicknameOnline :user="userStore.currentUser" />
+        </div>
+      </el-menu-item>
       <el-menu-item @click="userStore.logout" index="/">Logout</el-menu-item>
     </el-menu>
 
     <!-- <div class="top-menu">
-      <div class="top-menu__item">
-        <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Browse offers</a>
+        <div class="top-menu__item">
+          <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Browse offers</a>
+        </div>
+        <div class="top-menu__item">
+          <a link @click="() => push('/creator')" @click.middle="() => push('/creator', true)">Create offer</a>
+        </div>
+        <div class="top-menu__item">
+          <a link @click="() => push(`/user/${userStore.currentUser.nickname}/items`)"
+            @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">My items</a>
+        </div>
+        <div class="top-menu__item">
+          <a link @click="() => push(`/bids/`)" @click.middle="() => push(`/bids/`, true)">My bids</a>
+        </div>
       </div>
-      <div class="top-menu__item">
-        <a link @click="() => push('/creator')" @click.middle="() => push('/creator', true)">Create offer</a>
-      </div>
-      <div class="top-menu__item">
-        <a link @click="() => push(`/user/${userStore.currentUser.nickname}/items`)"
-          @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">My items</a>
-      </div>
-      <div class="top-menu__item">
-        <a link @click="() => push(`/bids/`)" @click.middle="() => push(`/bids/`, true)">My bids</a>
-      </div>
-    </div>
-    <div v-if="isAuth" class="logout">
-      <div class="top-menu__item">
-        <a link @click="push(`/user/${userStore.currentUser.nickname}/items`)"
-          @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">{{
-            userStore.currentUser.nickname }}</a>
-      </div>
-      <div class="top-menu__item">
-        <a link @click="userStore.logout">Logout</a>
-      </div>
-    </div> -->
+      <div v-if="isAuth" class="logout">
+        <div class="top-menu__item">
+          <a link @click="push(`/user/${userStore.currentUser.nickname}/items`)"
+            @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">{{
+              userStore.currentUser.nickname }}</a>
+        </div>
+        <div class="top-menu__item">
+          <a link @click="userStore.logout">Logout</a>
+        </div>
+      </div> -->
   </div>
 </template>
 

@@ -309,13 +309,13 @@ export class ChatGateway {
           include: [
             {
               model: this.userRepository,
-              attributes: ['nickname', 'id'],
+              attributes: ['nickname', 'id', 'online'],
             },
           ],
         },
         {
           model: this.userRepository,
-          attributes: ['nickname', 'id'],
+          attributes: ['nickname', 'id', 'online'],
         },
         {
           model: this.itemRepository,
@@ -407,13 +407,13 @@ export class ChatGateway {
           include: [
             {
               model: this.userRepository,
-              attributes: ['nickname', 'id'],
+              attributes: ['nickname', 'id', 'online'],
             },
           ],
         },
         {
           model: this.userRepository,
-          attributes: ['nickname', 'id'],
+          attributes: ['nickname', 'id', 'online'],
         },
         {
           model: this.itemRepository,
@@ -433,7 +433,7 @@ export class ChatGateway {
           include: [
             {
               model: this.userRepository,
-              attributes: ['nickname', 'id'],
+              attributes: ['nickname', 'id', 'online'],
             },
           ],
           where: {
@@ -534,7 +534,7 @@ export class ChatGateway {
           include: [
             {
               required: true,
-              attributes: ['nickname', 'id'],
+              attributes: ['nickname', 'id', 'online'],
               model: this.userRepository,
             },
           ],
@@ -624,7 +624,7 @@ export class ChatGateway {
       include: [
         {
           model: this.userRepository,
-          attributes: ['nickname', 'id'],
+          attributes: ['nickname', 'id', 'online'],
         },
       ],
     });

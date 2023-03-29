@@ -10,6 +10,7 @@ import { usersProviders } from 'src/user/user.providers';
 import { bidProviders } from 'src/bid/bid.providers';
 import { pgProviders } from 'src/pg/pg.providers';
 import { baseStatProvider } from 'src/base-stat/base-stat.provider';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [PgModule],
@@ -17,6 +18,7 @@ import { baseStatProvider } from 'src/base-stat/base-stat.provider';
   providers: [
     ItemService,
     ...itemsProviders,
+    UserService,
     ...existingItemProviders,
     ...statsProviders,
     ...usersProviders,

@@ -5,6 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ExistingItem, initExistingItemApi, initLimits, initUserApi, User } from '~/hooks'
 import CountExistingItem from '~/components/CountExistingItems.vue'
 import { useUserStore } from '@/store'
+import NicknameOnline from '@/components/NicknameOnline.vue'
 
 const userApi = initUserApi()
 const user = ref<User>()
@@ -81,7 +82,8 @@ onBeforeMount(async () => {
         </div>
         <div v-else class="profile__info">
           <img src="@/assets/images/avatar.png" alt="" class="bg">
-          <h2 class="darker-title user-nickname">{{ user?.nickname || 'NICKNAME' }}</h2>
+          <h2 class="darker-title user-nickname">
+            <NicknameOnline :user="user"/></h2>
         </div>
 
       </div>

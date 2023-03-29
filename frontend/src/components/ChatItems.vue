@@ -6,6 +6,7 @@ import { storeToRefs } from "pinia";
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, PropType, ref, watch, watchEffect } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import UnreadCount from './UnreadCount.vue'
+import NicknameOnline from "./NicknameOnline.vue";
 
 const route = useRoute()
 const router = useRouter()
@@ -163,14 +164,14 @@ const unreadMessagesCountByOffer = () => {
             <div v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" :name="index">
               <div class="bid" v-if="offerType === 'receivedOffers'" @click="initChat(bid.chatId || 0)">
                 <div>
-                  <strong>{{ bid.user.nickname }} - </strong>
+                  <strong><NicknameOnline :user="bid.user" /> - </strong>
                   <span class="gold">{{ bid.price }}g</span>
                 </div>
                 <UnreadCount :count="unreadMessagesCountByChatId(bid.chatId || 0)" />
               </div>
 
               <div v-else class="bid" @click="initChat(bid.chatId || 0)">
-                <strong>{{ existingItem.user?.nickname }}</strong> <span>{{ bid.price }}g</span>
+                <strong v-if="existingItem.user"><NicknameOnline :user="existingItem.user" /></strong> <span>{{ bid.price }}g</span>
               </div>
             </div>
           </el-collapse-item>
