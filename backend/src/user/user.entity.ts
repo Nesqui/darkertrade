@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 import {
   Table,
   Column,
@@ -47,6 +48,9 @@ export class User extends Model {
   @Default(true)
   @Column
   discordNotification: boolean;
+
+  @Column
+  bannedUntil: Date;
 
   @Column
   hash: string;

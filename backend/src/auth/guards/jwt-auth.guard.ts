@@ -7,10 +7,16 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
 import { jwtConstants } from '../constants';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly jwtService: JwtService) {}
+  private hashedUsers = [];
+  private lastQuery = new Date().getHours();
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+  ) {}
   canActivate(
     context: ExecutionContext | any,
   ): boolean | Promise<boolean> | Observable<boolean> {
@@ -25,6 +31,29 @@ export class JwtAuthGuard implements CanActivate {
       req.user = this.jwtService.verify(token, {
         secret: jwtConstants.secret,
       });
+
+      const currentHour = new Date().getHours();
+      if (currentHour != this.lastQuery) {
+        this.hashedUsers = [];
+      }
+      this.lastQuery = currentHour;
+
+      if (!this.hashedUsers.includes(req.user.id)) {
+        this.hashedUsers.push(req.user.id);
+      } else {
+        return true;
+      }
+
+      const currentTime = new Date().getTime();
+      if (req.user.bannedUntil) {
+        const banTime = new Date(req.user.bannedUntil).getTime();
+        if (currentTime < banTime) {
+          throw new UnauthorizedException({
+            message: `User is Banned until ${banTime.toLocaleString()}`,
+          });
+        }
+        this.userService.banLift(req.user.id);
+      }
       return true;
     } catch (e) {
       console.log('Auth error', e);

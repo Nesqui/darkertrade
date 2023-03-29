@@ -478,6 +478,15 @@ export class UserService {
     });
   }
 
+  async banLift(userid: number) {
+    const response = await this.usersRepository.findByPk(userid);
+    if (!response) {
+      return;
+    }
+    response.bannedUntil = null;
+    await response.save();
+  }
+
   async changeDiscordNotification(bool: boolean, user: User) {
     const currentUser = await this.usersRepository.findOne({
       where: {

@@ -1,6 +1,7 @@
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
+import { UserService } from 'src/user/user.service';
 import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constants';
@@ -20,7 +21,7 @@ describe('AuthService', () => {
           signOptions: { expiresIn: '60s' },
         }),
       ],
-      providers: [AuthService, LocalStrategy, JwtStrategy],
+      providers: [AuthService, LocalStrategy, JwtStrategy, UserService],
     }).compile();
 
     service = moduleRef.get<AuthService>(AuthService);
