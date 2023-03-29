@@ -49,6 +49,10 @@ export class User extends Model {
   @Column
   discordNotification: boolean;
 
+  @Default(false)
+  @Column
+  online: boolean;
+
   @Column
   bannedUntil: Date;
 

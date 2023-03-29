@@ -11,12 +11,14 @@ import { attributesProviders } from 'src/attribute/attribute.provider';
 import { pgProviders } from 'src/pg/pg.providers';
 import { ChatModule } from 'src/chat/chat.module';
 import { bidProviders } from 'src/bid/bid.providers';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   controllers: [ExistingItemController],
   imports: [ChatModule],
   providers: [
     ExistingItemService,
+    UserService,
     ...existingItemProviders,
     ...usersProviders,
     ...statsProviders,

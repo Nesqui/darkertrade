@@ -278,7 +278,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
           v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator-nickname="existingItem.user?.nickname"
+              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator="existingItem.user"
                 :item="chosenItem" :updated-at="existingItem.updatedAt" @click="() => itemClickHandle(existingItem)"
                 :offerType="existingItem.offerType" :stats="existingItem.stats" />
             </div>

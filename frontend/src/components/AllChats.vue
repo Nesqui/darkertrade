@@ -6,6 +6,7 @@ import { ElNotification } from "element-plus";
 import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from 'vue-router';
 import ChatItems from "./ChatItems.vue";
+import NicknameOnline from "./NicknameOnline.vue";
 const moment = useMoment()
 
 const { on, off, emit, isConnected } = useSocket()
@@ -262,9 +263,8 @@ const unreadMessagesTotal = () => {
 
           <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
-            <span>Chat with: <router-link v-if="conversationContact" :to="'/'">{{
-              conversationContact.nickname
-            }}</router-link></span>
+            <span>Chat with: <router-link v-if="conversationContact" :to="'/'">
+            <NicknameOnline :user="conversationContact"/></router-link></span>
             <el-button @click="clearActiveChat">Back</el-button>
           </div>
 

@@ -14,6 +14,7 @@ export interface User {
     active: boolean;
     hash?: string;
     discordNotification: boolean;
+    online: boolean
 }
 
 
