@@ -164,8 +164,8 @@ onBeforeMount(async () => {
               </div>
             </div>
             <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
-              :creator="existingItem.user"
-              :wanted-price="existingItem.wantedPrice" :item="existingItem.item" :stats="existingItem.stats" />
+              :creator="existingItem.user" :wanted-price="existingItem.wantedPrice" :item="existingItem.item"
+              :stats="existingItem.stats" />
           </div>
         </div>
         <div v-if="selectedExistingItem">
@@ -175,8 +175,9 @@ onBeforeMount(async () => {
               item</el-button>
             <el-button @click="clear">Back</el-button>
           </div>
-          <ItemPreview :creator="selectedExistingItem.user" :offer-type="selectedExistingItem.offerType" :wanted-price="selectedExistingItem.wantedPrice"
-            :item="selectedExistingItem.item" :stats="selectedExistingItem.stats" />
+          <ItemPreview :creator="selectedExistingItem.user" :offer-type="selectedExistingItem.offerType"
+            :wanted-price="selectedExistingItem.wantedPrice" :item="selectedExistingItem.item"
+            :stats="selectedExistingItem.stats" />
         </div>
         <div v-if="selectedExistingItem" class="bid-list">
           <div v-if="bids">
@@ -247,6 +248,7 @@ $itemsListWidth: 300px;
 
   .wrapper {
     width: var(--wrapper-xxl-width);
+    overflow-x: hidden;
   }
 
   a {
@@ -291,6 +293,7 @@ $itemsListWidth: 300px;
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
+    gap: 1rem;
 
     &__li {
       margin-top: 1rem;
@@ -307,6 +310,21 @@ $itemsListWidth: 300px;
 }
 
 
+@media (max-width: 1280px) {
+  .bids {
+    .wrapper {
+      width: 1000px;
+    }
+
+
+    .bids-items-list {
+      display: grid;
+      grid-template-columns: auto auto auto;
+      justify-content: center;
+      gap: 2rem;
+    }
+  }
+}
 
 @media (max-width:420px) {
 

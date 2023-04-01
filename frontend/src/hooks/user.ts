@@ -13,6 +13,7 @@ export interface User {
     discord?: string;
     active: boolean;
     hash?: string;
+    isAdmin: boolean;
     discordNotification: boolean;
     online: boolean
 }
@@ -24,6 +25,15 @@ export interface UpdateUserDto {
     hash: string;
 }
 
+export interface AdminUserQuery {
+    limit: number,
+    offset: number
+}
+
+export interface CountedUsers {
+    count: number,
+    rows: User[]
+}
 
 import { ElNotification } from "element-plus";
 import { useApi } from "./api"
@@ -37,7 +47,20 @@ export const initUserApi = () => {
             return
         }
         const res = await axiosClient(`user/hash/${hash}`)
+        return res.data
+    }
 
+    // !ADMIN 
+    const findAll = async (query: AdminUserQuery):Promise<CountedUsers> => {
+        const res = await axiosClient('user', {
+            params: query
+        })
+        return res.data
+    }
+
+    // !ADMIN 
+    const ban = async (userId: number, days: number) => {
+        const res = await axiosClient.patch(`user/ban/${userId}/${days}`)
         return res.data
     }
 
@@ -73,6 +96,8 @@ export const initUserApi = () => {
         findByNickname,
         findOneByHash,
         update,
-        changeDiscordNotification
+        changeDiscordNotification,
+        findAll,
+        ban
     }
 }

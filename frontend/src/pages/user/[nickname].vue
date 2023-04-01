@@ -83,7 +83,8 @@ onBeforeMount(async () => {
         <div v-else class="profile__info">
           <img src="@/assets/images/avatar.png" alt="" class="bg">
           <h2 class="darker-title user-nickname">
-            <NicknameOnline :user="user"/></h2>
+            {{ user.nickname }}
+          </h2>
         </div>
 
       </div>
@@ -111,7 +112,6 @@ onBeforeMount(async () => {
   gap: 2rem;
   $frameHeight: 180px;
 
-
   .loader,
   .profile__info {
     text-align: center;
@@ -123,7 +123,11 @@ onBeforeMount(async () => {
     justify-content: center;
   }
 
-  .profile__info {}
+  .profile__info {
+    h2 {
+      font-size: 15px;
+    }
+  }
 
   .bg {
     position: absolute;
@@ -141,7 +145,7 @@ onBeforeMount(async () => {
   }
 
   .restrictions {
-    margin-top: 1rem;
+    margin-top: 0rem;
   }
 
   .wrapper {
@@ -211,12 +215,51 @@ onBeforeMount(async () => {
   }
 }
 
+@media (max-width:1280px) {
+  .profile {
+    flex-direction: column;
+    align-items: center;
+
+    .restrictions {
+      width: 100%;
+    }
+
+    .wrapper {
+      width: 100%;
+      min-height: unset;
+      flex-direction: column;
+      align-items: center;
+      gap: .5rem;
+
+      .loader,
+      .profile__info {
+        height: 45px;
+        margin-bottom: 0;
+      }
+
+      .tat-frame {
+        padding: 0;
+        width: 100%;
+
+        h2 {
+          margin: 0;
+        }
+      }
+    }
+
+
+    .bg {
+      display: none;
+    }
+  }
+}
 
 @media (max-width:420px) {
   .profile {
     display: flex;
     flex-direction: column;
     align-items: center;
+
     h2 {
       margin: 0;
     }

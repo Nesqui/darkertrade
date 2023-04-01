@@ -17,7 +17,7 @@ export const useUserStore = defineStore('user', () => {
 
     const logout = () => {
         localStorage.clear()
-        currentUser.value = { id: 0, nickname: '', password: "", name: "", lastName: "", discord: '', active: false, discordNotification: true, online: false }
+        currentUser.value = { id: 0, nickname: '', password: "", name: "", lastName: "", discord: '', active: false, discordNotification: true, online: false, isAdmin: false }
         token.value = ""
         router.push('/')
     }

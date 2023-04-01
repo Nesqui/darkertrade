@@ -63,7 +63,7 @@ const changePublish = async () => {
     })
     await initPageData()
     ElNotification({
-      message: item.value.existingItems[0].published ? 'Item published' : 'Item unpublished'
+      message: item.value.existingItems[0].published ? 'Item published' : 'Item became private'
     })
   } catch (error) {
   } finally {
@@ -153,7 +153,7 @@ onBeforeMount(async () => {
             v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
             v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true"
-            size="large">Unpublish</el-button>
+            size="large">Make private</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
             v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === false"
             size="large">Publish</el-button>

@@ -218,9 +218,10 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
     <img src="@/assets/images/market.png" alt="" class="bg">
     <div class="search-wrapper wrapper-actions" :class="{ 'wrapper': !noWrapper }">
       <!-- !!! HERE I NEED ALL CHECKS  -->
-      <div v-if="!disabledItemActions.published || !disabledItemActions.hideMine || !disabledItemActions.offerType" class="actions-filter">
+      <div v-if="!disabledItemActions.published || !disabledItemActions.hideMine || !disabledItemActions.offerType"
+        class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
-          active-text="Published" inactive-text="Unpublished" />
+          active-text="Published" inactive-text="Private" />
         <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
           inactive-text="Show all" />
         <el-button-group v-if="!disabledItemActions.offerType">
@@ -278,8 +279,8 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
           v-infinite-scroll="loadMoreExistingItems" infinite-scroll-delay="200">
           <div class="item-list">
             <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
-              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator="existingItem.user"
-                :item="chosenItem" :updated-at="existingItem.updatedAt" @click="() => itemClickHandle(existingItem)"
+              <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator="existingItem.user" :item="chosenItem"
+                :updated-at="existingItem.updatedAt" @click="() => itemClickHandle(existingItem)"
                 :offerType="existingItem.offerType" :stats="existingItem.stats" />
             </div>
           </div>
@@ -316,13 +317,13 @@ $step: 1rem;
   }
 
   .bg {
-    position: fixed;
-    right: 250px;
+    position: absolute;
+    right: 0;
     top: 0;
-    width: var(--wrapper-large-width);
+    width: 100%;
     opacity: 0.335;
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
   }
 
   .wrapper {
@@ -354,7 +355,7 @@ $step: 1rem;
 .back {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+  margin-bottom: .5rem;
 }
 
 
@@ -410,14 +411,43 @@ $step: 1rem;
   margin-bottom: $step;
 }
 
+
+@media (max-height: 830px) {
+  .item-list-component {
+    .item-list-wrapper {
+      height: 430px;
+    }
+  }
+}
+
+// @media (max-width: 1770px) {
+//   .bg {
+//     position: absolute;
+//   }
+// }
+
+@media (max-width: 892px) {
+  .item-list-component {
+    .wrapper {
+      width: unset;
+    }
+
+    .item-list {
+      align-items: center;
+      justify-content: center;
+      grid-template-columns: auto auto;
+    }
+  }
+}
+
 @media (max-width:420px) {
   .item-list-component {
     width: 100%;
 
-    .bg {
-      position: absolute;
-      left: -60%;
-    }
+    // .bg {
+    //   position: absolute;
+    //   left: -60%;
+    // }
 
     .actions-filter {
       flex-direction: column;

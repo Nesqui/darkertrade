@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Chat, ChatCreatedDto, ChatMessagesResponse, ChatOfferType, ChatsCountsResponse, ChatsResponse, ExistingItemUnpublishedChats, Message, OnBidClosed, useMoment } from "@/hooks";
+import { initBidApi } from "@/hooks/bid";
 import useSocket, { UnreadMessagesCount } from "@/hooks/ws";
 import { useChatStore, useUserStore } from "@/store";
 import { ElNotification } from "element-plus";
@@ -16,7 +17,7 @@ const userStore = useUserStore()
 const chatStore = useChatStore()
 const expand = computed(() => chatStore.expand)
 const selectedChat = computed(() => chatStore.selectedChat)
-
+const bidApi = initBidApi()
 const loading = ref(true)
 const unreadMessagesCount = ref<UnreadMessagesCount[]>([])
 
@@ -102,7 +103,7 @@ const spliceExistingItem = (existingItemId: number, closeSelectedChatMessage: st
 }
 
 const onExistingItemUnpublish = (data: ExistingItemUnpublishedChats) => {
-  spliceExistingItem(data.existingItemId, 'Chat closed because item was unpublished')
+  spliceExistingItem(data.existingItemId, 'Chat closed because item became private')
 }
 
 const onBidClosed = (data: OnBidClosed) => {
@@ -233,6 +234,21 @@ const clearActiveChat = async () => {
   emit("findAllChat")
 }
 
+const closeBid = async (id: number) => {
+  if (!id)
+    ElNotification({
+      message: 'Bid not found'
+    })
+  try {
+    await bidApi.close(id)
+    ElNotification({
+      message: 'Bid closed'
+    })
+  } catch (error) {
+  }
+}
+
+
 const unreadMessagesTotal = () => {
   if (!unreadMessagesCount.value.length) return 0
   return unreadMessagesCount.value.reduce((pv, cv) => pv + Number(cv.unreadMessages), 0)
@@ -264,7 +280,8 @@ const unreadMessagesTotal = () => {
           <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
             <span>Chat with: <router-link v-if="conversationContact" :to="'/'">
-            <NicknameOnline :user="conversationContact"/></router-link></span>
+                <NicknameOnline :user="conversationContact" />
+              </router-link></span>
             <el-button @click="clearActiveChat">Back</el-button>
           </div>
 
@@ -275,18 +292,33 @@ const unreadMessagesTotal = () => {
               <span>
                 Bid item: <strong>{{ selectedChat.chat?.bid.existingItem.item?.name }}</strong>
               </span>
-              <el-button v-if="chatStore.currentChatOfferType === 'receivedOffers'"
-                :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
-                @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)"
-                circle><el-icon>
-                  <View />
-                </el-icon></el-button>
-              <el-button v-else
-                :class="{ 'icon-active': route.path === `/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
-                @click.stop="push(`/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)"
-                circle><el-icon>
-                  <View />
-                </el-icon></el-button>
+              <div class="bid-actions">
+                <el-button v-if="chatStore.currentChatOfferType === 'receivedOffers'"
+                  :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
+                  @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)"
+                  circle><el-icon>
+                    <View />
+                  </el-icon></el-button>
+                <el-button v-else
+                  :class="{ 'icon-active': route.path === `/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}` }"
+                  @click.stop="push(`/user/${conversationContact?.nickname}/items/${selectedChat.chat?.bid.existingItem.id}`)"
+                  circle><el-icon>
+                    <View />
+                  </el-icon></el-button>
+                <el-tooltip v-if="selectedChat.chat?.bid.id" class="box-item" effect="dark" content="If you finished your conversation you can close this bid. Chat will be purged"
+                  placement="top-start">
+                  <div class="bid-action">
+                    <el-popconfirm width="350" @confirm="closeBid(selectedChat.chat?.bid.id || 0)"
+                      confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to close this bid?`">
+                      <template #reference>
+                        <el-button circle><el-icon>
+                            <Close />
+                          </el-icon></el-button>
+                      </template>
+                    </el-popconfirm>
+                  </div>
+                </el-tooltip>
+              </div>
             </div>
 
             <div v-if="selectedChat.chat?.bid.suggestedExistingItemId" class="selected-chat__info__li">
@@ -320,7 +352,9 @@ const unreadMessagesTotal = () => {
               'right-message': index >= 2 && userStore.currentUser.id === message.userId
             }" :key="index" class="message">
               <p>{{ message.text }}</p>
-              <p v-if="!(selectedChat.messages.length >= selectedChat.count && index < 2)" class="date">{{ new Date(message.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }} {{ new Date(message.createdAt).toLocaleDateString() }}</p>
+              <p v-if="!(selectedChat.messages.length >= selectedChat.count && index < 2)" class="date">{{ new
+                Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }} {{ new
+    Date(message.createdAt).toLocaleDateString() }}</p>
             </span>
           </div>
           <div class="message-input">
@@ -351,6 +385,11 @@ const unreadMessagesTotal = () => {
   border-left: 2px solid rgba(20, 22, 1, 0.1);
   background-image: url(data:image/png;base64,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);
   box-shadow: 2px 3px 20px #000000, 0 0 125px #000000 inset;
+
+  .bid-actions {
+    display: flex;
+    gap: .25rem;
+  }
 
   p {
     padding: 0 1rem;
@@ -387,6 +426,7 @@ const unreadMessagesTotal = () => {
       font-size: 10px;
       text-align: right;
     }
+
     p {
       margin: 0;
     }
