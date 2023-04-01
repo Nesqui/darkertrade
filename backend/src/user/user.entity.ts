@@ -66,6 +66,10 @@ export class User extends Model {
   @Column
   active: boolean;
 
+  @Default(false)
+  @Column
+  isAdmin: boolean;
+
   @BelongsToMany(() => Community, () => CommunityUser)
   communities: Community[];
 }

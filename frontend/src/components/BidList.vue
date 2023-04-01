@@ -110,16 +110,19 @@ const acceptBid = async (bid: Bid) => {
 
 <template>
   <div class="bids-list">
-    <el-table max-height="500" empty-text="Currently no items here" :data="bids">
+    <el-table max-height="500" empty-text="Currently no bids here" :data="bids">
       <el-table-column prop="user.nickname" label="From" width="150">
         <template #default="scope">
-          <router-link :to="`/user/${scope.row.user.nickname}/items`"><NicknameOnline :user="scope.row.user"/></router-link>
+          <router-link :to="`/user/${scope.row.user.nickname}/items`">
+            <NicknameOnline :user="scope.row.user" />
+          </router-link>
         </template>
       </el-table-column>
       <el-table-column v-if="existingItem.user" prop="To" label="To" width="150">
         <template #default="scope">
           <router-link :to="`/user/${existingItem.user.nickname}/items/${existingItem.id}`">
-            <NicknameOnline :user="existingItem.user"/></router-link>
+            <NicknameOnline :user="existingItem.user" />
+          </router-link>
         </template>
       </el-table-column>
       <el-table-column prop="price" label="Price" width="80" />
@@ -136,10 +139,8 @@ const acceptBid = async (bid: Bid) => {
               </template>
               <ItemPreview v-if="existingItem.item" :item="existingItem.item"
                 @click="push(`/user/${scope.row.user.nickname}/items/${scope.row.suggestedExistingItemId}`)"
-                :wanted-price="scope.row.suggestedExistingItem.wantedPrice"
-                :creator="scope.row.user"
-                :offer-type="existingItem.offerType"
-                :stats="scope.row.suggestedExistingItem?.stats" />
+                :wanted-price="scope.row.suggestedExistingItem.wantedPrice" :creator="scope.row.user"
+                :offer-type="existingItem.offerType" :stats="scope.row.suggestedExistingItem?.stats" />
             </el-popover>
           </div>
           <div v-else>
@@ -204,7 +205,6 @@ const acceptBid = async (bid: Bid) => {
 .bids-list {
   width: 100%;
 
-
   .bid-actions {
     display: flex;
     align-items: center;
@@ -231,6 +231,14 @@ const acceptBid = async (bid: Bid) => {
 
   .el-table__cell:last-child {
     text-align: end;
+  }
+}
+
+@media (max-width: 1280px) {
+  .bids {
+    .el-table {
+      width: 700px;
+    }
   }
 }
 </style>

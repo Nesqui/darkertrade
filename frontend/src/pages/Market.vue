@@ -64,11 +64,11 @@ onBeforeMount(async () => {
     gap: 2rem;
 }
 
-
-@media (max-width:420px) {
+@media (max-width: 1200px) {
     .market {
         flex-direction: column;
         align-items: center;
     }
 }
+
 </style>

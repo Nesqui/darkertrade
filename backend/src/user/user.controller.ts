@@ -16,6 +16,8 @@ import { QueryUserDto } from './dto/query-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from './user.decorator';
 import { User } from './user.entity';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { AdminQueryUserDto } from './dto/admin-query-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -37,6 +39,21 @@ export class UserController {
     return await this.userService.findByHash(hash);
   }
 
+  // ADMIN
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('/')
+  async findAll(@Query() query: AdminQueryUserDto) {
+    return await this.userService.findAll(query);
+  }
+
+  // ADMIN
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Patch('/ban/:userId/:days')
+  async Ban(@Param('userId') userId: number, @Param('days') days: number) {
+    return await this.userService.ban(userId, days);
+  }
+
+  // ADMIN
   @Patch('discord/:bool')
   @UseGuards(JwtAuthGuard)
   async changeDiscordNotification(

@@ -334,7 +334,7 @@ onBeforeMount(async () => {
             </div>
             <div>
               <span v-if="stat.min !== stat.max">
-                min max: {{ stat.min }} | {{ stat.max }}
+                {{ stat.min }} - {{ stat.max }}
               </span>
               <span v-else>
                 {{ stat.min }}

@@ -95,7 +95,7 @@ const forceReconnect = async () => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding-top: 4rem;
+    padding-top: 2rem;
     justify-content: flex-start;
     align-items: center;
     transition: all .25s;

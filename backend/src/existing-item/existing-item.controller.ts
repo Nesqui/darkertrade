@@ -17,6 +17,8 @@ import { ReqUser } from 'src/user/user.decorator';
 import { User } from 'src/user/user.entity';
 import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { QueryItemDto } from 'src/item/dto/query-item.dto';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { AdminQueryExistingItemDto } from './dto/admin-query-existing-item.dto';
 
 @Controller('existing-item')
 export class ExistingItemController {
@@ -36,6 +38,13 @@ export class ExistingItemController {
   // findAll(@ReqUser() user: User, @Query() filterExistingItemDto: QueryItemDto) {
   //   return this.existingItemService.findAll(filterExistingItemDto, user);
   // }
+
+  // ADMIN
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('/')
+  async findAll(@Query() query: AdminQueryExistingItemDto) {
+    return await this.existingItemService.findAll(query);
+  }
 
   @Get('/item/:itemId/user/:userId')
   @UseGuards(JwtAuthGuard)

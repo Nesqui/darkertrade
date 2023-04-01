@@ -13,6 +13,7 @@ import { QueryItemDto } from 'src/item/dto/query-item.dto';
 import { Item } from 'src/item/item.entity';
 import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
+import { AdminQueryExistingItemDto } from './dto/admin-query-existing-item.dto';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
@@ -107,6 +108,15 @@ export class ExistingItemService {
     return { quantity: quantityOfExistingItems, limits: LIMITS };
   }
 
+  // !ADMIN
+  async findAll(query: AdminQueryExistingItemDto) {
+    return await this.existingItemRepository.findAndCountAll({
+      limit: query.limit,
+      offset: query.offset,
+      order: [['id', 'DESC']],
+    });
+  }
+
   // ITEM LIST FILTER
   async findAllByItemIdAndUserId(
     query: QueryItemDto,
@@ -170,7 +180,10 @@ export class ExistingItemService {
     }
     const item = await this.existingItemRepository.findAndCountAll({
       where: existingItemWhere,
-      order: [['id', 'DESC']],
+      order: [
+        ['wantedPrice', 'DESC'],
+        ['updatedAt', 'DESC'],
+      ],
       include: [
         {
           model: this.statRepository,

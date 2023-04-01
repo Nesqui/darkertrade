@@ -36,4 +36,15 @@ defineProps<{ user: User }>()
     background-color: rgb(122, 0, 0);
   }
 }
+
+
+@media (max-width:420px) {
+  .online {
+
+    .on,
+    .off {
+      right: -6px;
+    }
+  }
+}
 </style>

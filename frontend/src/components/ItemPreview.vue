@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, PropType } from 'vue'
-import { Item, Stat, truncate, initItemApi, useMoment, BaseStat, VirtualStat, User } from '../hooks'
+import { computed, PropType, ref } from 'vue'
+import { Item, Stat, truncate, initItemApi, useMoment, BaseStat, VirtualStat, User, ItemName } from '../hooks'
 import { useAttributesStore, useItemStore, useUserStore } from '../store'
 import NicknameOnline from './NicknameOnline.vue';
 
@@ -10,6 +10,35 @@ const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
 const moment = useMoment()
 const userStore = useUserStore()
+
+interface DivineItems {
+  [key: string]: string;
+  "Heater Shield": string;
+  "Survival Bow": string;
+  Halberd: string;
+  "Horsemans Axe": string;
+  Longsword: string;
+  "Arming Sword": string;
+  "Double Axe": string;
+  Longbow: string;
+  "Recurve Bow": string;
+  "Morning Star": string;
+  Rapier: string;
+}
+
+const divineItems: DivineItems = {
+  "Heater Shield": "Can deflect projectile spells while in defensive stance. After the reflection is triggered, you remain able to reflect for 3 seconds, and cannot reflect again for 20 seconds after performing a spell reflection.",
+  "Survival Bow": "When shooting a bow, the action speed is very fast and the arrow flies in a straight line.",
+  "Halberd": "Hitting an enemy deals 10 additional magic damage and burns them for 3 seconds.",
+  "Horsemans Axe": "Hitting the target will render them unable to receive any healing effects for 20 seconds.",
+  "Longsword": "If you hit an enemy, summons a thunderbolt to deal 20 additional magic damage.",
+  "Arming Sword": "15% Additional Dark Magical Damage.",
+  "Double Axe": "When receiving a lethal attack, HP becomes 1 and becomes invincible for 2 seconds. This effect can only be triggered once during an adventure.",
+  "Longbow": "Pushes the hit target back.",
+  "Recurve Bow": "Hitting the target inflicts a disease that deals 12 magic damage for 3 seconds.",
+  "Morning Star": "Crushes the enemy's armor with each hit, reducing the target's physical defense by -25%. Stacks up to 3 times.",
+  "Rapier": "Hitting an enemy deals 2 additional magic damage, freezes them, and frostbites them for 10 seconds."
+}
 
 const props = defineProps({
   item: {
@@ -66,6 +95,9 @@ const baseStats = computed(() => {
   return []
 })
 
+const getDivineItem = (name: ItemName): string => {
+  return divineItems[name] || ''
+}
 </script>
 
 <template>
@@ -73,9 +105,25 @@ const baseStats = computed(() => {
     <div class="tat-frame" :class="{ 'no-hover': noHover }">
       <div class="offer-header">
         <div class="text-divider">
-          <span :class="`darker-title ${wantedPrice ? 'rarity-' + stats?.filter(stat => !stat.isBaseStat).length: ''}`">
-            {{ item?.name || 'Choose item type' }}</span>
+          <!-- DIVINE NAME  -->
+          <div v-if="item?.name && stats?.filter(stat => !stat.isBaseStat).length === 5" class="item-name">
+            <el-icon>
+              <StarFilled />
+            </el-icon>
+            <span :class="`darker-title ${wantedPrice ? 'rarity-5' : ''}`">
+              {{ item?.name || 'Choose item type' }}</span>
+            <el-icon>
+              <StarFilled />
+            </el-icon>
+          </div>
+          <!-- CLASSIC NAME  -->
+          <div v-else>
+            <span
+              :class="`darker-title ${wantedPrice ? 'rarity-' + stats?.filter(stat => !stat.isBaseStat).length : ''}`">
+              {{ item?.name || 'Choose item type' }}</span>
+          </div>
         </div>
+
         <div v-if="offerType" class="offer-header__item">
           <span>Updated:</span>
           <p class="offer-header__small"> {{ moment.fromNow(updatedAt || new Date().toString()) }}</p>
@@ -83,7 +131,8 @@ const baseStats = computed(() => {
         <div v-if="offerType" class="offer-header__item">
           <span>{{ offerType === 'WTS' ? 'Seller:' : 'Buyer:' }}</span>
           <p class="offer-header__small">
-            <NicknameOnline :user="creator || userStore.currentUser"/></p>
+            <NicknameOnline :user="creator || userStore.currentUser" />
+          </p>
         </div>
         <div v-if="offerType" class="offer-header__item">
           <span>Market:</span>
@@ -104,10 +153,16 @@ const baseStats = computed(() => {
         </div>
         <div class="stats" v-if="stats?.length">
           <div class="text-divider">Additional stats:</div>
-          <span v-for="(stat, index) in stats.filter(stat => !stat.isBaseStat)" :key="index" class="stat darker-title rarity-2">
+          <span v-for="(stat, index) in stats.filter(stat => !stat.isBaseStat)" :key="index"
+            class="stat darker-title rarity-2">
             {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
               truncate(getAttributeNameById(stat.attributeId), 35) }}
           </span>
+        </div>
+        <div v-if="item?.name && stats?.filter(stat => !stat.isBaseStat).length === 5 && getDivineItem(item.name)"
+          class="item-description__divine">
+          <div class="text-divider">Description:</div>
+          <p>{{ getDivineItem(item.name) }}</p>
         </div>
         <div class="text-divider" v-if="!wantedPrice">Category</div>
         <div class="price" v-if="wantedPrice">
@@ -158,6 +213,12 @@ $item-description-padding: .7rem .5rem;
 
     text-align: center;
 
+    .item-name {
+      display: flex;
+      align-items: center;
+      gap: .25rem;
+    }
+
     p,
     strong {
       margin: .1rem 0;
@@ -189,6 +250,14 @@ $item-description-padding: .7rem .5rem;
     align-items: center;
     font-family: "Solmoe";
     gap: .25rem;
+
+    &__divine {
+      p {
+        font-size: 11px;
+        text-align: center;
+        margin-bottom: unset;
+      }
+    }
 
     .base-stats,
     .stats {

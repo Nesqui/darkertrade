@@ -15,8 +15,6 @@ const slots = ref<Slot[]>(['Amulet',
 
 <template>
   <div class="human">
-    <img src="@/assets/images/dummy.png" alt="" class="bg">
-
     <div class="wrapper">
       <!-- <div class="img"></div> -->
       <div v-for="(slot, index) in slots" :key="index" :class="{
@@ -41,8 +39,11 @@ const slots = ref<Slot[]>(['Amulet',
 </template>
 
 <style scoped lang="scss">
-$item-size: 41px;
-$human-height: 550px;
+$item-size: 30px;
+$human-height: 430px;
+$human-mobile-height: 500px;
+$x-offset: 50px;
+$y-offset: 35px;
 
 .human {
   // height: 100%;
@@ -51,16 +52,9 @@ $human-height: 550px;
   justify-content: center;
   position: relative;
 
-  .bg {
-    position: absolute;
-    left: 0;
-    top: 0;
-    left: 0;
-    width: 100%;
-    filter: brightness(50%);
-    background-repeat: no-repeat;
-    background-size: cover;
-  }
+  background-image: url("@/assets/images/dummy.png");
+  background-size: contain;
+  background-repeat: no-repeat;
 
   .wrapper {
     width: var(--wrapper-medium-width);
@@ -77,7 +71,7 @@ $human-height: 550px;
     align-items: center;
     width: $item-size;
     height: $item-size;
-    font-size: 25px;
+    font-size: 20px;
     box-shadow: var(--tat-frame-box-shadow);
   }
 
@@ -87,14 +81,19 @@ $human-height: 550px;
   }
 
   .item-description {
-    left: 0px;
-    bottom: 10px;
-    min-width: 125px;
-    min-height: 165px;
-    font-size: 14px;
+    padding: 1rem .6rem;
+    right: 0px;
+    bottom: 15px;
+    min-width: 90px;
+    min-height: 115px;
+    font-size: 12px;
     display: flex;
     flex-direction: column;
-    gap: .2rem;
+    gap: .1rem;
+
+    .darker-title {
+      font-size: 13px;
+    }
 
     span {
       width: 100%;
@@ -104,45 +103,45 @@ $human-height: 550px;
   }
 
   .head {
-    top: 40px;
-    left: 215px;
+    top: $y-offset;
+    left: calc($x-offset + 133px);
   }
 
   .chest {
-    top: 150px;
-    left: 215px;
+    top: calc($y-offset + 85px);
+    left: calc($x-offset + 133px);
   }
 
   .ring {
-    top: 150px;
-    left: 310px;
-  }
-
-  .gloves {
-    top: 285px;
-    left: 150px;
-  }
-
-  .weapon {
-    top: 100px;
-    left: 70px;
-    height: 140px;
-    width: 75px;
+    top: calc($y-offset + 95px);
+    left: calc($x-offset + 230px);
   }
 
   .amulet {
-    top: 77px;
-    left: 310px;
+    top: calc($y-offset + 45px);
+    left: calc($x-offset + 230px);
+  }
+
+  .gloves {
+    top: calc($y-offset + 200px);
+    left: calc($x-offset + 80px);
+  }
+
+  .weapon {
+    top: calc($y-offset + 65px);
+    left: $x-offset;
+    height: 110px;
+    width: 55px;
   }
 
   .boots {
-    top: 456px;
-    left: 213px;
+    top: calc($y-offset + 350px);
+    left: calc($x-offset + 133px);
   }
 
   .legs {
-    top: 365px;
-    left: 213px;
+    top: calc($y-offset + 250px);
+    left: calc($x-offset + 133px);
   }
 
 }
@@ -151,9 +150,9 @@ $human-height: 550px;
 @media (max-width:420px) {
   .human {
     $item-mobile-size: 30px;
-    $human-mobile-height: 500px;
-    $x-mobile-offset: 35px;
-    $y-mobile-offset: 35px;
+    $human-mobile-height: 350px;
+    $x-mobile-offset: 40px;
+    $y-mobile-offset: 30px;
 
     .wrapper {
       height: $human-mobile-height;
@@ -167,7 +166,7 @@ $human-height: 550px;
     }
 
     .item-description {
-      left: 10px;
+      right: 10px;
       bottom: 10px;
       min-width: 85px;
       min-height: 110px;
@@ -208,8 +207,8 @@ $human-height: 550px;
     }
 
     .gloves {
-      top: $y-mobile-offset + 250px;
-      left: $x-mobile-offset + 70px;
+      top: $y-mobile-offset + 165px;
+      left: $x-mobile-offset + 85px;
     }
 
     .weapon {

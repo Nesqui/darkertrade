@@ -1,15 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useUserStore } from '../store'
-import NicknameOnline from './NicknameOnline.vue';
 
 const windowWidth = ref(400)
 
 const userStore = useUserStore()
-const isAuth = computed(() => userStore.isAuth)
-const router = useRouter()
-const route = useRoute()
 const activeIndex = ref('/')
 
 const onResize = () => {
@@ -26,24 +21,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize);
 })
 
-// const handleSelect = (key: string, keyPath: string[]) => {
-//   console.log(key, keyPath)
-// }
-// const push = async (url: string, newWindow = false) => {
-//   if (newWindow && url) {
-//     window.open(url, '_blank')
-//     return
-//   }
-//   let redirect = false
-//   if (route.path === url) {
-//     redirect = true
-//   }
-//   await router.push({
-//     path: url,
-//   })
-//   if (redirect)
-//     router.go(0)
-// }
 </script>
 
 <template>
@@ -56,45 +33,17 @@ onBeforeUnmount(() => {
         </div>
       </el-menu-item>
       <div class="flex-grow" />
-
+      <el-menu-item index="/admin" v-if="userStore.currentUser.isAdmin">Admin</el-menu-item>
       <el-menu-item index="/market">Browse offers</el-menu-item>
       <el-menu-item index="/creator">Create offer</el-menu-item>
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
       <el-menu-item index="/bids/">My bids</el-menu-item>
       <div class="flex-grow" />
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">
-        <div>
-          <NicknameOnline :user="userStore.currentUser" />
-        </div>
+        {{ userStore.currentUser.nickname }}
       </el-menu-item>
       <el-menu-item @click="userStore.logout" index="/">Logout</el-menu-item>
     </el-menu>
-
-    <!-- <div class="top-menu">
-        <div class="top-menu__item">
-          <a link @click="() => push('/market')" @click.middle="() => push('/market', true)">Browse offers</a>
-        </div>
-        <div class="top-menu__item">
-          <a link @click="() => push('/creator')" @click.middle="() => push('/creator', true)">Create offer</a>
-        </div>
-        <div class="top-menu__item">
-          <a link @click="() => push(`/user/${userStore.currentUser.nickname}/items`)"
-            @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">My items</a>
-        </div>
-        <div class="top-menu__item">
-          <a link @click="() => push(`/bids/`)" @click.middle="() => push(`/bids/`, true)">My bids</a>
-        </div>
-      </div>
-      <div v-if="isAuth" class="logout">
-        <div class="top-menu__item">
-          <a link @click="push(`/user/${userStore.currentUser.nickname}/items`)"
-            @click.middle="() => push(`/user/${userStore.currentUser.nickname}/items`, true)">{{
-              userStore.currentUser.nickname }}</a>
-        </div>
-        <div class="top-menu__item">
-          <a link @click="userStore.logout">Logout</a>
-        </div>
-      </div> -->
   </div>
 </template>
 

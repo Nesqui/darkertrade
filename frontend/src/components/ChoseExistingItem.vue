@@ -149,21 +149,21 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
   }
 }
 
+
 @media (max-width:420px) {
   .chose-existing-item {
-    // .arrow-data {
-    //   display: none;
-    // }
-    
     .arrow {
       display: none;
     }
+
     .chosen-item {
       justify-content: center;
       flex-direction: column;
+
       .arrow-data {
         margin-bottom: 1rem;
       }
+
       .item-preview {
         order: 2;
       }

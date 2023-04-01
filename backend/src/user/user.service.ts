@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { AdminQueryUserDto } from './dto/admin-query-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -430,8 +431,26 @@ export class UserService {
     return 'This action adds a new user';
   }
 
-  findAll() {
-    return `This action returns all user`;
+  // !ADMIN
+  findAll(query: AdminQueryUserDto) {
+    return this.usersRepository.findAndCountAll({
+      attributes: {
+        exclude: ['password', 'hash'],
+      },
+      order: [['id', 'DESC']],
+      limit: query.limit,
+      offset: query.offset,
+    });
+  }
+
+  // !ADMIN
+  async ban(userId: number, days: number) {
+    const user = await this.usersRepository.findByPk(userId);
+    if (!user) throw new NotFoundException('user not found');
+
+    user.bannedUntil = new Date(new Date().getTime() + days * 1000 * 3600 * 24); // adding days for ban
+    await user.save();
+    return true;
   }
 
   async findByPk(id: number) {
