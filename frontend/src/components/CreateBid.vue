@@ -1,7 +1,7 @@
 
 <script setup lang="ts">
 import ItemPreview from './ItemPreview.vue';
-import { PropType, ref } from 'vue';
+import { onMounted, PropType, ref } from 'vue';
 import { ExistingItem, Item } from '../hooks';
 import { CreateBidDto, initBidApi } from '../hooks/bid';
 import { ElNotification } from 'element-plus';
@@ -47,6 +47,10 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
   suggestedItem.value = chosenExistingItem
   form.value.amount = chosenExistingItem.wantedPrice!
 }
+
+onMounted(() => {
+  form.value.amount = props.item.existingItems && props.item.existingItems[0].wantedPrice || 150
+})
 
 </script>
 

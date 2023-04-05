@@ -112,6 +112,12 @@ const forceReconnect = async () => {
     font-weight: 900;
   }
 
+  @media (max-width:1600px) {
+    .shifted {
+      margin-left: -340px;
+    }
+  }
+
   @media (max-width:420px) {
     .shifted {
       margin-left: 0;

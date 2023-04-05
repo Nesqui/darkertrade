@@ -44,12 +44,6 @@ const login = async (hashRequired = true) => {
     userStore.saveUser(a.user)
     userStore.saveToken(a.jwtToken)
     router.push('/')
-    if (a.user) {
-      ElNotification({
-        message: "Successful login"
-      })
-
-    }
   } catch (error) {
     // ElNotification({
     //   message: "Login or password wrong"

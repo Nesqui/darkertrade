@@ -89,12 +89,12 @@ const clear = () => {
     props.filterItem.name = ""
   if (!props.disabledItemActions.slot)
     props.filterItem.slot = ""
-  if (!props.disabledItemActions.offerType)
-    props.filterItem.offerType = "WTS"
-  if (!props.disabledItemActions.offerType)
-    props.filterItem.hideMine = false
-  if (!props.disabledItemActions.published)
-    props.filterItem.published = true
+  // if (!props.disabledItemActions.offerType)
+  //   props.filterItem.offerType = "WTS"
+  // if (!props.disabledItemActions.offerType)
+  //   props.filterItem.hideMine = false
+  // if (!props.disabledItemActions.published)
+  //   props.filterItem.published = true
 
   props.filterItem.attributesId = []
   selectedAttributes.value = []
@@ -173,6 +173,7 @@ const itemClickHandle = (chosenExistingItem: ExistingItem) => {
 const choseItem = async (currentItem: Item) => {
   // props.filterItem.id = currentItem.id
   // props.filterItem.name = currentItem.name;
+  existingItems.value = []
   if (!currentItem.id)
     return
   searchString.value = ""

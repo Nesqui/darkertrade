@@ -96,9 +96,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
-        <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
-        <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
-        <CountExistingItem />
+       <CountExistingItem />
       </div>
     </div>
     <router-view v-if="user" />

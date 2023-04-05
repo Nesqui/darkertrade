@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRouter, useRoute } from 'vue-router'
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useUserStore } from '../store'
 
@@ -6,6 +7,8 @@ const windowWidth = ref(400)
 
 const userStore = useUserStore()
 const activeIndex = ref('/')
+const route = useRoute()
+const router = useRouter()
 
 const onResize = () => {
   nextTick(() => {
@@ -15,17 +18,28 @@ const onResize = () => {
 
 onMounted(() => {
   window.addEventListener('resize', onResize);
+  onResize()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize);
 })
 
+const select = async (url: string) => {
+  if (route.path !== url)
+    return
+  await router.push({
+    path: '/redirect'
+  })
+  await router.push({
+    path: url
+  })
+}
 </script>
 
 <template>
   <div class="menu">
-    <el-menu router="true" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200"
+    <el-menu router="true" @select="select" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200"
       :default-active="activeIndex" mode="horizontal">
       <el-menu-item index="/">
         <div class="logo">
@@ -38,6 +52,7 @@ onBeforeUnmount(() => {
       <el-menu-item index="/creator">Create offer</el-menu-item>
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
       <el-menu-item index="/bids/">My bids</el-menu-item>
+      <el-menu-item index="/faq">How it works?</el-menu-item>
       <div class="flex-grow" />
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">
         {{ userStore.currentUser.nickname }}

@@ -268,11 +268,7 @@ onBeforeMount(async () => {
         <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
         <span>discord DM</span>
       </div>
-      <div class="restrictions">
-        <p v-if="!limits.isLoading() && !limits.canCreateWtb()">You cant create more WTB items!</p>
-        <p v-if="!limits.isLoading() && !limits.canCreateWts()">You cant create more WTS items!</p>
-        <CountExistingItem />
-      </div>
+      <CountExistingItem :showOnly="offerType"/>
     </div>
     <div class="item-creator__wrapper">
       <div class="item-creator__item">
@@ -306,7 +302,9 @@ onBeforeMount(async () => {
             <div class="sub-title">
               Stat value:
             </div>
-            <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1" :min="attributeStore.getAttributeById(attributeId)?.min || -200" :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
+            <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1"
+              :min="attributeStore.getAttributeById(attributeId)?.min || -200"
+              :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
               ref="valueRef" v-model="value" />
           </div>
           <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
