@@ -111,7 +111,7 @@ const getDivineItem = (name: ItemName): string => {
               <StarFilled />
             </el-icon>
             <span :class="`darker-title ${wantedPrice ? 'rarity-5' : ''}`">
-              {{ item?.name || 'Choose item type' }}</span>
+              {{ item?.name || 'Choose item' }}</span>
             <el-icon>
               <StarFilled />
             </el-icon>
@@ -120,7 +120,7 @@ const getDivineItem = (name: ItemName): string => {
           <div v-else>
             <span
               :class="`darker-title ${wantedPrice ? 'rarity-' + stats?.filter(stat => !stat.isBaseStat).length : ''}`">
-              {{ item?.name || 'Choose item type' }}</span>
+              {{ item?.name || 'Choose item' }}</span>
           </div>
         </div>
 
@@ -141,7 +141,7 @@ const getDivineItem = (name: ItemName): string => {
       </div>
       <div class="item-img">
         <img v-if="item?.id" :src="itemApi.getImg(item)" alt="">
-        <div v-else class="img-avatar"></div>
+        <div v-else class="img-avatar">?</div>
       </div>
       <div class="item-description">
         <div class="base-stats" v-if="wantedPrice && baseStats.length">
@@ -190,6 +190,14 @@ $item-description-padding: .7rem .5rem;
     padding: var(--tat-frame-padding);
   }
 
+  .img-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--el-bg-color);
+    font-weight: 500;
+    font-size: 34px;
+  }
 
   .item-img {
     display: flex;
@@ -252,6 +260,7 @@ $item-description-padding: .7rem .5rem;
     gap: .25rem;
 
     &__divine {
+      width: 100%;
       p {
         font-size: 11px;
         text-align: center;

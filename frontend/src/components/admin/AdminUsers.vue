@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { AdminUserQuery, initUserApi, truncate, useMoment, User } from '@/hooks'
 import { onBeforeMount, ref, watch } from 'vue'
+import NicknameOnline from '../NicknameOnline.vue';
 
 const moment = useMoment()
 const userApi = initUserApi()
@@ -43,7 +44,13 @@ onBeforeMount(async () => {
   <div class="admin-users">
     <el-table :data="users" style="width: 100%">
       <el-table-column width="50" prop="id" label="Id" />
-      <el-table-column width="100" prop="nickname" label="nickname" />
+      <el-table-column width="100" prop="nickname" label="nickname">
+        <template #default="scope">
+          <NicknameOnline :user="scope.row"/>
+        </template>
+      </el-table-column>
+
+      
       <el-table-column width="195" prop="discordId" label="discordId">
         <template #default="scope">
           <el-tooltip effect="dark" :content="scope.row.discord" placement="top-start">

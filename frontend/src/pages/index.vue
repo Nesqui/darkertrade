@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-
-const val = ref(+(Math.random() * 100).toFixed(0))
 </script>
 
 <template>
@@ -26,14 +23,8 @@ const val = ref(+(Math.random() * 100).toFixed(0))
         rather a faster and easier solution for finding both sides of transaction. Either mismatch of stats and//or bogus
         items should be discussed by seller and buyer between themselves.
       </p>
+      <router-link to="/faq">How it works?</router-link>
     </div>
-    <svg>
-      <filter id="wavy2">
-        <feTurbulence x="0" y="0" baseFrequency="0.01" numOctaves="5" :seed="val" />
-        <feDisplacementMap in="SourceGraphic" scale="25" />
-      </filter>
-    </svg>
-
   </div>
 </template>
 
@@ -52,45 +43,30 @@ const val = ref(+(Math.random() * 100).toFixed(0))
   display: flex;
   align-items: center;
   flex-direction: column;
+  justify-content: center;
+  margin-top: 7rem;
+  overflow: hidden;
+
+  h1 {
+    font-size: 24px;
+  }
+
+  p {
+    font-size: 18px;
+  }
+
+  a {
+    font-size: 20px;
+    margin-top: 2rem;
+    text-decoration: underline;
+  }
 
   .paper {
-    position: relative;
-    padding: 4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 900px;
-  }
-
-  .paper::before {
-    // border-radius: 5px;
-    scrollbar-gutter: stable both-edges;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 600px;
-    content: "";
-    background-color: #19161670;
-    filter: url(#wavy2);
-    overflow-y: auto;
-    max-height: 800px;
-    outline: none;
-    box-shadow: var(--tat-frame-box-shadow);
-  }
-
-  .wrapper {
-    width: var(--wrapper-large-width);
-
-    h1 {
-      font-size: 20px;
-    }
-
-    p {
-      font-family: "Solmoe";
-      text-align: justify;
-      font-size: 18px;
-    }
+    width: 750px;
+    overflow: hidden;
   }
 
   .logo {
@@ -108,10 +84,14 @@ const val = ref(+(Math.random() * 100).toFixed(0))
     left: -100px;
     opacity: 0.2;
   }
-.logo {
-  display: none;
-}
+
+  .logo {
+    display: none;
+  }
+
   .index {
+    margin-top: 0;
+
     .wrapper {
       width: var(--wrapper-mobile-width);
     }
