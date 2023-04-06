@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue'
-import SignUp from "./SignUp.vue"
-import SignIn from "./SignIn.vue"
+import SignUp from "../components/SignUp.vue"
+import SignIn from "../components/SignIn.vue"
 import { useRoute } from 'vue-router';
 import { UpdateUserDto } from '@/hooks';
 
@@ -40,9 +40,11 @@ const onUserCreated = (user: UpdateUserDto) => {
 <style scoped lang="scss">
 .bg {
     position: fixed;
+    top: 0;
     left: 0;
+    height: 100%;
     width: 100%;
-    opacity: 0.15;
+    opacity: 0.35;
     background-repeat: no-repeat;
 }
 
@@ -50,7 +52,7 @@ const onUserCreated = (user: UpdateUserDto) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: calc(100vh - var(--menu-height) - var(--main-wrapper-padding-top));
 
     h2 {
         font-size: 34px;
@@ -87,6 +89,7 @@ const onUserCreated = (user: UpdateUserDto) => {
 
 @media (max-width:420px) {
     .auth {
+        height: calc(100vh - var(--menu-mobile-height) - var(--main-wrapper-padding-top));
         h2 {
             font-size: 20px;
             margin-bottom: 1.5rem;
@@ -101,6 +104,8 @@ const onUserCreated = (user: UpdateUserDto) => {
 
     .bg {
         width: unset;
+        top: 0;
+        left: -135%;
         height: 100vh;
         background-size: contain;
     }

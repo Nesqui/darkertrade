@@ -55,6 +55,10 @@
   --rarity-4: rgb(247,162,45);
   --rarity-5: rgb(227,216,140);
   --el-menu-bg-color: transparent;
+  --menu-height: 50px;
+  --menu-mobile-height: 30px;
+  --main-wrapper-padding-top: 3rem;
+  --main-wrapper-mobile-padding-top: 2rem;
 }
 
 @media (max-width:420px) {

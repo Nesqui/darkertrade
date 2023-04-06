@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onBeforeMount, onBeforeUnmount, onUnmounted, ref } from 'vue'
+import { computed, onBeforeMount, onBeforeUnmount, onUnmounted, ref, watch } from 'vue'
 import { initAttributesApi, initItemApi } from '../hooks'
-import { useAttributesStore, useChatStore, useItemStore } from '../store'
+import { useAttributesStore, useChatStore, useItemStore, useUserStore } from '../store'
 import AllChats from "../components/AllChats.vue";
 import TopMenu from '../components/TopMenu.vue'
 import { ElNotification } from 'element-plus';
@@ -17,10 +17,16 @@ onBeforeMount(async () => {
   const attributes = await attributeApi.findAll()
   attributeStore.saveAll(attributes)
   itemStore.saveAll(await itemApi.getBase())
-  connect()
+  if (isAuth.value)
+    connect()
 })
 
-
+const userStore = useUserStore()
+const isAuth = computed(() => userStore.isAuth)
+watch(isAuth, () => {
+  if (isAuth)
+    reconnect()
+})
 const changeActiveTab = async () => {
   if (document.visibilityState !== "hidden") {
     if (!isConnected.value)
@@ -31,7 +37,10 @@ const changeActiveTab = async () => {
 const chatStore = useChatStore()
 
 onUnmounted(() => {
-  disconnect()
+  console.log(isConnected.value);
+
+  if (isConnected.value)
+    disconnect()
   document.removeEventListener("visibilitychange", changeActiveTab)
 })
 
@@ -40,7 +49,11 @@ const forceReconnect = async () => {
   try {
     if (!isConnected.value)
       reconnect()
+    console.log(isConnected.value);
+
   } catch (error) {
+    console.log(error);
+
     ElNotification({
       message: 'Unfortunately chat service not responding. Please contact with us via discord'
     })
@@ -56,12 +69,12 @@ const forceReconnect = async () => {
   <div class="main">
     <TopMenu />
     <div class="main-wrapper" :class="{
-      'shifted': !!chatStore.expand.chats.length
+      'shifted': isAuth && !!chatStore.expand.chats.length
     }">
       <router-view />
     </div>
-    <AllChats v-if="isConnected" />
-    <div v-else @click="forceReconnect" class="ws-error">{{
+    <AllChats v-if="isAuth && isConnected" />
+    <div v-else-if="isAuth" @click="forceReconnect" class="ws-error">{{
       reconnecting ? 'Reconnecting ...' : 'Chat offine. Try reconnect ? ' }}</div>
   </div>
 </template>
@@ -95,7 +108,7 @@ const forceReconnect = async () => {
     width: 100%;
     display: flex;
     flex-direction: column;
-    padding-top: 2rem;
+    padding-top: var(--main-wrapper-padding-top);
     justify-content: flex-start;
     align-items: center;
     transition: all .25s;
@@ -124,7 +137,7 @@ const forceReconnect = async () => {
     }
 
     .main-wrapper {
-      padding-top: 1rem;
+      padding-top: var(--main-wrapper-mobile-padding-top);
       width: 100%;
       margin-bottom: 10rem;
     }

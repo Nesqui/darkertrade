@@ -14,7 +14,8 @@ const selectedAttributes = ref<Attribute[]>([])
 const attributeSearchString = ref('')
 const selectedAttributeRef = ref()
 const MAX_ATTRIBUTES = 5
-
+const userStore = useUserStore()
+const isAuth = computed(() => userStore.isAuth)
 const handleSelectAttribute = (attribute: Attribute) => {
   selectedAttributes.value.push(attribute)
   attributeSearchString.value = ''
@@ -223,7 +224,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         class="actions-filter">
         <el-switch v-if="!disabledItemActions.published" v-model="filterItem.published" size="large"
           active-text="Published" inactive-text="Private" />
-        <el-switch v-if="!disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
+        <el-switch v-if="isAuth && !disabledItemActions.hideMine" v-model="filterItem.hideMine" size="large" active-text="Hide mine"
           inactive-text="Show all" />
         <el-button-group v-if="!disabledItemActions.offerType">
           <el-button :disabled="filterItem.offerType === 'WTB'" @click="changeOfferType('WTB')">

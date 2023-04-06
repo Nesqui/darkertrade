@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ElNotification } from 'element-plus'
-import { onBeforeMount, ref, watch } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BidList from '@/components/BidList.vue';
 import CreateBid from '@/components/CreateBid.vue';
@@ -20,7 +20,7 @@ const route = useRoute()
 const showBidCreator = ref(false)
 const router = useRouter()
 const discordNotificationLoading = ref(false)
-
+const isAuth = computed(() => userStore.isAuth)
 const existingItemsApi = initExistingItemApi()
 const moment = useMoment()
 
@@ -147,7 +147,7 @@ onBeforeMount(async () => {
           <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All
             items</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
-            v-if="!ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
+            v-if="isAuth && !ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
             bid +</el-button>
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useUserStore } from '../store'
 
 const windowWidth = ref(400)
-
 const userStore = useUserStore()
+const isAuth = computed(() => userStore.isAuth)
 const activeIndex = ref('/')
 const route = useRoute()
 const router = useRouter()
@@ -49,15 +49,16 @@ const select = async (url: string) => {
       <div class="flex-grow" />
       <el-menu-item index="/admin" v-if="userStore.currentUser.isAdmin">Admin</el-menu-item>
       <el-menu-item index="/market">Browse offers</el-menu-item>
-      <el-menu-item index="/creator">Create offer</el-menu-item>
-      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
-      <el-menu-item index="/bids/">My bids</el-menu-item>
+      <el-menu-item v-if="isAuth" index="/creator">Create offer</el-menu-item>
+      <el-menu-item v-if="isAuth" :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
+      <el-menu-item v-if="isAuth" index="/bids/">My bids</el-menu-item>
       <el-menu-item index="/faq">How it works?</el-menu-item>
       <div class="flex-grow" />
-      <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">
+      <el-menu-item v-if="isAuth" :index="`/user/${userStore.currentUser.nickname}/items`">
         {{ userStore.currentUser.nickname }}
       </el-menu-item>
-      <el-menu-item @click="userStore.logout" index="/">Logout</el-menu-item>
+      <el-menu-item v-if="isAuth" @click="userStore.logout" index="/">Logout</el-menu-item>
+      <el-menu-item v-else index="/auth">Sign In</el-menu-item>
     </el-menu>
   </div>
 </template>
@@ -71,13 +72,13 @@ $menuMobileHeight: 30px;
   // align-items: center;
   // background-color: transparent;
   // width: 100%;
-
+  height: var(--menu-height);
   .logo {
     cursor: pointer;
     min-width: 209px;
 
     >img {
-      height: calc($menuHeight - 15px);
+      height: calc(var(--menu-height) - 15px);
     }
   }
 
@@ -101,13 +102,14 @@ $menuMobileHeight: 30px;
 @media (max-width:420px) {
 
   .menu {
+    height: var(--menu-mobile-height);
     .el-menu {
       padding: .9rem 0;
     }
 
     .logo {
       img {
-        height: $menuMobileHeight;
+        height: var(--menu-mobile-height);
       }
     }
   }

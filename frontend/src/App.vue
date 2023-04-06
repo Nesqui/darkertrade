@@ -2,8 +2,7 @@
 import { computed, onBeforeMount } from 'vue'
 import { useUserStore, useAttributesStore } from './store'
 import Home from './pages/Home.vue'
-import Auth from './components/Auth.vue'
-
+// import Auth from './components/Auth.vue'
 
 const userStore = useUserStore()
 const isAuth = computed(() => userStore.isAuth)
@@ -11,8 +10,7 @@ const isAuth = computed(() => userStore.isAuth)
 
 <template>
   <div class="app">
-    <Home v-if="isAuth" />
-    <Auth v-else />
+    <Home />
   </div>
 </template>
 
