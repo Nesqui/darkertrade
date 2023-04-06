@@ -20,7 +20,6 @@ defineProps<{ user: User }>()
 .online-wrapper {
   display: flex;
   align-items: center;
-  justify-content: center;
   width: 100%;
   gap: 5px;
 }

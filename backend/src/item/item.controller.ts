@@ -14,7 +14,10 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
 import { ApiQuery } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  JwtAuthGuard,
+  JwtOptionalAuthGuard,
+} from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from 'src/user/user.decorator';
 import { User } from 'src/user/user.entity';
 
@@ -41,7 +44,7 @@ export class ItemController {
   @ApiQuery({
     type: QueryItemDto,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOptionalAuthGuard)
   getBase() {
     return this.itemService.getBase();
   }
@@ -50,13 +53,13 @@ export class ItemController {
   @ApiQuery({
     type: QueryItemDto,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOptionalAuthGuard)
   getMarket(@Query() itemQuery: QueryItemDto, @ReqUser() user: User) {
     return this.itemService.getMarket(itemQuery, user);
   }
 
   @Get('/user/:userId/:existingItemId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOptionalAuthGuard)
   findUserItem(
     @Param('userId') userId: number,
     @Param('existingItemId') existingItemId: number,
@@ -69,7 +72,7 @@ export class ItemController {
   @ApiQuery({
     type: QueryItemDto,
   })
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOptionalAuthGuard)
   findUserItems(
     @Query() itemQuery: QueryItemDto,
     @Param('userId') userId: number,

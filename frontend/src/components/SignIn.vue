@@ -12,6 +12,7 @@ const props = defineProps({
     type: Object as PropType<UpdateUserDto>,
   }
 })
+
 const authApi = initAuthApi()
 const userStore = useUserStore()
 const router = useRouter()

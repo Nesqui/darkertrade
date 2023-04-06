@@ -54,7 +54,7 @@ export class ItemService {
       userId,
       archived: false,
     };
-    if (user.id !== userId) existingItemWhere['published'] = true;
+    if (user && user.id !== userId) existingItemWhere['published'] = true;
 
     const res = await this.itemsRepository.findOne({
       include: [
@@ -103,7 +103,11 @@ export class ItemService {
     return res;
   }
 
-  async findUserItems(userId: number, query: QueryItemDto, user: User) {
+  async findUserItems(
+    userId: number,
+    query: QueryItemDto,
+    user: User | undefined,
+  ) {
     const existingItemWhere = {
       userId,
       archived: false,
@@ -126,7 +130,7 @@ export class ItemService {
       };
     }
 
-    if (user.id !== userId) existingItemWhere['published'] = true;
+    if (user && user.id !== userId) existingItemWhere['published'] = true;
 
     return await this.itemsRepository.findAll({
       where: itemWhere,
@@ -141,7 +145,7 @@ export class ItemService {
     });
   }
 
-  async getMarket(query: QueryItemDto, user: User) {
+  async getMarket(query: QueryItemDto, user: User | undefined) {
     const itemWhere = {};
 
     const existingItemWhere = {
@@ -152,7 +156,7 @@ export class ItemService {
     if (query.slot) itemWhere['slot'] = query.slot;
     if (query.offerType) existingItemWhere['offerType'] = query.offerType;
 
-    if (query.hideMine)
+    if (user && query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
     if (query.searchItemString) {

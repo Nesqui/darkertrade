@@ -92,7 +92,16 @@ export class ExistingItemService {
     return await this.findOne(item.id);
   }
 
-  async count(user: User) {
+  async count(user: User | undefined) {
+    // Not auth user
+    if (!user)
+      return {
+        quantity: [
+          { offerType: 'WTS', offerTypeCount: '0' },
+          { offerType: 'WTB', offerTypeCount: '0' },
+        ],
+        limits: { WTB: 0, WTS: 0 },
+      };
     const quantityOfExistingItems = await this.existingItemRepository.findAll({
       where: {
         userId: user.id,
@@ -122,7 +131,7 @@ export class ExistingItemService {
     query: QueryItemDto,
     itemId: number,
     userId: number | null = null,
-    user: User,
+    user: User | undefined,
   ) {
     const existingItemWhere = {
       archived: false,
@@ -148,10 +157,10 @@ export class ExistingItemService {
 
     existingItemWhere['published'] = query.published;
 
-    if (!query.published) existingItemWhere['userId'] = user.id;
+    if (user && !query.published) existingItemWhere['userId'] = user.id;
 
     existingItemWhere['offerType'] = query.offerType;
-    if (query.hideMine)
+    if (user && query.hideMine)
       existingItemWhere[sequelize.Op.not] = { userId: user.id };
 
     if (query.attributesId) {

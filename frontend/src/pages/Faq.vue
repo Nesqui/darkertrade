@@ -1,22 +1,24 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { useUserStore } from "@/store";
+import { computed, ref } from "vue";
 
-const activeName = ref('WTS')
+const userStore = useUserStore()
+const isAuth = computed(() => userStore.isAuth)
 </script>
 
 <template>
-  <img src="@/assets/images/library.png" alt="" class="bg">
-  <div class="faq">
+  <img src="@/assets/images/library1.png" alt="" class="bg">
+  <div class="faq wrapper">
     <div class="img-wrapper">
-      <h2>I want to buy</h2>
+      <div class="text-divider">I want to buy</div>
       <img src="@/assets/images/wtb.png" alt="">
-      <h2>I want to sell</h2>
+      <div class="text-divider">I want to sell</div>
       <img src="@/assets/images/wts.png" alt="">
-      <h2>Bids</h2>
+      <div class="text-divider">Bids</div>
       <img src="@/assets/images/bid.png" alt="">
     </div>
     <div class="links">
-      <router-link to="/creator">Go to creator</router-link>
+      <router-link v-if="isAuth" to="/creator">Go to creator</router-link>
       <router-link to="/market">Go to market</router-link>
     </div>
   </div>
@@ -27,17 +29,18 @@ const activeName = ref('WTS')
   position: fixed;
   left: 0;
   top: 0;
-  height: 100%;
-  opacity: 0.45;
+  width: 100%;
+  opacity: 0.55;
   background-repeat: no-repeat;
   background-size: cover;
 }
 
 .links {
   width: 100%;
+  padding-top: 1.5rem;
   display: flex;
   justify-content: center;
-  gap: 1rem;
+  gap: 3rem;
   align-items: center;
 
   a {
@@ -45,21 +48,23 @@ const activeName = ref('WTS')
   }
 }
 
-h2 {
-  text-transform: uppercase;
+.text-divider {
+  margin-top: unset;
+  font-size: 22px;
+  font-weight: 600;
   margin-bottom: 2rem;
 }
-
 
 .faq {
   width: var(--wrapper-xxl-width);
 
   .img-wrapper {
-    padding-top: 1rem;
+    width: 100%;
+    text-align: center;
 
     img {
       height: 160px;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
     }
   }
 }
@@ -68,6 +73,8 @@ h2 {
 @media (max-width: 1255px) {
   .bg {
     left: 50%;
+    width: unset;
+    height: 100%;
     transform: translateX(-48%);
   }
 
@@ -82,7 +89,7 @@ h2 {
 
       img {
         height: unset;
-        width: 95vw;
+        width: 90vw;
       }
     }
   }

@@ -14,6 +14,8 @@ export interface UnreadMessagesCount {
   unreadMessages: string
 }
 const createSocket = () => {
+  console.log('socket', socket);
+
   // Create a new socket instance if one does not already exist
   if (!socket) {
     socket = io(import.meta.env.VITE_WEBSOCKET_URL);
@@ -21,6 +23,7 @@ const createSocket = () => {
     // Broadcast a message to other tabs to let them know that a socket has been created
     channel.postMessage({ type: 'connect', socketId });
   }
+  console.log(1);
 
   // Listen for socket events
   socket.on('connect', () => {});
@@ -28,8 +31,9 @@ const createSocket = () => {
   socket.emit("auth", {
     token
   })
-
   socket.on('authorized', () => {
+    console.log('authorized');
+
     isConnected.value = true
   })
 
@@ -40,8 +44,12 @@ const createSocket = () => {
 
 const destroySocket = () => {
   // Disconnect the socket when the component unmounts
-  socket.disconnect();
-
+  if (socket) {
+    socket.off('connect')
+    socket.off('disconnect')
+    socket.off('authorized')
+    socket.disconnect();
+  }
   // Broadcast a message to other tabs to let them know that the socket has been disconnected
   channel.postMessage({ type: 'disconnect', socketId });
 }
@@ -69,7 +77,7 @@ const off = (eventName: string, callback: any) => {
 
 const handleMessage = (event: any) => {
   const { data } = event;
-  
+
   // Check if the message is relevant to this socket instance
   if (data.type === 'connect' && data.socketId !== socketId) {
     // Another socket instance has been created, so disconnect this one
@@ -85,14 +93,14 @@ export default function useSocket() {
   const userStore = useUserStore()
   token = userStore.token
   const connect = () => {
+    token = userStore.token
     channel.addEventListener('message', handleMessage);
     createSocket();
   }
 
   const reconnect = () => {
-    socket.disconnect()
-    socket = null
-    createSocket();
+    disconnect()
+    connect()
   }
 
   const disconnect = () => {
