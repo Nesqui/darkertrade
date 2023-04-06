@@ -52,7 +52,7 @@ const select = async (url: string) => {
       <el-menu-item index="/creator">Create offer</el-menu-item>
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
       <el-menu-item index="/bids/">My bids</el-menu-item>
-      <el-menu-item index="/faq">How it works?</el-menu-item>
+      <el-menu-item index="/faq">How's it works?</el-menu-item>
       <div class="flex-grow" />
       <el-menu-item :index="`/user/${userStore.currentUser.nickname}/items`">
         {{ userStore.currentUser.nickname }}

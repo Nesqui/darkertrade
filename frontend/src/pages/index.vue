@@ -23,7 +23,7 @@
         rather a faster and easier solution for finding both sides of transaction. Either mismatch of stats and//or bogus
         items should be discussed by seller and buyer between themselves.
       </p>
-      <router-link to="/faq">How it works?</router-link>
+      <router-link to="/faq">How's it works?</router-link>
     </div>
   </div>
 </template>
