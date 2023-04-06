@@ -279,7 +279,7 @@ const unreadMessagesTotal = () => {
 
           <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
-            <span>Chat with: <router-link v-if="conversationContact" :to="'/'">
+            <span class="selected-chat__actions__conversation">Chat with: <router-link v-if="conversationContact" :to="'/'">
                 <NicknameOnline :user="conversationContact" />
               </router-link></span>
             <el-button @click="clearActiveChat">Back</el-button>
@@ -492,6 +492,12 @@ const unreadMessagesTotal = () => {
       padding-top: .8rem;
       gap: .25rem;
       margin-bottom: .5rem;
+
+      &__conversation {
+        display: flex;
+        gap: .25rem;
+        align-items: center;
+      }
     }
 
     &__info {
@@ -628,6 +634,14 @@ const unreadMessagesTotal = () => {
       .el-collapse-item__header {
         background-color: transparent;
       }
+    }
+  }
+}
+
+@media (max-height:700px) {
+  .chat {
+    .el-collapse-item__header__first>.el-collapse-item__wrap>.el-collapse-item__content {
+      height: 500px;
     }
   }
 }

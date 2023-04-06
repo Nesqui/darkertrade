@@ -13,7 +13,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { QueryUserDto } from './dto/query-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import {
+  JwtAuthGuard,
+  JwtOptionalAuthGuard,
+} from 'src/auth/guards/jwt-auth.guard';
 import { ReqUser } from './user.decorator';
 import { User } from './user.entity';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
@@ -29,7 +32,7 @@ export class UserController {
   }
 
   @Get('/nickname/:nickname')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOptionalAuthGuard)
   async findOneByNickname(@Param('nickname') nickname: string) {
     return await this.userService.findByNickname(nickname);
   }
