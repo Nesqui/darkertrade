@@ -217,7 +217,7 @@ export class RegisterCommand {
 
     try {
       const discordMessage =
-        `__${this.configService.get('APP_URL')}/signup?hash=${hash}__` +
+        `__${this.configService.get('APP_URL')}/auth?hash=${hash}__` +
         '\n' +
         `Your link to complete registration on **TaT**`;
 
@@ -227,7 +227,7 @@ export class RegisterCommand {
     }
 
     await modal.reply({
-      content: this.configService.get('APP_URL') + `/signup?hash=${hash}`,
+      content: this.configService.get('APP_URL') + `/auth?hash=${hash}`,
       ephemeral: true,
     });
   }
