@@ -25,6 +25,12 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize);
 })
 
+const openBlank = async (url: string) => {
+  if (url && isAuth.value) {
+    window.open(url, '_blank')
+  }
+}
+
 const select = async (url: string) => {
   if (route.path !== url)
     return
@@ -41,20 +47,20 @@ const select = async (url: string) => {
   <div class="menu">
     <el-menu router="true" @select="select" :unique-opened="true" menu-trigger="click" :ellipsis="windowWidth < 1200"
       :default-active="activeIndex" mode="horizontal">
-      <el-menu-item index="/">
+      <el-menu-item @click.middle="() => openBlank('/')" index="/">
         <div class="logo">
           <img src="../assets/logo.png" alt="">
         </div>
       </el-menu-item>
       <div class="flex-grow" />
-      <el-menu-item index="/admin" v-if="userStore.currentUser.isAdmin">Admin</el-menu-item>
-      <el-menu-item index="/market">Browse offers</el-menu-item>
-      <el-menu-item v-if="isAuth" index="/creator">Create offer</el-menu-item>
-      <el-menu-item v-if="isAuth" :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
-      <el-menu-item v-if="isAuth" index="/bids/">My bids</el-menu-item>
-      <el-menu-item index="/faq">How it works?</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank('/admin')" index="/admin" v-if="userStore.currentUser.isAdmin">Admin</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank('/market')" index="/market">Browse offers</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank('/creator')" :disabled="!isAuth" index="/creator">Create offer</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank(`/user/${userStore.currentUser.nickname}/items`)" :disabled="!isAuth" :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank('/bids/')" :disabled="!isAuth" index="/bids/">My bids</el-menu-item>
+      <el-menu-item @click.middle="() => openBlank('/faq')" index="/faq">How it works?</el-menu-item>
       <div class="flex-grow" />
-      <el-menu-item v-if="isAuth" :index="`/user/${userStore.currentUser.nickname}/items`">
+      <el-menu-item :disabled="!isAuth" @click.middle="() => openBlank(`/user/${userStore.currentUser.nickname}/items`)" :index="`/user/${userStore.currentUser.nickname}/items`">
         {{ userStore.currentUser.nickname }}
       </el-menu-item>
       <el-menu-item v-if="isAuth" @click="userStore.logout" index="/">Logout</el-menu-item>
