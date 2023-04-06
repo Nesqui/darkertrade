@@ -638,6 +638,14 @@ const unreadMessagesTotal = () => {
   }
 }
 
+@media (max-height:700px) {
+  .chat {
+    .el-collapse-item__header__first>.el-collapse-item__wrap>.el-collapse-item__content {
+      height: 500px;
+    }
+  }
+}
+
 @media (max-width:420px) {
   .chat {
     .el-collapse-item__header__first>.el-collapse-item__wrap>.el-collapse-item__content {

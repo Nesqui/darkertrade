@@ -14,8 +14,6 @@ export interface UnreadMessagesCount {
   unreadMessages: string
 }
 const createSocket = () => {
-  console.log('socket', socket);
-
   // Create a new socket instance if one does not already exist
   if (!socket) {
     socket = io(import.meta.env.VITE_WEBSOCKET_URL);
@@ -23,8 +21,6 @@ const createSocket = () => {
     // Broadcast a message to other tabs to let them know that a socket has been created
     channel.postMessage({ type: 'connect', socketId });
   }
-  console.log(1);
-
   // Listen for socket events
   socket.on('connect', () => {});
 
@@ -32,8 +28,6 @@ const createSocket = () => {
     token
   })
   socket.on('authorized', () => {
-    console.log('authorized');
-
     isConnected.value = true
   })
 
