@@ -69,7 +69,7 @@ export const pgProviders = [
         BaseStat,
       ]);
       try {
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
         await initData(sequelize, ConfigService);
         return sequelize;
       } catch (error) {

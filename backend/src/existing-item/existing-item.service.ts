@@ -350,6 +350,7 @@ export class ExistingItemService {
     LIMIT ${pageSize}
     OFFSET ${offset};
   `;
+
     const existingItems = await this.db.query(query, {
       model: this.existingItemRepository,
       mapToModel: true,
