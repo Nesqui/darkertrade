@@ -227,6 +227,7 @@ onBeforeMount(async () => {
   display: flex;
   position: relative;
   gap: 2rem;
+  align-items: flex-start;
 
   .bg {
     position: fixed;
