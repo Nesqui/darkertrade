@@ -5,11 +5,11 @@ import { itemsProviders } from './item.providers';
 import { PgModule } from 'src/pg/pg.module';
 import { JwtService } from '@nestjs/jwt';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
-import { statsProviders } from 'src/stat/stat.proviers';
+import { statsProviders } from 'src/stat/stat.providers';
 import { usersProviders } from 'src/user/user.providers';
 import { bidProviders } from 'src/bid/bid.providers';
 import { pgProviders } from 'src/pg/pg.providers';
-import { baseStatProvider } from 'src/base-stat/base-stat.provider';
+import { baseStatProviders } from 'src/base-stat/base-stat.providers';
 import { UserService } from 'src/user/user.service';
 
 @Module({
@@ -24,7 +24,7 @@ import { UserService } from 'src/user/user.service';
     ...usersProviders,
     ...bidProviders,
     ...pgProviders,
-    ...baseStatProvider,
+    ...baseStatProviders,
     JwtService,
   ],
 })

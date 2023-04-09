@@ -8,7 +8,7 @@ import { usersProviders } from 'src/user/user.providers';
 import { DiscordBotModule } from 'src/discord/discord.module';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import { ChatModule } from 'src/chat/chat.module';
-import { statsProviders } from 'src/stat/stat.proviers';
+import { statsProviders } from 'src/stat/stat.providers';
 import { itemsProviders } from 'src/item/item.providers';
 import { attributesProviders } from 'src/attribute/attribute.provider';
 import { UserService } from 'src/user/user.service';

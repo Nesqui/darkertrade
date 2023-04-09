@@ -44,13 +44,16 @@ onBeforeMount(async () => {
   <div class="admin-users">
     <el-table :data="users" style="width: 100%">
       <el-table-column width="50" prop="id" label="Id" />
+
       <el-table-column width="100" prop="nickname" label="nickname">
         <template #default="scope">
-          <NicknameOnline :user="scope.row"/>
+          <router-link :to="`/user/${scope.row.nickname}`">
+            <NicknameOnline :user="scope.row" />
+          </router-link>
         </template>
       </el-table-column>
 
-      
+
       <el-table-column width="195" prop="discordId" label="discordId">
         <template #default="scope">
           <el-tooltip effect="dark" :content="scope.row.discord" placement="top-start">
@@ -109,6 +112,7 @@ onBeforeMount(async () => {
     padding: 1rem 2rem;
     display: flex;
     flex-direction: column;
+
     .actions {
       padding-top: 2rem;
       display: flex;

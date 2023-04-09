@@ -13,6 +13,7 @@ import {
 } from 'sequelize-typescript';
 import { Stat } from 'src/stat/stat.entity';
 import { AttributePair } from './attribute-pair.entity';
+import { IsString } from 'class-validator';
 
 @Table
 export class Attribute extends Model {
@@ -30,6 +31,10 @@ export class Attribute extends Model {
   @Max(9999)
   @Column(DataType.DECIMAL)
   max: number;
+
+  @IsString()
+  @Column
+  symbol: string;
 
   @HasMany(() => Stat)
   stats: Stat[];

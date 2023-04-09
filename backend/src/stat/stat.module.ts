@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { StatService } from './stat.service';
 import { StatController } from './stat.controller';
-import { statsProviders } from './stat.proviers';
+import { statsProviders } from './stat.providers';
 
 @Module({
   controllers: [StatController],
-  providers: [StatService, ...statsProviders]
+  providers: [StatService, ...statsProviders],
 })
 export class StatModule {}

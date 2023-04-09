@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onBeforeMount, ref} from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import AdminUsers from '@/components/admin/AdminUsers.vue'
+import AdminAttributes from '@/components/admin/AdminAttributes.vue'
+import AdminBaseStats from '@/components/admin/AdminBaseStats.vue'
 
 const activeName = ref('users')
 
@@ -14,11 +16,17 @@ onBeforeMount(async () => {
 <template>
   <div class="admin wrapper">
     <el-tabs v-model="activeName" @tab-click="changeTab">
-    <el-tab-pane label="User" name="users">
-      <AdminUsers/>
-    </el-tab-pane>
-    <el-tab-pane label="ExistingItems" name="existingItems">Existing items</el-tab-pane>
-  </el-tabs>
+      <el-tab-pane label="User" name="users">
+        <AdminUsers />
+      </el-tab-pane>
+      <el-tab-pane label="ExistingItems" name="existingItems">Existing items</el-tab-pane>
+      <el-tab-pane label="Attributes" name="attributes">
+        <AdminAttributes />
+      </el-tab-pane>
+      <el-tab-pane label="BaseStats" name="baseStats">
+        <AdminBaseStats />
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 

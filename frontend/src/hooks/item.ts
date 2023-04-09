@@ -1,4 +1,5 @@
 import { Attribute, ExistingItem, ItemName, Slot, useApi } from "."
+import { BaseStat } from "./baseStat"
 // const gallery = Object.values(import.meta.glob('@assets/images/items/*.{png,jpg,jpeg,PNG,JPEG}', { eager: true, as: 'url' }))
 // import g from '@/assets/images/items/'
 export interface QueryItemDto {
@@ -80,16 +81,6 @@ export const initItemApi = () => {
     }
 }
 
-export interface BaseStat {
-  min: number;
-  max: number;
-  inputRequired: boolean;
-  itemId: number;
-  item: Item;
-  attributeId: number;
-  attribute: Attribute;
-  statsLength: number;
-}
 
 export interface VirtualStat {
   min: number;

@@ -24,8 +24,11 @@ export class AttributeService {
     return `This action returns a #${id} attribute`;
   }
 
-  update(id: number, updateAttributeDto: UpdateAttributeDto) {
-    return `This action updates a #${id} attribute`;
+  async update(id: number, updateAttributeDto: UpdateAttributeDto) {
+    const res = await this.attributesRepository.update(updateAttributeDto, {
+      where: { id },
+    });
+    return res;
   }
 
   remove(id: number) {
