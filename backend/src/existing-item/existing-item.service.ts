@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { groupBy } from 'lodash';
 import sequelize from 'sequelize';
 import { AttributePair } from 'src/attribute/attribute-pair.entity';
 import { Attribute } from 'src/attribute/attribute.entity';
@@ -15,8 +16,10 @@ import { Stat } from 'src/stat/stat.entity';
 import { User } from 'src/user/user.entity';
 import { AdminQueryExistingItemDto } from './dto/admin-query-existing-item.dto';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
+import { SimilarExistingItemDto } from './dto/similar-existing-item.dto';
 import { UpdateExistingItemDto } from './dto/update-existing-item.dto';
 import { ExistingItem } from './existing-item.entity';
+
 const ATTRIBUTE_BASE_WEIGHT = 1.444455623;
 const LIMITS = {
   WTB: 10,
@@ -239,7 +242,7 @@ export class ExistingItemService {
     return existingItem;
   }
 
-  async findSimilar(id: number) {
+  async findSimilarById(id: number, user: User, offerType: 'WTS' | 'WTB') {
     const baseExistingItem = await this.existingItemRepository.findOne({
       where: {
         id,
@@ -260,6 +263,30 @@ export class ExistingItemService {
       ],
     });
 
+    if (!baseExistingItem) throw new NotFoundException('Item not found');
+    return await this.findSimilar(
+      { ...baseExistingItem.dataValues, id },
+      user,
+      offerType,
+    );
+  }
+
+  async findSimilar(
+    baseExistingItem: SimilarExistingItemDto,
+    user: User,
+    offerType: 'WTS' | 'WTB',
+  ) {
+    const ringsAndAmulets = await this.itemRepository.findAll({
+      attributes: ['id', 'slot'],
+      where: {
+        slot: ['Ring', 'Amulet'],
+      },
+    });
+
+    const groupedRingAndAmulets = groupBy(ringsAndAmulets, (e: Item) => e.slot);
+    const ringsId = groupedRingAndAmulets['Ring'].map((item) => item.id);
+    const amuletsId = groupedRingAndAmulets['Amulet'].map((item) => item.id);
+
     // function* chooseKCombos(arr: number[], k: number, start = 0, combo = []) {
     //   if (combo.length === k) {
     //     yield combo;
@@ -272,11 +299,10 @@ export class ExistingItemService {
     // }
 
     //tupeyshiy cancer udalit fast amuleti teper amuleti ringi teper ringi
-    const itemIdLF = [1, 2, 3, 4, 5].includes(baseExistingItem.item.id)
-      ? [1, 2, 3, 4, 5]
-      : [6, 7, 8, 9].includes(baseExistingItem.item.id)
-      ? [6, 7, 8, 9]
-      : [baseExistingItem.item.id];
+
+    let itemIdLF = [baseExistingItem.itemId];
+    if (amuletsId.includes(baseExistingItem.itemId)) itemIdLF = amuletsId;
+    else if (ringsId.includes(baseExistingItem.itemId)) itemIdLF = ringsId;
 
     const baseExistingItemAttributeIds = baseExistingItem.stats.map(
       (a) => a.attributeId,
@@ -295,7 +321,7 @@ export class ExistingItemService {
     const pageSize = 6;
     const offset = 0;
 
-    const query = `
+    let query = `
     SELECT "ExistingItem".*, 
       SUM(
         CASE 
@@ -309,10 +335,16 @@ export class ExistingItemService {
       ) AS weight
     FROM "ExistingItems" AS "ExistingItem"
     LEFT JOIN "Stats" AS "Stat" ON "Stat"."existingItemId" = "ExistingItem"."id"
-    WHERE "ExistingItem"."id" != ${id}
-    AND "ExistingItem"."archived" = false
+    WHERE "ExistingItem"."archived" = false
     AND "ExistingItem"."itemId" IN (${itemIdLF.join(', ')})
     AND "Stat"."attributeId" IN (${similarAttributeIds.join(', ')})
+    `;
+
+    if (baseExistingItem.id) {
+      query += `AND "ExistingItem"."id" != ${baseExistingItem.id}`;
+    }
+
+    query += `
     GROUP BY "ExistingItem"."id"
     ORDER BY weight DESC
     LIMIT ${pageSize}
@@ -322,15 +354,35 @@ export class ExistingItemService {
       model: this.existingItemRepository,
       mapToModel: true,
       include: [
-        {
-          model: this.statRepository,
-          include: [this.attributeRepository],
-        },
-        this.itemRepository,
+        // {
+        //   model: this.statRepository,
+        //   include: [this.attributeRepository],
+        // },
+        // this.itemRepository,
       ],
     });
+    const existingItemsWhere = {
+      id: existingItems.map((existingItem) => existingItem.id),
+      [sequelize.Op.not]: { userId: user.id },
+    };
+    if (offerType) existingItemsWhere['offerType'] = offerType;
 
-    return existingItems;
+    const res = await this.existingItemRepository.findAll({
+      where: existingItemsWhere,
+      include: [
+        this.statRepository,
+        this.itemRepository,
+        {
+          model: this.userRepository,
+          attributes: {
+            exclude: ['password', 'discord', 'discordId', 'hash'],
+          },
+        },
+      ],
+    });
+    return existingItems
+      .map((ei) => res.find((existingItem) => existingItem.id === ei.id))
+      .filter((i) => !!i);
   }
 
   // publish unpublish

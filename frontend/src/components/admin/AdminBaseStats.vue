@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { AdminUserQuery, initBaseStatApi, initUserApi, truncate, useMoment, User } from '@/hooks'
-import { Item, Attribute, initAttributesApi, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat } from '@/hooks'
-import { onBeforeMount, ref, watch, PropType, computed, nextTick, } from 'vue'
-import { useItemStore } from '@/store';
+import { AdminUserQuery, initBaseStatApi } from '@/hooks'
+import { Item, Attribute, initAttributesApi, initItemApi, PrefillItem,BaseStat } from '@/hooks'
+import { onBeforeMount, ref, watch, PropType } from 'vue'
 import { ElNotification } from 'element-plus';
+import { useAttributesStore } from '@/store';
 
 const requiredClear = ref(false)
+const attributeStore = useAttributesStore()
+const getAttributeNameById = attributeStore.getAttributeNameById
 const items = ref<Item[]>([])
 const attributesApi = initAttributesApi()
 const attributes = ref<Attribute[]>()
@@ -13,10 +15,7 @@ const itemApi = initItemApi()
 const baseStatsApi = initBaseStatApi();
 const itemName = ref('')
 const itemAutoCompleteRef = ref()
-const itemStore = useItemStore()
-const baseStatValue = ref(0)
 const baseStats = ref<BaseStat[]>([])
-const stats = ref<Stat[]>([])
 const query = ref<AdminUserQuery>({
   limit: 15,
   offset: 0
@@ -55,24 +54,11 @@ const clearItem = () => {
 
 }
 
-const getMinRequiredStat = () => {
-  const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
-  if (!currentItem?.baseStats) {
-    return 0
-  }
-  const currentStatsLength = stats.value.length
-  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == currentStatsLength)
-  return requiredStats[0] ? requiredStats[0].min : 0
-}
-
 const handleSelectItem = async (chosenItem: Item) => {
   item.value = chosenItem
   itemAutoCompleteRef.value.inputRef.blur()
-  baseStats.value = (await baseStatsApi.findAllByItemPK(item.value.id ? item.value.id : 0)).sort((a, b) => { return a.statsLength - b.statsLength });
-}
-
-const paginate = (page: number) => {
-  query.value.offset = (page - 1) * query.value.limit
+  const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
+  baseStats.value = res.sort((a, b) => a.statsLength - b.statsLength);
 }
 
 watch(() => query.value.offset, async () => {
@@ -86,11 +72,6 @@ const init = async () => {
 }
 
 const updateBaseStat = async (baseStat: BaseStat) => {
-  // min: number;
-  // max: number;
-  // inputRequired: boolean;
-  // attributeId: number;
-  // statsLength: number;
   const req: any = { ...baseStat };
   const id = req.id;
   delete req.id;
@@ -100,10 +81,7 @@ const updateBaseStat = async (baseStat: BaseStat) => {
   try {
     const res = await baseStatsApi.updateBaseStat(id, req)
     if (res[0] === 1) ElNotification({ message: "Updated attr", })
-  } catch (error) {
-
-  }
-
+  } catch (error) {}
 }
 
 
@@ -132,28 +110,28 @@ const itemSearch = (queryString: string, cb: any) => {
   cb(results)
 }
 
+
 </script>
 
 <template>
-  <div class="admin-baseStats">
+  <div class="admin-base-stats">
     <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
       @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
       @select="handleSelectItem" />
-
   </div>
   <el-table :data="baseStats" style="width: 100%">
-    <el-table-column width="210" prop="attributeId" label="attrId">
+    <el-table-column width="240" prop="attributeId" label="attrId">
       <template #default="scope">
-        <span>{{ attributes?.find(elem => elem.id === scope.row.attributeId)?.name }}</span>
+        <span>{{ getAttributeNameById(scope.row.attributeId) }}</span>
         <el-input size="small" v-model="scope.row.attributeId" />
       </template>
     </el-table-column>
-    <el-table-column width="140" prop="min" label="min">
+    <el-table-column width="150" prop="min" label="min">
       <template #default="scope">
         <el-input-number size="small" v-model="scope.row.min" />
       </template>
     </el-table-column>
-    <el-table-column width="140" prop="max" label="max">
+    <el-table-column width="150" prop="max" label="max">
       <template #default="scope">
         <el-input-number size="small" v-model="scope.row.max" />
       </template>
@@ -177,23 +155,10 @@ const itemSearch = (queryString: string, cb: any) => {
 </template>
 
 <style scoped lang="scss">
-.admin {
-  width: var(--wrapper-xxl-width);
-
-  .ban-wrapper {
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-
-    .actions {
-      padding-top: 2rem;
-      display: flex;
-      justify-content: center;
-    }
-  }
-
-  .pagination-block {
-    padding: 1rem 0;
-  }
+.admin-base-stats {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  margin-bottom: 1rem;
 }
 </style>

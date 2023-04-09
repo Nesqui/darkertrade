@@ -45,6 +45,11 @@ export interface CountedExistingItemsResponse {
     rows: ExistingItem[]
 }
 
+export interface SimilarCounters {
+    WTS: number,
+    WTB: number
+}
+
 export const initExistingItemApi = () => {
     const { axiosClient } = useApi()
 
@@ -52,6 +57,16 @@ export const initExistingItemApi = () => {
         const res = await axiosClient(`existing-item/item/${itemId}`, {
             params: filterExistingItemDto
         })
+        return res.data
+    }
+
+    const findSimilarById = async (id: number, offerType: 'WTS' | 'WTB'): Promise<ExistingItem[]> => {
+        const res = await axiosClient.get(`existing-item/similar/${id}/${offerType}`)
+        return res.data
+    }
+
+    const findSimilar = async (offerType: 'WTS' | 'WTB', item: ExistingItem): Promise<ExistingItem[]> => {
+        const res = await axiosClient.put(`existing-item/similar/${offerType}`, item)
         return res.data
     }
 
@@ -88,6 +103,8 @@ export const initExistingItemApi = () => {
         create,
         patch,
         findAllByItemIdAndUserId,
-        changeDiscordNotification
+        changeDiscordNotification,
+        findSimilar,
+        findSimilarById
     }
 }

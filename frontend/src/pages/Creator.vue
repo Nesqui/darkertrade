@@ -7,6 +7,8 @@ import { ElNotification } from 'element-plus';
 import CountExistingItem from '../components/CountExistingItems.vue'
 import { useRouter } from 'vue-router';
 import { useItemStore } from '@/store';
+import SimilarItems from '@/components/SimilarItems.vue';
+
 const router = useRouter()
 
 const statPlaceHolder = ['Resourcefulness', 'Knowledge', 'Agility', 'Strength', 'Action Speed'][Math.floor(Math.random() * 5)]
@@ -257,109 +259,121 @@ onBeforeMount(async () => {
 
 <template>
   <img src="@/assets/images/blacksmith3.png" alt="" class="bg" />
-  <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
-
-    <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
-      <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
-      <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
-    </el-tabs>
-    <div class="header">
-      <div class="settings__discord">
-        <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
-        <span>discord DM</span>
-      </div>
-      <CountExistingItem :showOnly="offerType"/>
-    </div>
-    <div class="item-creator__wrapper">
-      <div class="item-creator__item">
-        <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
-          @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
-          @select="handleSelectItem" />
-        <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
-          <div class="labeled-switch">
-            <!-- <label class="sub-title" for="">Offer type:</label> -->
-          </div>
-        </div>
-        <div class="item-creator__attributes__line">
-          <div>
-            <div class="sub-title">
-              {{ existingItem.offerType === 'WTB' ? `Declared maximum price:` : `Preferrable sell price:` }}
-            </div>
-            <el-input-number :step-strictly="true" :precision="0" :step="25" :min="25" :max="9999" type="number"
-              placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
-          </div>
-        </div>
-        <div class="item-creator__attributes__actions">
-          <div>
-            <div class="sub-title">
-              Stat name:
-            </div>
-            <el-autocomplete @click="clearAttribute" ref="attributeAutoCompleteRef" value-key="name"
-              v-model="attributeName" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
-              @select="handleSelectAttribute" />
-          </div>
-          <div>
-            <div class="sub-title">
-              Stat value:
-            </div>
-            <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1"
-              :min="attributeStore.getAttributeById(attributeId)?.min || -200"
-              :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
-              ref="valueRef" v-model="value" />
-          </div>
-          <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
-        </div>
-        <div class="stats">
-          <h3 v-if="stats.length">Selected additional stats:</h3>
-          <div class="stats-item" v-for="(stat, index) in stats" :key="index">
-            <span class="stats-details">
-              {{ (attributes.find(a => a.id === stat.attributeId))?.name }}
-              {{ stat.value }}
-            </span>
-            <el-button @click="() => deleteStat(index)">Delete</el-button>
-          </div>
-        </div>
-
-        <div v-if="stats.length && requiredBaseStats.length" class="stats">
-          <h3>Base stats:</h3>
-          <div class="stats-item__base" v-for="(stat, index) in requiredBaseStats" :key="index">
-            <div>
-              <span>{{ (attributes.find(a => a.id === stat.attributeId))?.name }}</span>
-            </div>
-            <div v-if="stat.min !== stat.max">
-              <el-input-number :precision="1" :step="1" :min="stat.min" :max="stat.max" placeholder="Value" maxlength="3"
-                v-model="baseStatValue" />
-            </div>
-            <div>
-              <span v-if="stat.min !== stat.max">
-                {{ stat.min }} - {{ stat.max }}
-              </span>
-              <span v-else>
-                {{ stat.min }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true"
-        :stats="[...stats, ...virtualStats]" />
+  <div class="creator">
+    <div class="similar" v-if="!noWrapper">
+      <h4>Similar items | WTB</h4>
+      <SimilarItems :existing-item="existingItem" offer-type="WTB" />
     </div>
 
+    <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
 
-    <div class="item-creator__actions">
-      <div class="create"
-        v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
-        <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
-          size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button>
-        <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
-          size="large">Create private item</el-button>
+      <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
+        <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
+        <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
+      </el-tabs>
+      <div class="header">
+        <div class="settings__discord">
+          <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
+          <span>discord DM</span>
+        </div>
+        <CountExistingItem :showOnly="offerType" />
       </div>
-      <div v-else>
-        <p>You can always delete some {{ existingItem.offerType }} offers via profile</p>
-      </div>
-      <el-button v-if="item.id || stats.length" @click="clear" size="large">
-        Clear</el-button>
+      <div class="item-creator__wrapper">
+        <div class="item-creator__item">
+          <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
+            @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
+            @select="handleSelectItem" />
+          <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
+            <div class="labeled-switch">
+              <!-- <label class="sub-title" for="">Offer type:</label> -->
+            </div>
+          </div>
+          <div class="item-creator__attributes__line">
+            <div>
+              <div class="sub-title">
+                {{ existingItem.offerType === 'WTB' ? `Declared maximum price:` : `Preferrable sell price:` }}
+              </div>
+              <el-input-number :step-strictly="true" :precision="0" :step="25" :min="25" :max="9999" type="number"
+                placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
+            </div>
+          </div>
+          <div class="item-creator__attributes__actions">
+            <div>
+              <div class="sub-title">
+                Stat name:
+              </div>
+              <el-autocomplete @click="clearAttribute" ref="attributeAutoCompleteRef" value-key="name"
+                v-model="attributeName" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
+                @select="handleSelectAttribute" />
+            </div>
+            <div>
+              <div class="sub-title">
+                Stat value:
+              </div>
+              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1"
+                :min="attributeStore.getAttributeById(attributeId)?.min || -200"
+                :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
+                ref="valueRef" v-model="value" />
+            </div>
+            <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
+          </div>
+          <div class="stats">
+            <h3 v-if="stats.length">Selected additional stats:</h3>
+            <div class="stats-item" v-for="(stat, index) in stats" :key="index">
+              <span class="stats-details">
+                {{ (attributes.find(a => a.id === stat.attributeId))?.name }}
+                {{ stat.value }}
+              </span>
+              <el-button @click="() => deleteStat(index)">Delete</el-button>
+            </div>
+          </div>
 
+          <div v-if="stats.length && requiredBaseStats.length" class="stats">
+            <h3>Base stats:</h3>
+            <div class="stats-item__base" v-for="(stat, index) in requiredBaseStats" :key="index">
+              <div>
+                <span>{{ (attributes.find(a => a.id === stat.attributeId))?.name }}</span>
+              </div>
+              <div v-if="stat.min !== stat.max">
+                <el-input-number :precision="1" :step="1" :min="stat.min" :max="stat.max" placeholder="Value"
+                  maxlength="3" v-model="baseStatValue" />
+              </div>
+              <div>
+                <span v-if="stat.min !== stat.max">
+                  {{ stat.min }} - {{ stat.max }}
+                </span>
+                <span v-else>
+                  {{ stat.min }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true"
+          :stats="[...stats, ...virtualStats]" />
+      </div>
+
+
+      <div class="item-creator__actions">
+        <div class="create"
+          v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
+          <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
+            size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button>
+          <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
+            size="large">Create private item</el-button>
+        </div>
+        <div v-else>
+          <p>You can always delete some {{ existingItem.offerType }} offers via profile</p>
+        </div>
+        <el-button v-if="item.id || stats.length" @click="clear" size="large">
+          Clear</el-button>
+
+      </div>
+    </div>
+
+    <div class="similar" v-if="!noWrapper">
+      <h4>Similar items | WTS</h4>
+      <SimilarItems :existing-item="existingItem" offer-type="WTS" />
     </div>
   </div>
 </template>
@@ -373,6 +387,15 @@ onBeforeMount(async () => {
   opacity: 0.25;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+.creator {
+  display: flex;
+  gap: 2rem;
 }
 
 .settings__discord {
@@ -484,6 +507,11 @@ onBeforeMount(async () => {
     overflow-y: auto;
     max-height: unset;
   }
+
+  .similar {
+    display: none;
+  }
+
 
   .stats {
     h3 {

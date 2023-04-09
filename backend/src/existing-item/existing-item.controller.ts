@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Query,
+  Put,
 } from '@nestjs/common';
 import { ExistingItemService } from './existing-item.service';
 import { CreateExistingItemDto } from './dto/create-existing-item.dto';
@@ -22,6 +23,8 @@ import { FilterExistingItemDto } from './dto/filter-existing-item.dto';
 import { QueryItemDto } from 'src/item/dto/query-item.dto';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { AdminQueryExistingItemDto } from './dto/admin-query-existing-item.dto';
+import { ExistingItem } from './existing-item.entity';
+import { SimilarExistingItemDto } from './dto/similar-existing-item.dto';
 
 @Controller('existing-item')
 export class ExistingItemController {
@@ -86,9 +89,28 @@ export class ExistingItemController {
     );
   }
 
-  @Get('similar/:id')
-  findSimilar(@Param('id') id: string) {
-    return this.existingItemService.findSimilar(+id);
+  @Get('similar/:id/:offerType')
+  @UseGuards(JwtAuthGuard)
+  findSimilarById(
+    @Param('id') id: string,
+    @ReqUser() user: User,
+    @Param('offerType') offerType: 'WTS' | 'WTB',
+  ) {
+    return this.existingItemService.findSimilarById(+id, user, offerType);
+  }
+
+  @Put('similar/:offerType')
+  @UseGuards(JwtAuthGuard)
+  findSimilar(
+    @ReqUser() user: User,
+    @Param('offerType') offerType: 'WTS' | 'WTB',
+    @Body() similarExistingItem: SimilarExistingItemDto,
+  ) {
+    return this.existingItemService.findSimilar(
+      similarExistingItem,
+      user,
+      offerType,
+    );
   }
 
   @Get(':id')

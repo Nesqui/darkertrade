@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AdminUserQuery, Attribute, initAttributesApi, truncate, useMoment, User } from '@/hooks'
+import { AdminUserQuery, Attribute, initAttributesApi } from '@/hooks'
 import { ElNotification } from 'element-plus';
 import { onBeforeMount, ref, watch } from 'vue'
 
@@ -9,10 +9,6 @@ const query = ref<AdminUserQuery>({
   limit: 15,
   offset: 0
 })
-
-const paginate = (page: number) => {
-  query.value.offset = (page - 1) * query.value.limit
-}
 
 watch(() => query.value.offset, async () => {
   await init()
@@ -31,10 +27,7 @@ const updateAttribute = async (attribute: Attribute) => {
   try {
     const res = await attributesApi.updateAttribute(id, req)
     if (res[0] === 1) ElNotification({ message: "Updated attr", })
-  } catch (error) {
-
-  }
-
+  } catch (error) {}
 }
 
 onBeforeMount(async () => {
@@ -83,24 +76,5 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.admin {
-  width: var(--wrapper-xxl-width);
-
-  .ban-wrapper {
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-
-    .actions {
-      padding-top: 2rem;
-      display: flex;
-      justify-content: center;
-    }
-  }
-
-  .pagination-block {
-    padding: 1rem 0;
-  }
-}
 </style>
 

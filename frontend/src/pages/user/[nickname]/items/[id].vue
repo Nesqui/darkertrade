@@ -4,10 +4,11 @@ import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BidList from '@/components/BidList.vue';
 import CreateBid from '@/components/CreateBid.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, useMoment, User } from '@/hooks'
+import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, SimilarCounters, useMoment, User } from '@/hooks'
 import ItemPreview from "@/components/ItemPreview.vue"
 import { useUserStore } from '@/store';
 import { Bid, QueryBidDto } from '@/hooks/bid';
+import SimilarItems from '@/components/SimilarItems.vue';
 
 const userStore = useUserStore()
 const itemApi = initItemApi()
@@ -23,7 +24,7 @@ const discordNotificationLoading = ref(false)
 const isAuth = computed(() => userStore.isAuth)
 const existingItemsApi = initExistingItemApi()
 const moment = useMoment()
-
+const activeName = ref('WTS')
 const selectedTab = ref('Info')
 
 const filterBids = ref<QueryBidDto>({
@@ -32,6 +33,11 @@ const filterBids = ref<QueryBidDto>({
   limit: 3,
   offset: 0,
   offerType: 'WTS'
+})
+
+const similarCounters = ref<SimilarCounters>({
+  WTS: 0,
+  WTB: 0
 })
 
 
@@ -152,8 +158,8 @@ onBeforeMount(async () => {
           <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
             v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
-            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true"
-            size="large">Make private</el-button>
+            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true" size="large">Make
+            private</el-button>
           <el-button :loading="actionsLoading" @click="changePublish"
             v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === false"
             size="large">Publish</el-button>
@@ -192,9 +198,9 @@ onBeforeMount(async () => {
                 </div>
               </div>
             </div>
-            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item" :creator="item.existingItems[0].user" 
-              :wantedPrice="item.existingItems[0].wantedPrice" :offerType="item.existingItems[0].offerType"
-              :stats="item?.existingItems[0].stats" />
+            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item" :creator="item.existingItems[0].user"
+              :updated-at="item.existingItems[0].updatedAt" :wantedPrice="item.existingItems[0].wantedPrice"
+              :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" />
           </div>
         </el-tab-pane>
         <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids"
@@ -205,19 +211,26 @@ onBeforeMount(async () => {
         </el-tab-pane>
       </el-tabs>
     </div>
-
+    <el-tabs class="similar" v-if="item?.existingItems && item.existingItems[0]" v-model="activeName">
+      <el-tab-pane :label="`Similar WTS (${similarCounters.WTS})`" name="WTS">
+        <SimilarItems :counters="similarCounters" offer-type="WTS" :existing-item="item.existingItems[0]" />
+      </el-tab-pane>
+      <el-tab-pane :label="`Similar WTB (${similarCounters.WTB})`" name="WTB">
+        <SimilarItems :counters="similarCounters" offer-type="WTB" :existing-item="item.existingItems[0]" />
+      </el-tab-pane>
+    </el-tabs>
   </div>
 </template>
 
 <style scoped lang="scss">
 .item {
   display: flex;
-  flex-direction: column;
   position: relative;
+  gap: 2rem;
 
   .bg {
-    position: absolute;
-    right: 200px;
+    position: fixed;
+    left: 0;
     top: 0;
     width: 100%;
     opacity: 0.10;
@@ -268,6 +281,9 @@ onBeforeMount(async () => {
 }
 
 @media (max-width:420px) {
+  .similar {
+    display: none;
+  }
   .item {
     .wrapper {
       overflow: hidden;
@@ -277,7 +293,9 @@ onBeforeMount(async () => {
     .el-button {
       height: 35px;
       padding: 2px 12px;
-    };
+    }
+
+    ;
 
     .item-details {
       flex-direction: column;

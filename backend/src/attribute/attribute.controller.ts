@@ -6,7 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AttributeService } from './attribute.service';
 import { CreateAttributeDto } from './dto/create-attribute.dto';
 import { UpdateAttributeDto } from './dto/update-attribute.dto';
@@ -31,6 +34,7 @@ export class AttributeController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   update(
     @Param('id') id: string,
     @Body() updateAttributeDto: UpdateAttributeDto,

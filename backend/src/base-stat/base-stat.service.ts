@@ -8,7 +8,7 @@ export class BaseStatService {
   constructor(
     @Inject('BASE_STAT_REPOSITORY')
     private baseStatRepository: typeof BaseStat,
-  ) { }
+  ) {}
 
   create(createBaseStatDto: CreateBaseStatDto) {
     return 'This action adds a new Basestat';
@@ -19,13 +19,12 @@ export class BaseStatService {
   }
 
   findOne(id: number) {
-    return this.findBaseStatsById(id);
     return `This action doesnt return ${id} Basestat`;
   }
 
-  async findBaseStatsById(id: number) {
+  async findBaseStatsByItemId(itemId: number) {
     const res = await this.baseStatRepository.findAll({
-      where: { itemId: id },
+      where: { itemId },
     });
     return res;
   }

@@ -35,6 +35,10 @@ watch(() => route.params.nickname, async () => {
 
 const initUserData = async () => {
   const userNickname = route.params.nickname
+  // const itemId = route.params.id
+  // if(itemId)
+  // console.log(itemId);
+  
   if (typeof userNickname === 'string') {
     user.value = await userApi.findByNickname(userNickname)
     if (!user.value) {
