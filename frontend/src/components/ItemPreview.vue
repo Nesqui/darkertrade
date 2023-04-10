@@ -8,6 +8,7 @@ const itemApi = initItemApi()
 const itemStore = useItemStore()
 const attributeStore = useAttributesStore()
 const getAttributeNameById = attributeStore.getAttributeNameById
+const getAttributeSymbolById = attributeStore.getAttributeSymbolById;
 const moment = useMoment()
 const userStore = useUserStore()
 
@@ -85,7 +86,7 @@ const baseStats = computed(() => {
           max: foundStat.value,
           inputRequired: true,
           attributeId: stat.attributeId,
-          statsLength: stat.statsLength,
+          statsLength: stat.statsLength
         }
       return stat
     })
@@ -147,15 +148,15 @@ const getDivineItem = (name: ItemName): string => {
         <div class="base-stats" v-if="wantedPrice && baseStats.length">
           <div class="text-divider">base stats:</div>
           <span v-for="(stat, index) in baseStats" :key="index" class="base-stat rarity-0">
-            {{ stat.min === stat.max ? stat.min : `${stat.min}-${stat.max}` }} {{
-              truncate(getAttributeNameById(stat.attributeId), 35) }}
+            {{ stat.min === stat.max ? stat.min : `${stat.min}-${stat.max}` }}{{ getAttributeSymbolById(stat.attributeId)
+            }} {{ truncate(getAttributeNameById(stat.attributeId), 35) }}
           </span>
         </div>
         <div class="stats" v-if="stats?.length">
           <div class="text-divider">Additional stats:</div>
           <span v-for="(stat, index) in stats.filter(stat => !stat.isBaseStat)" :key="index"
             class="stat darker-title rarity-2">
-            {{ stat.value > 0 ? `+${stat.value}` : stat.value }} {{
+            {{ stat.value > 0 ? `+${stat.value}` : stat.value }}{{ getAttributeSymbolById(stat.attributeId) }} {{
               truncate(getAttributeNameById(stat.attributeId), 35) }}
           </span>
         </div>
@@ -168,6 +169,7 @@ const getDivineItem = (name: ItemName): string => {
         <div class="price" v-if="wantedPrice">
           <div class="text-divider"> Price</div>
           <span class="darker-title"> {{ wantedPrice }} gold</span>
+          <span class="darker-title"> {{ Math.ceil(wantedPrice / 50) }} purses</span>
         </div>
       </div>
     </div>
@@ -261,6 +263,7 @@ $item-description-padding: .7rem .5rem;
 
     &__divine {
       width: 100%;
+
       p {
         font-size: 11px;
         text-align: center;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { AdminUserQuery, initBaseStatApi } from '@/hooks'
-import { Item, Attribute, initAttributesApi, initItemApi, PrefillItem,BaseStat } from '@/hooks'
+import { Item, Attribute, initAttributesApi, initItemApi, PrefillItem, BaseStat } from '@/hooks'
 import { onBeforeMount, ref, watch, PropType } from 'vue'
 import { ElNotification } from 'element-plus';
 import { useAttributesStore } from '@/store';
@@ -58,7 +58,7 @@ const handleSelectItem = async (chosenItem: Item) => {
   item.value = chosenItem
   itemAutoCompleteRef.value.inputRef.blur()
   const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
-  baseStats.value = res.sort((a, b) => a.statsLength - b.statsLength);
+  baseStats.value = res.sort((a, b) => a.statsLength - b.statsLength).sort((x, y) => { return (x === y) ? 0 : x ? -1 : 1; });
 }
 
 watch(() => query.value.offset, async () => {
@@ -81,7 +81,7 @@ const updateBaseStat = async (baseStat: BaseStat) => {
   try {
     const res = await baseStatsApi.updateBaseStat(id, req)
     if (res[0] === 1) ElNotification({ message: "Updated attr", })
-  } catch (error) {}
+  } catch (error) { }
 }
 
 
@@ -115,6 +115,7 @@ const itemSearch = (queryString: string, cb: any) => {
 
 <template>
   <div class="admin-base-stats">
+    <span>itemId: {{ item.id }}</span>
     <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
       @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
       @select="handleSelectItem" />
