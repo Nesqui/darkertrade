@@ -13,6 +13,7 @@ const router = useRouter()
 
 const statPlaceHolder = ['Resourcefulness', 'Knowledge', 'Agility', 'Strength', 'Action Speed'][Math.floor(Math.random() * 5)]
 const attributeStore = useAttributesStore()
+const getAttributeSymbolById = attributeStore.getAttributeSymbolById;
 const attributeAutoCompleteRef = ref()
 const attributes = attributeStore.attributes
 const existingItemApi = initExistingItemApi()
@@ -168,6 +169,7 @@ const handleSelectItem = (chosenItem: Item) => {
 }
 
 const handleSelectAttribute = (attribute: Attribute) => {
+  value.value = 1
   attributeId.value = attribute.id
   // valueRef.value.blur()
   attributeAutoCompleteRef.value.blur()
@@ -310,7 +312,7 @@ onBeforeMount(async () => {
               <div class="sub-title">
                 Stat value:
               </div>
-              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="1"
+              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="getAttributeSymbolById(attributeId) ? 0.1 : 1"
                 :min="attributeStore.getAttributeById(attributeId)?.min || -200"
                 :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
                 ref="valueRef" v-model="value" />

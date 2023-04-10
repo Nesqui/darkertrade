@@ -20,7 +20,7 @@ export const useUserStore = defineStore('user', () => {
         currentUser.value = { id: 0, nickname: '', password: "", name: "", lastName: "", discord: '', active: false, discordNotification: true, online: false, isAdmin: false }
         token.value = ""
         // disconnect()
-        router.push('/')
+        router.push('/auth')
     }
 
     const saveToken = (jwtToken: string) => {

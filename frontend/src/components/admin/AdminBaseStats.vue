@@ -58,7 +58,9 @@ const handleSelectItem = async (chosenItem: Item) => {
   item.value = chosenItem
   itemAutoCompleteRef.value.inputRef.blur()
   const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
-  baseStats.value = res.sort((a, b) => a.statsLength - b.statsLength).sort((x, y) => { return (x === y) ? 0 : x ? -1 : 1; });
+  res.sort((a, b) => a.statsLength - b.statsLength);
+  res.sort((x, y) => x.inputRequired === y.inputRequired ? 0 : x.inputRequired ? 1 : -1);
+  baseStats.value = res
 }
 
 watch(() => query.value.offset, async () => {
@@ -159,7 +161,10 @@ const itemSearch = (queryString: string, cb: any) => {
 .admin-base-stats {
   display: flex;
   justify-content: flex-end;
+  gap: 1rem;
   width: 100%;
   margin-bottom: 1rem;
+  font-weight: 600;
+  align-items: center;
 }
 </style>

@@ -279,10 +279,11 @@ const unreadMessagesTotal = () => {
 
           <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
-            <span class="selected-chat__actions__conversation">Chat with: <router-link v-if="conversationContact" :to="'/'">
+            <span class="selected-chat__actions__conversation">Chat with: <router-link v-if="conversationContact"
+                :to="`user/${conversationContact.nickname}`">
                 <NicknameOnline :user="conversationContact" />
               </router-link></span>
-            <el-button @click="clearActiveChat">Back</el-button>
+            <el-button link @click="clearActiveChat">Back</el-button>
           </div>
 
           <el-divider />
@@ -305,7 +306,8 @@ const unreadMessagesTotal = () => {
                   circle><el-icon>
                     <View />
                   </el-icon></el-button>
-                <el-tooltip v-if="selectedChat.chat?.bid.id" class="box-item" effect="dark" content="If you finished your conversation you can close this bid. Chat will be purged"
+                <el-tooltip v-if="selectedChat.chat?.bid.id" class="box-item" effect="dark"
+                  content="If you finished your conversation you can close this bid. Chat will be purged"
                   placement="top-start">
                   <div class="bid-action">
                     <el-popconfirm width="350" @confirm="closeBid(selectedChat.chat?.bid.id || 0)"
@@ -353,8 +355,8 @@ const unreadMessagesTotal = () => {
             }" :key="index" class="message">
               <p>{{ message.text }}</p>
               <p v-if="!(selectedChat.messages.length >= selectedChat.count && index < 2)" class="date">{{ new
-                Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }} {{ new
-    Date(message.createdAt).toLocaleDateString() }}</p>
+                Date(message.createdAt).toLocaleTimeString("en-GB", { hour: '2-digit', minute: '2-digit' }) }} {{ new
+    Date(message.createdAt).toLocaleDateString("en-GB") }}</p>
             </span>
           </div>
           <div class="message-input">
@@ -494,13 +496,20 @@ const unreadMessagesTotal = () => {
       margin-bottom: .5rem;
 
       &__conversation {
+        font-size: 12px;
         display: flex;
         gap: .25rem;
         align-items: center;
+
+        a {
+          font-size: 12px;
+        }
       }
     }
 
     &__info {
+      font-size: 12px;
+
       &__li {
         display: flex;
         align-items: center;

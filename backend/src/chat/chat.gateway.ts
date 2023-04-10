@@ -329,17 +329,17 @@ export class ChatGateway {
         read: false,
         userId: bid.userId,
         text: `Chat started.
-        Bid was created ${new Date(
-          bid.createdAt,
-        ).toLocaleDateString()} at ${new Date(
-          bid.createdAt,
-        ).toLocaleTimeString()}`,
+        Bid was created ${new Date(bid.createdAt).toLocaleDateString(
+          'en-GB',
+        )} at ${new Date(bid.createdAt).toLocaleTimeString('en-GB')}`,
       },
       {
         chatId: chat.id,
         read: false,
         userId: bid.existingItem.user.id,
-        text: `Bid was accepted ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}`,
+        text: `Bid was accepted ${new Date().toLocaleDateString(
+          'en-GB',
+        )} at ${new Date().toLocaleTimeString()}`,
       },
     ]);
 

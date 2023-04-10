@@ -287,19 +287,6 @@ export class ExistingItemService {
     const ringsId = groupedRingAndAmulets['Ring'].map((item) => item.id);
     const amuletsId = groupedRingAndAmulets['Amulet'].map((item) => item.id);
 
-    // function* chooseKCombos(arr: number[], k: number, start = 0, combo = []) {
-    //   if (combo.length === k) {
-    //     yield combo;
-    //     return;
-    //   }
-
-    //   for (let i = start; i < arr.length; i++) {
-    //     yield* chooseKCombos(arr, k, i + 1, [...combo, arr[i]]);
-    //   }
-    // }
-
-    //tupeyshiy cancer udalit fast amuleti teper amuleti ringi teper ringi
-
     let itemIdLF = [baseExistingItem.itemId];
     if (amuletsId.includes(baseExistingItem.itemId)) itemIdLF = amuletsId;
     else if (ringsId.includes(baseExistingItem.itemId)) itemIdLF = ringsId;
@@ -362,6 +349,7 @@ export class ExistingItemService {
         // this.itemRepository,
       ],
     });
+
     const existingItemsWhere = {
       id: existingItems.map((existingItem) => existingItem.id),
       [sequelize.Op.not]: { userId: user.id },

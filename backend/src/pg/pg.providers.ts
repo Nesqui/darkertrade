@@ -71,9 +71,10 @@ export const pgProviders = [
       try {
         await sequelize.sync({ alter: false });
         await initData(sequelize, ConfigService);
-        return sequelize;
       } catch (error) {
         console.error(error);
+      } finally {
+        return sequelize;
       }
     },
   },

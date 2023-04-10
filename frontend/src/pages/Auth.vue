@@ -2,14 +2,21 @@
 import { onBeforeMount, ref } from 'vue'
 import SignUp from "../components/SignUp.vue"
 import SignIn from "../components/SignIn.vue"
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { UpdateUserDto } from '@/hooks';
+import { useUserStore } from '@/store';
 
 const userCreated = ref<UpdateUserDto>()
-
+const router = useRouter()
 const route = useRoute()
 const mode = ref<'signIn' | 'signUp'>('signIn')
+const userStore = useUserStore()
+
 onBeforeMount(() => {
+    if (userStore.isAuth) {
+        router.push('/')
+        return
+    }
     if (route.query.hash)
         mode.value = 'signUp'
 })

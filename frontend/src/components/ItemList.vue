@@ -261,7 +261,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
     <!-- LIST  -->
     <div v-else ref="itemsRef" class="item-list-wrapper" :class="{ 'wrapper': !noWrapper }">
       <div class="back">
-        <el-button v-if="chosenItem" @click="() => chosenItem = undefined">Back</el-button>
+        <el-button v-if="chosenItem" @click="clear">Back</el-button>
       </div>
       <div v-if="!chosenItem && !filteredItems?.length">
         <p>No items exist for chosen filter yet</p>
