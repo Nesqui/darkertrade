@@ -148,8 +148,8 @@ const getDivineItem = (name: ItemName): string => {
         <div class="base-stats" v-if="wantedPrice && baseStats.length">
           <div class="text-divider">base stats:</div>
           <span v-for="(stat, index) in baseStats" :key="index" class="base-stat rarity-0">
-            {{ stat.min === stat.max ? stat.min : `${stat.min}-${stat.max}` }}{{ getAttributeSymbolById(stat.attributeId)
-            }} {{ truncate(getAttributeNameById(stat.attributeId), 35) }}
+            {{ truncate(getAttributeNameById(stat.attributeId), 35) }} {{ stat.min === stat.max ? stat.min :
+              `${stat.min}-${stat.max}` }}{{ getAttributeSymbolById(stat.attributeId) }}
           </span>
         </div>
         <div class="stats" v-if="stats?.length">
