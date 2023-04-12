@@ -31,7 +31,7 @@ const openBlank = async (url: string) => {
   }
 }
 const changeUrl = (url: string) => {
-    window.open(url, '_blank')
+  window.open(url, '_blank')
 }
 const select = async (url: string) => {
   if (route.path !== url)
@@ -64,7 +64,8 @@ const select = async (url: string) => {
         :index="`/user/${userStore.currentUser.nickname}/items`">My items</el-menu-item>
       <el-menu-item @click.middle="() => openBlank('/bids/')" :disabled="!isAuth" index="/bids/">My bids</el-menu-item>
       <el-menu-item @click.middle="() => openBlank('/faq')" index="/faq">How's it works?</el-menu-item>
-      <el-menu-item @click.middle="() => changeUrl('https://discord.gg/VT6grnfD6t')" @click="changeUrl('https://discord.gg/rD9bgctHNr')" index="">Discord</el-menu-item>
+      <el-menu-item @click.middle="() => changeUrl('https://discord.gg/VT6grnfD6t')"
+        @click="changeUrl('https://discord.gg/VT6grnfD6t')" index="">Discord</el-menu-item>
       <div class="flex-grow" />
       <el-menu-item :disabled="!isAuth" @click.middle="() => openBlank(`/user/${userStore.currentUser.nickname}/items`)"
         :index="`/user/${userStore.currentUser.nickname}/items`">
