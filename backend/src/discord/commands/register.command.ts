@@ -45,7 +45,7 @@ export class RegisterCommand {
     private usersRepository: typeof User,
     @InjectDiscordClient()
     private readonly client: Client,
-  ) {}
+  ) { }
 
   // async getNickname(nickname: string) {
   //   for (let prefix = 0; prefix < DISCORD_NAME_ATTEMPTS; prefix++) {
@@ -112,30 +112,21 @@ export class RegisterCommand {
     this.logger.log(`Modal ${modal.customId} submit`);
     const discUser = await this.client.users.fetch(modal.user.id);
     const hash = uuidv4();
-    let siteUserNickname = '';
 
-    if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
-      siteUserNickname = discUser.username
-        .match(/[a-zA-Z0-9]+/g)
-        .toString()
-        .split(',')
-        .join('');
-    } else {
-      siteUserNickname = new Date().getTime().toString();
-    }
-
-    // if (siteUserNickname.length < 3) {
-    //   const alphabet = 'abcdefghijklmnopqrstuvwxyz';
-    //   siteUserNickname = '';
-    //   for (let index = 0; index < 10; index++) {
-    //     siteUserNickname += alphabet.charAt(
-    //       Math.floor(Math.random() * alphabet.length),
-    //     );
-    //   }
+    const siteUserNickname = new Date().getTime().toString();
+    // let siteUserNickname = '';
+    // if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
+    //   siteUserNickname = discUser.username
+    //     .match(/[a-zA-Z0-9]+/g)
+    //     .toString()
+    //     .split(',')
+    //     .join('');
+    // } else {
+    //   siteUserNickname = new Date().getTime().toString();
     // }
-    if (siteUserNickname.length < 5) {
-      siteUserNickname = new Date().getTime().toString();
-    }
+    // if (siteUserNickname.length < 5) {
+    //   siteUserNickname = new Date().getTime().toString();
+    // }
 
     const discCheck = await this.usersRepository.findOne({
       where: {
