@@ -113,7 +113,7 @@ export class RegisterCommand {
     const discUser = await this.client.users.fetch(modal.user.id);
     const hash = uuidv4();
 
-    const siteUserNickname = new Date().getTime().toString();
+    let siteUserNickname = new Date().getTime().toString();
     // let siteUserNickname = '';
     // if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
     //   siteUserNickname = discUser.username
