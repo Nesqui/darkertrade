@@ -50,6 +50,15 @@ export class CreateExistingItemDto {
   readonly wantedPrice: number;
 
   @ApiProperty({
+    type: Number,
+  })
+  @Max(5)
+  @Min(0)
+  @IsInt()
+  @Transform(({ value }) => Number.parseInt(value))
+  readonly rarity: number;
+
+  @ApiProperty({
     type: [CreateStatDto],
     isArray: true,
   })

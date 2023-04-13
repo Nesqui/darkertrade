@@ -23,10 +23,12 @@ const props = defineProps({
   }
 })
 
-watch(() => props.existingItem, async () => {
+watch(() => props.existingItem.stats.length, async () => {
   await init()
-}, {
-  deep: true
+})
+
+watch(() => props.existingItem.itemId, async () => {
+  await init()
 })
 
 const init = async () => {
@@ -58,7 +60,7 @@ onMounted(async () => {
     <ItemPreview v-for="(existingItem, index) in similarItems"
       @click="openBlank(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" :key="index" :loading="loading"
       :creator="existingItem.user" :updated-at="existingItem.updatedAt" :wantedPrice="existingItem.wantedPrice"
-      :item="existingItem.item" :offer-type="existingItem.offerType" :stats="existingItem.stats" />
+      :item="existingItem.item" :offer-type="existingItem.offerType" :stats="existingItem.stats" :rarity="existingItem.rarity" />
   </div>
   <div class="similar-empty" v-else>
     <p>

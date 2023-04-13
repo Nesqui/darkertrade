@@ -280,7 +280,7 @@ const unreadMessagesTotal = () => {
           <!-- SELECTED CHAT HEADER  -->
           <div class="selected-chat__actions">
             <span class="selected-chat__actions__conversation">Chat with: <router-link v-if="conversationContact"
-                :to="`user/${conversationContact.nickname}`">
+                :to="`/user/${conversationContact.nickname}`">
                 <NicknameOnline :user="conversationContact" />
               </router-link></span>
             <el-button link @click="clearActiveChat">Back</el-button>

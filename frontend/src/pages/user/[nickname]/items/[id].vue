@@ -24,7 +24,7 @@ const discordNotificationLoading = ref(false)
 const isAuth = computed(() => userStore.isAuth)
 const existingItemsApi = initExistingItemApi()
 const moment = useMoment()
-const activeName = ref('WTS')
+const activeName = ref<'WTS' | 'WTB'>('WTS')
 const selectedTab = ref('Info')
 
 const filterBids = ref<QueryBidDto>({
@@ -200,7 +200,8 @@ onBeforeMount(async () => {
             </div>
             <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item" :creator="item.existingItems[0].user"
               :updated-at="item.existingItems[0].updatedAt" :wantedPrice="item.existingItems[0].wantedPrice"
-              :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" />
+              :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats"
+              :rarity="item.existingItems[0].rarity" />
           </div>
         </el-tab-pane>
         <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids"
@@ -211,14 +212,18 @@ onBeforeMount(async () => {
         </el-tab-pane>
       </el-tabs>
     </div>
-    <el-tabs class="similar" v-if="item?.existingItems && item.existingItems[0]" v-model="activeName">
-      <el-tab-pane :label="`Similar WTS (${similarCounters.WTS})`" name="WTS">
-        <SimilarItems :counters="similarCounters" offer-type="WTS" :existing-item="item.existingItems[0]" />
-      </el-tab-pane>
-      <el-tab-pane :label="`Similar WTB (${similarCounters.WTB})`" name="WTB">
-        <SimilarItems :counters="similarCounters" offer-type="WTB" :existing-item="item.existingItems[0]" />
-      </el-tab-pane>
-    </el-tabs>
+    <div class="similar" v-if="item?.existingItems && item.existingItems[0]">
+      <el-button-group class="similar">
+        <el-button :disabled="activeName === 'WTS'" @click="activeName = 'WTS'">
+          Similar WTS {{ `(${similarCounters.WTS})` }}
+        </el-button>
+        <el-button :disabled="activeName === 'WTB'" @click="activeName = 'WTB'">
+          Similar WTB {{ `(${similarCounters.WTB})` }}
+        </el-button>
+      </el-button-group>
+      <SimilarItems v-if="activeName === 'WTS'" :counters="similarCounters" offer-type="WTS" :existing-item="item.existingItems[0]" />
+      <SimilarItems v-else :counters="similarCounters" offer-type="WTB" :existing-item="item.existingItems[0]" />
+    </div>
   </div>
 </template>
 
@@ -228,6 +233,14 @@ onBeforeMount(async () => {
   position: relative;
   gap: 2rem;
   align-items: flex-start;
+
+  .similar {
+    .el-button {
+      padding-left: 15px;
+      padding-right: 15px;
+      font-size: 13px;
+    }
+  }
 
   .bg {
     position: fixed;
@@ -284,7 +297,9 @@ onBeforeMount(async () => {
 @media (max-width:420px) {
   .similar {
     display: none;
+    .el-button {}
   }
+
   .item {
     .wrapper {
       overflow: hidden;

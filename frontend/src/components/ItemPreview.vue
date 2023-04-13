@@ -59,6 +59,10 @@ const props = defineProps({
     required: false,
     type: Number
   },
+  rarity: {
+    required: true,
+    type: Number,
+  },
   updatedAt: {
     required: false,
     type: String
@@ -70,12 +74,14 @@ const props = defineProps({
 
 const baseStats = computed(() => {
   const item = itemStore.items.find(item => item.id === props.item?.id)
-  const currentStatsLength = props.stats?.filter(item => !item.isBaseStat).length || 0
+  // Поиск не виртуальных статов 
+  // const currentStatsLength = props.stats?.filter(item => !item.isBaseStat).length || 0
   if (item?.baseStats) {
+    // Статы которые выводятся просто (не требовали ввода данных юзера)
     const flatStats = item.baseStats.filter(stat => !stat.inputRequired && stat.statsLength === 0)
     let computedStats: VirtualStat[] = []
 
-    const requiredStats = item.baseStats.filter(stat => stat.inputRequired && stat.statsLength === currentStatsLength)
+    const requiredStats = item.baseStats.filter(stat => stat.inputRequired && stat.statsLength === props.rarity)
 
     const virtualStats = requiredStats.map(stat => {
       const foundStat = props.stats?.find(propStat => propStat.isBaseStat && propStat.attributeId === stat.attributeId)
@@ -96,6 +102,7 @@ const baseStats = computed(() => {
   return []
 })
 
+
 const getDivineItem = (name: ItemName): string => {
   return divineItems[name] || ''
 }
@@ -107,7 +114,7 @@ const getDivineItem = (name: ItemName): string => {
       <div class="offer-header">
         <div class="text-divider">
           <!-- DIVINE NAME  -->
-          <div v-if="item?.name && stats?.filter(stat => !stat.isBaseStat).length === 5" class="item-name">
+          <div v-if="item?.name && rarity === 5" class="item-name">
             <el-icon>
               <StarFilled />
             </el-icon>
@@ -120,7 +127,7 @@ const getDivineItem = (name: ItemName): string => {
           <!-- CLASSIC NAME  -->
           <div v-else>
             <span
-              :class="`darker-title ${wantedPrice ? 'rarity-' + stats?.filter(stat => !stat.isBaseStat).length : ''}`">
+              :class="`darker-title ${wantedPrice ? 'rarity-' + rarity : ''}`">
               {{ item?.name || 'Choose item' }}</span>
           </div>
         </div>

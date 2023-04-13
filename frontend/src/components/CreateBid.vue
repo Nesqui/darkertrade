@@ -95,7 +95,7 @@ onMounted(() => {
         </el-form>
       </div>
       <ItemPreview v-if="item?.existingItems" :item="item" :wantedPrice="item.existingItems[0].wantedPrice"
-        :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" />
+        :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" :rarity="item.existingItems[0].rarity" />
     </div>
   </div>
 </template>

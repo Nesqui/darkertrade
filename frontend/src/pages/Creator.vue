@@ -35,6 +35,13 @@ const itemAutoCompleteRef = ref()
 const requiredClear = ref(false)
 const discordNotification = ref(true)
 const itemStore = useItemStore()
+const colors = [
+  'rgba(98, 190, 11)',
+  'rgba(74, 155, 209, 1)',
+  'rgba(173, 90, 255, 1)',
+  'rgba(247, 162, 45, 1)',
+  'rgba(227, 216, 140, 1)',
+]
 const props = defineProps({
   noWrapper: {
     type: Boolean,
@@ -47,6 +54,18 @@ const props = defineProps({
   doAfterCreate: {
     type: Function,
   }
+})
+
+const selectedColor = ref('rgba(222, 222, 222, 1)')
+const predefineColors = computed(() => {
+  return colors.slice(stats.value.length, colors.length)
+})
+
+const rarity = computed(() => {
+  const colorIndex = colors.findIndex(color => color === selectedColor.value)
+  if (colorIndex !== -1)
+    return colorIndex + 1
+  return stats.value.filter(stat => !stat.isBaseStat).length;
 })
 
 const item = ref<Item>({
@@ -80,7 +99,8 @@ const existingItem = computed((): ExistingItem => ({
   published: published.value,
   wantedPrice: wantedPrice.value,
   offerType: offerType.value,
-  discordNotification: discordNotification.value
+  discordNotification: discordNotification.value,
+  rarity: rarity.value
 }))
 
 const itemSearch = (queryString: string, cb: any) => {
@@ -139,14 +159,19 @@ const addStatValidator = computed(() => {
   return true
 })
 
+const onChangeColor = () => {
+  baseStatValue.value = getMinRequiredStat()
+}
+
+// Вывод минимального порога для ввода бейз стата
 const getMinRequiredStat = () => {
   const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
   if (!currentItem?.baseStats) {
     return 0
   }
 
-  const currentStatsLength = stats.value.length
-  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == currentStatsLength)
+  // const currentStatsLength = stats.value.length
+  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == rarity.value)
   return requiredStats[0] ? requiredStats[0].min : 0
 }
 
@@ -158,8 +183,10 @@ const addStat = () => {
     isBaseStat: false
   })
   clearForm()
+  console.log(stats.value);
 
   baseStatValue.value = getMinRequiredStat()
+  selectedColor.value = colors[stats.value.length - 1]
 }
 
 const handleSelectItem = (chosenItem: Item) => {
@@ -178,6 +205,7 @@ const handleSelectAttribute = (attribute: Attribute) => {
 const deleteStat = (index: number) => {
   stats.value.splice(index, 1)
   baseStatValue.value = getMinRequiredStat()
+  selectedColor.value = stats.value.length ? colors[stats.value.length - 1] : 'rgba(222, 222, 222, 1)'
 }
 
 const createExistingItem = async () => {
@@ -203,6 +231,7 @@ const createAndPublish = async () => {
 }
 
 const clear = () => {
+  selectedColor.value = 'rgb(222,222,222)'
   item.value = {
     id: 0,
     slot: '',
@@ -224,6 +253,7 @@ const prefillData = () => {
 
 const baseStatValue = ref(0)
 
+// Массив бейз статов которые нужно ввести польователю 
 const virtualStats = computed<Stat[] | []>(() => {
   if (requiredBaseStats.value.length && stats.value.length)
     return [{
@@ -234,14 +264,15 @@ const virtualStats = computed<Stat[] | []>(() => {
   return []
 })
 
+// Массив бейз статов которые нужно ввести польователю 
 const requiredBaseStats = computed<BaseStat[]>(() => {
   const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
   if (!currentItem?.baseStats) {
     return []
   }
 
-  const currentStatsLength = stats.value.length
-  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == currentStatsLength)
+  // const currentStatsLength = stats.value.length
+  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == rarity.value)
   return requiredStats
 })
 
@@ -312,7 +343,8 @@ onBeforeMount(async () => {
               <div class="sub-title">
                 Stat value:
               </div>
-              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1" :step="getAttributeSymbolById(attributeId) ? 0.1 : 1"
+              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1"
+                :step="getAttributeSymbolById(attributeId) ? 0.1 : 1"
                 :min="attributeStore.getAttributeById(attributeId)?.min || -200"
                 :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
                 ref="valueRef" v-model="value" />
@@ -350,9 +382,15 @@ onBeforeMount(async () => {
               </div>
             </div>
           </div>
+
+          <div class="color-picker">
+            Manual set rarity color (Optional):
+            <el-color-picker v-model="selectedColor" @change="onChangeColor" show-alpha
+              :predefine="predefineColors" />
+          </div>
         </div>
-        <ItemPreview :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true"
-          :stats="[...stats, ...virtualStats]" />
+        <ItemPreview :rarity="rarity" :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType"
+          :no-hover="true" :stats="[...stats, ...virtualStats]" />
       </div>
 
 
@@ -381,6 +419,12 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
+$maxHeight: 790px;
+
+.similar {
+  max-height: $maxHeight;
+}
+
 .bg {
   position: fixed;
   left: 0;
@@ -413,7 +457,8 @@ h4 {
 }
 
 .item-creator {
-  max-height: 750px;
+  max-height: $maxHeight;
+  width: 100%;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
@@ -425,7 +470,7 @@ h4 {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
-    max-height: 540px;
+    max-height: 600px;
     flex: 1;
   }
 
@@ -573,6 +618,18 @@ h4 {
 </style>
 
 <style lang="scss">
+.el-color-dropdown__main-wrapper,
+.el-color-alpha-slider,
+.el-color-dropdown__value {
+  display: none;
+}
+
+.el-color-picker__panel {
+  .el-color-dropdown__link-btn {
+    display: none;
+  }
+}
+
 .item-creator {
   .el-autocomplete {
     width: 100%;

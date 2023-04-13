@@ -165,7 +165,7 @@ onBeforeMount(async () => {
             </div>
             <ItemPreview @click="() => selectExistingItem(existingItem)" :offer-type="existingItem.offerType"
               :creator="existingItem.user" :wanted-price="existingItem.wantedPrice" :item="existingItem.item"
-              :stats="existingItem.stats" />
+              :stats="existingItem.stats" :rarity="existingItem.rarity" />
           </div>
         </div>
         <div v-if="selectedExistingItem">
@@ -177,7 +177,7 @@ onBeforeMount(async () => {
           </div>
           <ItemPreview :creator="selectedExistingItem.user" :offer-type="selectedExistingItem.offerType"
             :wanted-price="selectedExistingItem.wantedPrice" :item="selectedExistingItem.item"
-            :stats="selectedExistingItem.stats" />
+            :stats="selectedExistingItem.stats" :rarity="selectedExistingItem.rarity" />
         </div>
         <div v-if="selectedExistingItem" class="bid-list">
           <div v-if="bids">

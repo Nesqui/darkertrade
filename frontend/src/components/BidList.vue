@@ -140,7 +140,7 @@ const acceptBid = async (bid: Bid) => {
               <ItemPreview v-if="existingItem.item" :item="existingItem.item"
                 @click="push(`/user/${scope.row.user.nickname}/items/${scope.row.suggestedExistingItemId}`)"
                 :wanted-price="scope.row.suggestedExistingItem.wantedPrice" :creator="scope.row.user"
-                :offer-type="existingItem.offerType" :stats="scope.row.suggestedExistingItem?.stats" />
+                :offer-type="existingItem.offerType" :stats="scope.row.suggestedExistingItem?.stats" :rarity="existingItem.rarity" />
             </el-popover>
           </div>
           <div v-else>

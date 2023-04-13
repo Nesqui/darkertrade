@@ -270,7 +270,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
         <!-- CATEGORIES -->
         <div v-if="!chosenItem && filteredItems?.length" class="item-list">
           <div class="wrapper-item" v-for="(currentItem, index) in filteredItems" :key="index">
-            <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" />
+            <ItemPreview @click="() => choseItem(currentItem)" :item="currentItem" :stats="[]" :rarity="0" />
           </div>
         </div>
         <!-- NO EXISTING ITEMS IN CATEGORY  -->
@@ -283,7 +283,7 @@ const changeOfferType = (offerType: "WTS" | "WTB") => {
             <div class="wrapper-item" v-for="(existingItem, index) in filteredExistingItems" :key="index">
               <ItemPreview :wantedPrice="existingItem.wantedPrice" :creator="existingItem.user" :item="chosenItem"
                 :updated-at="existingItem.updatedAt" @click="() => itemClickHandle(existingItem)"
-                :offerType="existingItem.offerType" :stats="existingItem.stats" />
+                :offerType="existingItem.offerType" :stats="existingItem.stats" :rarity="existingItem.rarity" />
             </div>
           </div>
         </div>

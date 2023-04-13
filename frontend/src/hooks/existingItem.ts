@@ -14,7 +14,8 @@ export interface ExistingItem {
     bids?: Bid[],
     updatedAt?: string,
     createdAt?: string,
-    discordNotification? : boolean
+    discordNotification? : boolean,
+    rarity: number
 }
 
 export interface UpdateExistingItemDto {

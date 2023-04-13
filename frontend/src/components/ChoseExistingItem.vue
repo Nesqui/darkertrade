@@ -77,7 +77,7 @@ const findAllByItemIdAndUserId = async (itemId: number, query: QueryItemDto) => 
       item</el-button>
     <div v-else class="chosen-item">
       <ItemPreview :item="prefillItem" :wantedPrice="chosenExistingItem.wantedPrice"
-        :offerType="chosenExistingItem.offerType" :stats="chosenExistingItem.stats" />
+        :offerType="chosenExistingItem.offerType" :stats="chosenExistingItem.stats" :rarity="chosenExistingItem.rarity" />
       <div class="arrow-data">
         <div class="arrow left"></div>
         <p>Compare</p>

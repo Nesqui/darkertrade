@@ -53,6 +53,13 @@ export class ExistingItem extends Model {
   @Column
   discordNotification: boolean;
 
+  @Default(0)
+  @Min(0)
+  @Max(5)
+  @IsDecimal
+  @Column
+  rarity: number;
+
   @IsDecimal
   @Min(0)
   @Max(9999)
