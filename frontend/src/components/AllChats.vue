@@ -308,7 +308,7 @@ const unreadMessagesTotal = () => {
                   </el-icon></el-button>
                 <el-tooltip v-if="selectedChat.chat?.bid.id" class="box-item" effect="dark"
                   content="If you finished your conversation you can close this bid. Chat will be purged"
-                  placement="top-start">
+                  placement="bottom-start">
                   <div class="bid-action">
                     <el-popconfirm width="350" @confirm="closeBid(selectedChat.chat?.bid.id || 0)"
                       confirm-button-text="OK" cancel-button-text="No, Thanks" :title="`Are you sure to close this bid?`">

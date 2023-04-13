@@ -185,8 +185,8 @@ const addStat = () => {
   clearForm()
   console.log(stats.value);
 
-  baseStatValue.value = getMinRequiredStat()
   selectedColor.value = colors[stats.value.length - 1]
+  baseStatValue.value = getMinRequiredStat()
 }
 
 const handleSelectItem = (chosenItem: Item) => {
