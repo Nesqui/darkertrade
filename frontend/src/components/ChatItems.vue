@@ -63,7 +63,6 @@ onBeforeMount(() => {
 })
 
 // onBeforeUnmount(() => {
-//   console.log('UNMOUNT');
 //   socket.value.off('chatsCountsReceived', onChatsCountsReceived)
 //   socket.value.off('chatsReceived', onChatsReceived)
 //   socket.value.off('receiveChatMessages', onChatMessagesReceive)

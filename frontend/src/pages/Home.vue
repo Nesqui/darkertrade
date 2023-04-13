@@ -37,8 +37,6 @@ const changeActiveTab = async () => {
 const chatStore = useChatStore()
 
 onUnmounted(() => {
-  console.log(isConnected.value);
-
   if (isConnected.value)
     disconnect()
   document.removeEventListener("visibilitychange", changeActiveTab)
@@ -49,11 +47,7 @@ const forceReconnect = async () => {
   try {
     if (!isConnected.value)
       reconnect()
-    console.log(isConnected.value);
-
   } catch (error) {
-    console.log(error);
-
     ElNotification({
       message: 'Unfortunately chat service not responding. Please contact with us via discord'
     })

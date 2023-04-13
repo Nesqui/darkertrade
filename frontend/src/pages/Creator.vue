@@ -183,8 +183,6 @@ const addStat = () => {
     isBaseStat: false
   })
   clearForm()
-  console.log(stats.value);
-
   selectedColor.value = colors[stats.value.length - 1]
   baseStatValue.value = getMinRequiredStat()
 }

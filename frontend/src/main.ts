@@ -10,6 +10,11 @@ import { setupLayouts } from "virtual:generated-layouts";
 import { initApi } from './hooks';
 import { createPinia } from 'pinia'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+declare global {
+  interface Window {
+      ym:any;
+  }
+}
 
 const routes = setupLayouts(generatedRoutes);
 initApi()
