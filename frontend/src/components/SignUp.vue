@@ -189,7 +189,7 @@ const env = ref(import.meta.env.VITE_ENV)
     <div class="register">
       <el-form-item prop="nickname">
         <el-input readonly onfocus="this.removeAttribute('readonly');"
-          :placeholder="user?.nickname ? `nickname (${user.nickname})` : 'nickname'" v-model="form.nickname"></el-input>
+          :placeholder="user?.nickname ? `nickname` : 'nickname'" v-model="form.nickname"></el-input>
       </el-form-item>
       <el-form-item prop="password">
         <el-input readonly onfocus="this.removeAttribute('readonly');" type="password" v-model="form.password"
@@ -260,11 +260,11 @@ p {
 }
 
 @media (max-width:420px) {
-    .register-discord {
-      p {
-        word-break: break-all;
-      }
+  .register-discord {
+    p {
+      word-break: break-all;
     }
+  }
 
 }
 </style>
