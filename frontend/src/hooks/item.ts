@@ -2,20 +2,20 @@ import { ref } from "vue"
 import { Attribute, ExistingItem, ItemName, Slot, useApi } from "."
 import { BaseStat } from "./baseStat"
 const env = import.meta.env.VITE_ENV
-let gallery: string[] = []
+// let gallery: string[] = []
 // const gallery = Object.values(import.meta.glob('@assets/images/items/*.{png,jpg,jpeg,PNG,JPEG}', { eager: true, as: 'url' }))
 // const gallery =  Object.values(import.meta.glob(`${env.value === 'production' ? '/items/*.{png,jpg,jpeg,PNG,JPEG}' : '/public/items/*.{png,jpg,jpeg,PNG,JPEG}'}`, { eager: true, as: 'url' }))
-if (env === 'production') {
-    gallery = Object.values(import.meta.glob(`/items/*.{png,jpg,jpeg,PNG,JPEG}`, { eager: true, as: 'url' }))
-}
-else {
-    gallery = Object.values(import.meta.glob(`@/assets/items/*.{png,jpg,jpeg,PNG,JPEG}`, { eager: true, as: 'url' }))
-}
+// if (env === 'production') {
+//     gallery = Object.values(import.meta.glob(`/items/*.{png,jpg,jpeg,PNG,JPEG}`, { eager: true, as: 'url' }))
+// }
+// else {
+//     gallery = Object.values(import.meta.glob(`@/assets/items/*.{png,jpg,jpeg,PNG,JPEG}`, { eager: true, as: 'url' }))
+// }
 
-gallery = gallery.map(e => {
-    const splitted = e.split('/')
-    return splitted[splitted.length - 1]
-})
+// gallery = gallery.map(e => {
+//     const splitted = e.split('/')
+//     return splitted[splitted.length - 1]
+// })
 
 export interface QueryItemDto {
     id?: number,
@@ -82,10 +82,10 @@ export const initItemApi = () => {
 
     const getImg = (item: Item) => {
         const itemName = `60px-${item.name.replaceAll(' ', '_')}.png`
-        if (gallery.includes(itemName)) {
-            const href = `/items/${itemName}`;
-            return href
-        } return `/items/60px-Placeholder.png`
+        // if (gallery.includes(itemName)) {
+        const href = `/items/${itemName}`;
+        return href
+        // } return `/items/60px-Placeholder.png`
     }
 
     return {
