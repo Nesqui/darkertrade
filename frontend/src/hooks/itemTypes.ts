@@ -1,6 +1,7 @@
 export type Slot =
     | 'Amulet'
     | 'Ring'
+    | 'Cape'
     | 'Head'
     | 'Chest'
     | 'Legs'

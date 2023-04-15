@@ -5,6 +5,7 @@ import { QueryItemDto, Slot } from "../hooks";
 defineProps<{ filterItem: QueryItemDto }>()
 const slots = ref<Slot[]>(['Amulet',
   'Ring',
+  'Cape',
   'Head',
   'Chest',
   'Gloves',
@@ -27,6 +28,7 @@ const slots = ref<Slot[]>(['Amulet',
       <div class="tat-frame no-hover item-description">
         <span><label class="darker-title">A</label>Amulet</span>
         <span><label class="darker-title">B</label>Boots</span>
+        <span><label class="darker-title">C</label>Cape</span>
         <span><label class="darker-title">C</label>Chest</span>
         <span><label class="darker-title">G</label>Gloves</span>
         <span><label class="darker-title">H</label>Head</span>
@@ -85,7 +87,7 @@ $y-offset: 35px;
     right: 0px;
     bottom: 15px;
     min-width: 90px;
-    min-height: 115px;
+    min-height: 125px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
@@ -115,6 +117,11 @@ $y-offset: 35px;
   .ring {
     top: calc($y-offset + 95px);
     left: calc($x-offset + 230px);
+  }
+
+  .cape {
+    top: calc($y-offset + 155px);
+    left: calc($x-offset + 210px);
   }
 
   .amulet {
@@ -191,13 +198,18 @@ $y-offset: 35px;
       left: $x-mobile-offset + 130px;
     }
 
+    .cape {
+      top: calc($y-offset + 155px);
+      left: calc($x-offset + 180px);
+    }
+
     .chest {
       top: $y-mobile-offset + 100px;
       left: $x-mobile-offset + 130px;
     }
 
     .ring {
-      top: $y-mobile-offset+ 140px;
+      top: $y-mobile-offset+ 120px;
       left: $x-mobile-offset + 220px;
     }
 
