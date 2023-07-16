@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { UserService } from './user.service';
+import { PgModule } from 'src/pg/pg.module';
 import { UserController } from './user.controller';
 import { usersProviders } from './user.providers';
-import { PgModule } from 'src/pg/pg.module';
 import { JwtService } from '@nestjs/jwt';
 
 @Module({

@@ -36,7 +36,7 @@ export class User extends Model {
   lastName: string;
 
   @Validate({
-    is: /^[a-zA-Z0-9\s]+#[0-9]{4}$/,
+    is: /^[a-zA-Z0-9\s]+$/,
   })
   @Column
   discord: string;

@@ -1,14 +1,26 @@
 {
+  "files.eol": "\n",
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": false, // required
+  "editor.formatOnType": false, // required
+  "editor.formatOnSaveMode": "file", // required to format on save
+  // "vs-code-prettier-eslint.prettierLast": true, // set as "true" to run 'prettier' last not first
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "eslint.validate": [
-    "typescript"
-  ],
-  "cSpell.words": [
-    "Lootable"
-  ],
-  "editor.formatOnSave": true,
-  "eslint.format.enable": true,
-  "files.eol": "\n"
+  "[vue]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
+  },
+  "stylelint.validate": [
+    "css",
+    "less",
+    "postcss",
+    "vue" // necessary for stylelint diagnostics in .vue <style> tag
+  ]
 }

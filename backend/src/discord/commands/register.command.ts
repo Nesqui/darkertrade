@@ -45,7 +45,7 @@ export class RegisterCommand {
     private usersRepository: typeof User,
     @InjectDiscordClient()
     private readonly client: Client,
-  ) { }
+  ) {}
 
   // async getNickname(nickname: string) {
   //   for (let prefix = 0; prefix < DISCORD_NAME_ATTEMPTS; prefix++) {
@@ -111,28 +111,17 @@ export class RegisterCommand {
 
     this.logger.log(`Modal ${modal.customId} submit`);
     const discUser = await this.client.users.fetch(modal.user.id);
+
     const hash = uuidv4();
 
     let siteUserNickname = new Date().getTime().toString();
-    // let siteUserNickname = '';
-    // if (discUser.username.match(/[a-zA-Z0-9]+/g)) {
-    //   siteUserNickname = discUser.username
-    //     .match(/[a-zA-Z0-9]+/g)
-    //     .toString()
-    //     .split(',')
-    //     .join('');
-    // } else {
-    //   siteUserNickname = new Date().getTime().toString();
-    // }
-    // if (siteUserNickname.length < 5) {
-    //   siteUserNickname = new Date().getTime().toString();
-    // }
 
     const discCheck = await this.usersRepository.findOne({
       where: {
         discordId: discUser.id,
       },
     });
+
     if (discCheck) {
       await modal.reply({
         content: 'discord ID is already registered',
@@ -182,17 +171,16 @@ export class RegisterCommand {
       await modal.reply({ content: 'server error try again', ephemeral: true });
       return;
     }
+    
 
     await this.usersRepository.create({
       nickname: siteUserNickname,
       discordId: discUser.id,
       hash,
-      discord:
-        discUser.username.toString().toLowerCase() +
-        '#' +
-        discUser.discriminator,
+      discord: discUser.username.toString().toLowerCase(),
       active: true,
     });
+    
 
     try {
       modal.guild.members.cache
