@@ -67,7 +67,7 @@ onBeforeMount(async () => {
   <div class="login">
     <el-input @keyup.enter="login" v-model="formData.nickname"
       placeholder="Login"></el-input>
-    <el-input show-password type="password"
+    <el-input show-password type="password" class="ym-disable-keys"
       v-model="formData.password" @keyup.enter="login" placeholder="Password"></el-input>
     <el-button :disabled="!valid" @click="login">Signin</el-button>
   </div>

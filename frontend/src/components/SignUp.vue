@@ -192,11 +192,11 @@ const env = ref(import.meta.env.VITE_ENV)
           :placeholder="user?.nickname ? `nickname` : 'nickname'" v-model="form.nickname"></el-input>
       </el-form-item>
       <el-form-item prop="password">
-        <el-input readonly onfocus="this.removeAttribute('readonly');" type="password" v-model="form.password"
+        <el-input class="ym-disable-keys" readonly onfocus="this.removeAttribute('readonly');" type="password" v-model="form.password"
           placeholder="Password"></el-input>
       </el-form-item>
       <el-form-item prop="confirmPassword">
-        <el-input readonly onfocus="this.removeAttribute('readonly');" type="password" v-model="form.confirmPassword"
+        <el-input class="ym-disable-keys" readonly onfocus="this.removeAttribute('readonly');" type="password" v-model="form.confirmPassword"
           placeholder="Confirm password"></el-input>
       </el-form-item>
       <el-button :disabled="loading" @click="signUp(ruleFormRef)">Signup</el-button>
