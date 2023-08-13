@@ -7,6 +7,11 @@ export interface Stat {
   isBaseStat: boolean
 }
 
+export interface StatRecognition {
+  base: Stat[],
+  additional: Stat[]
+}
+
 export const initStatApi = () => {
   const { axiosClient } = useApi()
 

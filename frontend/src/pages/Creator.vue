@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, PropType, ref } from 'vue'
-import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat } from '../hooks'
+import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat, StatRecognition } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
 import { ElNotification } from 'element-plus';
@@ -8,6 +8,7 @@ import CountExistingItem from '../components/CountExistingItems.vue'
 import { useRouter } from 'vue-router';
 import { useItemStore } from '@/store';
 import SimilarItems from '@/components/SimilarItems.vue';
+import ImgRecognition from '@/components/ImgRecognition.vue';
 
 const router = useRouter()
 
@@ -21,7 +22,7 @@ const maxAttributes = 5
 const attributeName = ref('')
 const value = ref(1)
 const wantedPrice = ref(100)
-const offerType = ref<'WTB' | 'WTS'>('WTS')
+const offerType = ref<'WTB' | 'WTS' | 'screenshot'>('screenshot')
 const itemName = ref('')
 const valueRef = ref()
 const stats = ref<Stat[]>([])
@@ -200,6 +201,28 @@ const handleSelectAttribute = (attribute: Attribute) => {
   attributeAutoCompleteRef.value.blur()
 }
 
+const onStatRecognitionFinished = (parsedStats: StatRecognition) => {
+  // const countOfSkippedStats = parsedStats.splice(0, items.values.find(item => item)
+  parsedStats.additional.forEach(stat => {
+    stats.value.push({
+      attributeId: stat.attributeId,
+      value: stat.value,
+      isBaseStat: false
+    })
+  })
+
+  if (requiredBaseStats.value.length) {
+    //TODO несколько бейз статов для ввода
+    const stat = requiredBaseStats.value[0]
+    const recognizedVirtalStat = parsedStats.base.find(parsedStat => parsedStat.attributeId === stat.attributeId)
+    if (recognizedVirtalStat) {
+      baseStatValue.value = recognizedVirtalStat.value
+    }
+  }
+
+  offerType.value = 'WTS'
+}
+
 const deleteStat = (index: number) => {
   stats.value.splice(index, 1)
   baseStatValue.value = getMinRequiredStat()
@@ -274,6 +297,7 @@ const requiredBaseStats = computed<BaseStat[]>(() => {
   return requiredStats
 })
 
+
 onBeforeMount(async () => {
   try {
     loading.value = true
@@ -297,19 +321,25 @@ onBeforeMount(async () => {
     </div>
 
     <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
-
       <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
+        <el-tab-pane label="Screenshot" name="screenshot"></el-tab-pane>
         <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
         <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
       </el-tabs>
-      <div class="header">
+
+
+      <ImgRecognition v-show="offerType === 'screenshot'" @startRecognition="clear"
+        @itemRecognitionFinished="handleSelectItem" @statRecognitionFinished="onStatRecognitionFinished" />
+
+      <div v-show="offerType !== 'screenshot'" class="header">
         <div class="settings__discord">
           <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
           <span>discord DM</span>
         </div>
-        <CountExistingItem :showOnly="offerType" />
+
+        <CountExistingItem v-if="offerType !== 'screenshot'" :showOnly="offerType" />
       </div>
-      <div class="item-creator__wrapper">
+      <div v-show="offerType !== 'screenshot'" class="item-creator__wrapper">
         <div class="item-creator__item">
           <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
             @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
@@ -383,16 +413,14 @@ onBeforeMount(async () => {
 
           <div class="color-picker">
             Manual set rarity color (Optional):
-            <el-color-picker v-model="selectedColor" @change="onChangeColor" show-alpha
-              :predefine="predefineColors" />
+            <el-color-picker v-model="selectedColor" @change="onChangeColor" show-alpha :predefine="predefineColors" />
           </div>
         </div>
         <ItemPreview :rarity="rarity" :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType"
           :no-hover="true" :stats="[...stats, ...virtualStats]" />
       </div>
 
-
-      <div class="item-creator__actions">
+      <div class="item-creator__actions" v-if="offerType !== 'screenshot'">
         <div class="create"
           v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
           <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
@@ -450,7 +478,7 @@ h4 {
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: start;
   justify-content: space-between;
 }
 
