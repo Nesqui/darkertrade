@@ -99,7 +99,7 @@ const existingItem = computed((): ExistingItem => ({
   stats: [...stats.value, ...virtualStats.value],
   published: published.value,
   wantedPrice: wantedPrice.value,
-  offerType: offerType.value,
+  offerType: offerType.value === 'screenshot' ? 'WTS' : offerType.value,
   discordNotification: discordNotification.value,
   rarity: rarity.value
 }))
@@ -416,8 +416,8 @@ onBeforeMount(async () => {
             <el-color-picker v-model="selectedColor" @change="onChangeColor" show-alpha :predefine="predefineColors" />
           </div>
         </div>
-        <ItemPreview :rarity="rarity" :loading="loading" :item="item" :wantedPrice="wantedPrice" :offer-type="offerType"
-          :no-hover="true" :stats="[...stats, ...virtualStats]" />
+        <ItemPreview v-if="offerType !== 'screenshot'" :rarity="rarity" :loading="loading" :item="item"
+          :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="[...stats, ...virtualStats]" />
       </div>
 
       <div class="item-creator__actions" v-if="offerType !== 'screenshot'">
