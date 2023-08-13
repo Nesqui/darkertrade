@@ -146,7 +146,7 @@ watch(() => fileList.value.length, async () => {
 
       <template #tip>
         <div class="upload-description">
-          <div class="pr-2">
+          <div>
             <h2>Image Recognition Tool</h2>
             <strong>Get Quick Object Insights!</strong>
             <strong>Crop the image before posting</strong>
@@ -189,7 +189,7 @@ watch(() => fileList.value.length, async () => {
   display: flex;
   flex-direction: row;
   padding: 0;
-  gap: 0;
+  gap: 1rem;
 }
 
 img {
