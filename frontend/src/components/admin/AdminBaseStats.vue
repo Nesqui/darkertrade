@@ -16,6 +16,7 @@ const baseStatsApi = initBaseStatApi();
 const itemName = ref('')
 const itemAutoCompleteRef = ref()
 const baseStats = ref<BaseStat[]>([])
+const loading = ref(false)
 const query = ref<AdminUserQuery>({
   limit: 15,
   offset: 0
@@ -55,12 +56,14 @@ const clearItem = () => {
 }
 
 const handleSelectItem = async (chosenItem: Item) => {
+  loading.value = true
   item.value = chosenItem
   itemAutoCompleteRef.value.inputRef.blur()
   const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
   res.sort((a, b) => a.statsLength - b.statsLength);
   res.sort((x, y) => x.inputRequired === y.inputRequired ? 0 : x.inputRequired ? 1 : -1);
   baseStats.value = res
+  loading.value = false
 }
 
 watch(() => query.value.offset, async () => {
@@ -68,9 +71,10 @@ watch(() => query.value.offset, async () => {
 })
 
 const init = async () => {
+  loading.value = true
   const res = await attributesApi.findAll()
   attributes.value = res.sort((a, b) => { return a.id - b.id; })
-  baseStats.value = await baseStatsApi.findAllByItemPK(0);
+  loading.value = false
 }
 
 const updateBaseStat = async (baseStat: BaseStat) => {
@@ -86,6 +90,25 @@ const updateBaseStat = async (baseStat: BaseStat) => {
   } catch (error) { }
 }
 
+const addBaseStat = async () => {
+  try {
+  const res = await baseStatsApi.createBaseStat({
+    itemId: item.value.id
+  })
+  await handleSelectItem(item.value)
+    if (!res) ElNotification({ message: "Added attr", })
+  } catch (error) { }
+
+}
+
+const removeBaseStat = async (baseStat: BaseStat) => {
+  try {
+    if (!baseStat.id) return
+  const res = await baseStatsApi.removeBaseStat(baseStat.id)  
+    if (!res) ElNotification({ message: "Removed attr", })
+  await handleSelectItem(item.value)
+  } catch (error) { }
+}
 
 onBeforeMount(async () => {
   await init()
@@ -117,12 +140,13 @@ const itemSearch = (queryString: string, cb: any) => {
 
 <template>
   <div class="admin-base-stats">
+        <el-button v-if="item.id" @click="() => addBaseStat()" link>Add New Stat</el-button>
     <span>itemId: {{ item.id }}</span>
     <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
       @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
       @select="handleSelectItem" />
   </div>
-  <el-table :data="baseStats" style="width: 100%">
+  <el-table v-if="!loading" :data="baseStats" style="width: 100%">
     <el-table-column width="240" prop="attributeId" label="attrId">
       <template #default="scope">
         <span>{{ getAttributeNameById(scope.row.attributeId) }}</span>
@@ -152,6 +176,7 @@ const itemSearch = (queryString: string, cb: any) => {
     <el-table-column label="actions" align="right">
       <template #default="scope">
         <el-button @click="() => updateBaseStat(scope.row)" link>Update</el-button>
+        <el-button @click="() => removeBaseStat(scope.row)" link>Delete</el-button>
       </template>
     </el-table-column>
   </el-table>

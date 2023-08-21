@@ -10,4 +10,18 @@ import {
   IsOptional,
 } from 'class-validator';
 
-export class CreateBaseStatDto {}
+export class CreateBaseStatDto {
+  @ApiProperty({
+    type: Number,
+  })
+  @IsOptional()
+  @Min(-100)
+  @Max(1000)
+  itemId: number;
+  
+  @ApiProperty({
+    type: Number,
+  })
+  @IsOptional()
+  attributeId: number;
+}

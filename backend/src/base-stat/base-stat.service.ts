@@ -10,8 +10,9 @@ export class BaseStatService {
     private baseStatRepository: typeof BaseStat,
   ) {}
 
-  create(createBaseStatDto: CreateBaseStatDto) {
-    return 'This action adds a new Basestat';
+  async create(createBaseStatDto: CreateBaseStatDto) {
+    const res = await this.baseStatRepository.create({...createBaseStatDto} );
+    return res;
   }
 
   findAll() {
@@ -36,7 +37,11 @@ export class BaseStatService {
     return res;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} Basestat`;
+  async remove(id: number) {
+    const res = await this.baseStatRepository.destroy( {
+      where: { id },
+    });
+    return res;
   }
+
 }
