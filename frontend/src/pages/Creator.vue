@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeMount, PropType, ref } from 'vue'
+import { computed, nextTick, onBeforeMount, PropType, ref, watch } from 'vue'
 import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat, StatRecognition } from '../hooks'
 import { useAttributesStore } from '../store/attributes';
 import ItemPreview from '../components/ItemPreview.vue';
@@ -89,7 +89,7 @@ const clearItem = () => {
 
 }
 
-const clearAttribute = () => {
+const clearAttribute = (stat?: Stat) => {
   attributeName.value = ''
   requiredClear.value = true
 }
@@ -194,7 +194,11 @@ const handleSelectItem = (chosenItem: Item) => {
   baseStatValue.value = getMinRequiredStat()
 }
 
-const handleSelectAttribute = (attribute: Attribute) => {
+const handleSelectAttribute = (attribute: Attribute, stat?: Stat) => {
+  if (stat) {
+    stat.attributeId = attribute.id
+    return
+  }
   value.value = 1
   attributeId.value = attribute.id
   // valueRef.value.blur()
@@ -297,6 +301,13 @@ const requiredBaseStats = computed<BaseStat[]>(() => {
   return requiredStats
 })
 
+const additionalStatsAttributesName = ref<string[]>([])
+
+watch(() => stats.value, () => {
+  additionalStatsAttributesName.value= stats.value.map(stat => (attributes.find(a => a.id === stat.attributeId))?.name || '' )
+}, {
+  deep: true
+})
 
 onBeforeMount(async () => {
   try {
@@ -380,13 +391,23 @@ onBeforeMount(async () => {
             <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
           </div>
           <div class="stats">
-            <h3 v-if="stats.length">Selected additional stats:</h3>
+            <h3 v-if="stats.length">Additional stats:</h3>
             <div class="stats-item" v-for="(stat, index) in stats" :key="index">
               <span class="stats-details">
-                {{ (attributes.find(a => a.id === stat.attributeId))?.name }}
-                {{ stat.value }}
+              <el-autocomplete @click="() => clearAttribute(stat)" value-key="name"
+                v-model="additionalStatsAttributesName[index]" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
+                @select="(attribute: Attribute) => handleSelectAttribute(attribute, stat, index)" />
               </span>
-              <el-button @click="() => deleteStat(index)">Delete</el-button>
+
+              <div class="d-flex align-center">
+                <el-input-number :disabled="!attributeStore.getAttributeById(stat.attributeId)" :precision="1"
+                  :step="getAttributeSymbolById(stat.attributeId) ? 0.1 : 1" width="100"
+                  :min="attributeStore.getAttributeById(stat.attributeId)?.min || -200"
+                  :max="attributeStore.getAttributeById(stat.attributeId)?.max || 200" placeholder="Value" maxlength="3"
+                  ref="valueRef" v-model="stat.value" />
+
+                <el-button size="large" @click="() => deleteStat(index)">Delete</el-button>
+              </div>
             </div>
           </div>
 
@@ -555,6 +576,7 @@ h4 {
     justify-content: space-between;
     align-items: center;
     margin-bottom: .25rem;
+    gap: 1rem;
   }
 
   .stats-item__base {
@@ -568,10 +590,6 @@ h4 {
     width: 100%;
     justify-content: end;
     padding-top: 2rem;
-  }
-
-  .stats-details {
-    width: 100%;
   }
 }
 
