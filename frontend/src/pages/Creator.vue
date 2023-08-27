@@ -396,7 +396,7 @@ onBeforeMount(async () => {
               <span class="stats-details">
               <el-autocomplete @click="() => clearAttribute(stat)" value-key="name"
                 v-model="additionalStatsAttributesName[index]" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
-                @select="(attribute: Attribute) => handleSelectAttribute(attribute, stat, index)" />
+                @select="(attribute: Attribute) => handleSelectAttribute(attribute, stat)" />
               </span>
 
               <div class="d-flex align-center">
