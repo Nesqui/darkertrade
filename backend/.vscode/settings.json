@@ -8,9 +8,6 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": true
   },
-  "[vue]": {
-    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
-  },
   "[javascript]": {
     "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
   },

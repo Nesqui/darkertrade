@@ -1,35 +1,25 @@
-/* eslint-env node */
-require("@rushstack/eslint-patch/modern-module-resolution");
-
 module.exports = {
-  root: true,
-  plugins: ["prefer-arrow"],
-  extends: [
-    "plugin:vue/vue3-essential",
-    "eslint:recommended",
-    "@vue/eslint-config-typescript",
-    "@vue/eslint-config-prettier/skip-formatting",
-  ],
-  // parser:'@vue-eslint-parser',
+  parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: "latest",
+    project: 'tsconfig.json',
+    tsconfigRootDir: __dirname,
+    sourceType: 'module',
   },
+  plugins: ['@typescript-eslint/eslint-plugin'],
+  extends: [
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+  ],
+  root: true,
+  env: {
+    node: true,
+    jest: true,
+  },
+  ignorePatterns: ['.eslintrc.js'],
   rules: {
-    "vue/no-mutating-props": ["error", {
-      "shallowOnly": true
-    }],
-    'vue/multi-word-component-names': ['error', {
-      'ignores': ['index', 'projects', 'queues','create', 'users','[id]', 'constructor','Debug']
-    }],
-    "prefer-arrow/prefer-arrow-functions": [
-      "error",
-      {
-        disallowPrototype: true,
-        singleReturnOnly: false,
-        classPropertiesAllowed: false,
-      },
-    ],
-    "prefer-arrow-callback": ["error", { allowNamedFunctions: true }],
-    "func-style": ["error", "expression", { allowArrowFunctions: true }],
+    '@typescript-eslint/interface-name-prefix': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/no-explicit-any': ['off'],
   },
 };

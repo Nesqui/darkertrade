@@ -171,7 +171,6 @@ export class RegisterCommand {
       await modal.reply({ content: 'server error try again', ephemeral: true });
       return;
     }
-    
 
     await this.usersRepository.create({
       nickname: siteUserNickname,
@@ -180,7 +179,6 @@ export class RegisterCommand {
       discord: discUser.username.toString().toLowerCase(),
       active: true,
     });
-    
 
     try {
       modal.guild.members.cache
