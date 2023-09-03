@@ -18,9 +18,7 @@ module.exports = {
     "vue/no-mutating-props": ["error", {
       "shallowOnly": true
     }],
-    'vue/multi-word-component-names': ['error', {
-      'ignores': ['index', 'projects', 'queues','create', 'users','[id]', 'constructor','Debug']
-    }],
+    'vue/multi-word-component-names': 'off',
     "prefer-arrow/prefer-arrow-functions": [
       "error",
       {

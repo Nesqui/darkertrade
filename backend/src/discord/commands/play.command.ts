@@ -3,23 +3,65 @@ import {
   Command,
   EventParams,
   Handler,
+  InjectDiscordClient,
   InteractionEvent,
 } from '@discord-nestjs/core';
-import { ClientEvents } from 'discord.js';
-
+import { Inject } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Client, ClientEvents, PermissionFlagsBits } from 'discord.js';
+import { User } from 'src/user/user.entity';
+import { v4 as uuidv4 } from 'uuid';
 @Command({
-  name: 'play',
-  description: 'Plays a song',
+  name: 'reset',
+  description: 'Reset the user authentication',
+  defaultMemberPermissions: PermissionFlagsBits.UseApplicationCommands,
 })
 export class PlayCommand {
+  constructor(
+    private configService: ConfigService,
+    @Inject('USERS_REPOSITORY')
+    private usersRepository: typeof User,
+    @InjectDiscordClient()
+    private readonly client: Client,
+  ) {}
+
+  
   @Handler()
-  onPlayCommand(
+ async onPlayCommand(
     @InteractionEvent(SlashCommandPipe) dto: any,
     @EventParams() args: ClientEvents['interactionCreate'],
-  ): string {
-    console.log('DTO', dto);
-    console.log('Event args', args);
+  ): Promise<void> {
+    const discordId = dto.user.id
+    const discUser = await this.client.users.fetch(discordId);
+    console.log({dto});
+    
+    try {
+      const user = await this.usersRepository.findOne({
+        where: {
+          discordId,
+        },
+      });
+  
+      if (!user) {
+        discUser.send('Current user not found, please register first, or ask moderators to help (Xloctis or Nesqui).')
+        dto.reply('Please check your dm')
+        return  
+     }
 
-    return `Start playing `;
+      const hash = uuidv4();
+      user.hash = hash
+      await user.save()
+
+      const discordMessage =
+      `__${this.configService.get('APP_URL')}/auth?hash=${hash}__` +
+      '\n' +
+      `Your link to reset user on **TaT**`;
+
+      discUser.send(discordMessage)
+      dto.reply('Please check your dm')
+    } catch (error) {
+      dto.reply('Please check your dm')
+      discUser.send(JSON.stringify(error))
+    }
   }
 }

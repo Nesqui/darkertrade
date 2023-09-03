@@ -548,6 +548,7 @@ export class UserService {
   }
 
   async update(updateUserDto: UpdateUserDto) {
+    if (updateUserDto.hash === '') throw new ForbiddenException('Hash must be provided');
     if (!regeXnickname.test(updateUserDto.nickname))
       throw new ForbiddenException(
         'Allowed Latin letters and numbers in nickname',
@@ -575,7 +576,7 @@ export class UserService {
     } catch (error) {
       throw new NotFoundException('This nickname already exist');
     }
-    return { message: 'user created' };
+    return { message: 'user updated' };
   }
 
   remove(id: number) {
