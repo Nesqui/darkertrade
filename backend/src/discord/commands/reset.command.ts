@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
   description: 'Reset the user authentication',
   defaultMemberPermissions: PermissionFlagsBits.UseApplicationCommands,
 })
-export class PlayCommand {
+export class ResetCommand {
   constructor(
     private configService: ConfigService,
     @Inject('USERS_REPOSITORY')
@@ -27,13 +27,12 @@ export class PlayCommand {
 
   
   @Handler()
- async onPlayCommand(
+ async onResetCommand(
     @InteractionEvent(SlashCommandPipe) dto: any,
     @EventParams() args: ClientEvents['interactionCreate'],
   ): Promise<void> {
     const discordId = dto.user.id
     const discUser = await this.client.users.fetch(discordId);
-    console.log({dto});
     
     try {
       const user = await this.usersRepository.findOne({

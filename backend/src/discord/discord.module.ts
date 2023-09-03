@@ -6,7 +6,7 @@ import { GatewayIntentBits } from 'discord.js';
 import { DiscordController } from './discord.controller';
 
 import { DiscordGateway } from './discord.gateway';
-import { PlayCommand } from './commands/play.command';
+import { ResetCommand } from './commands/reset.command';
 import { RegisterCommand } from './commands/register.command';
 import { usersProviders } from 'src/user/user.providers';
 import { bidProviders } from 'src/bid/bid.providers';
@@ -42,7 +42,7 @@ import { existingItemProviders } from 'src/existing-item/existing-item.providers
   providers: [
     DiscordGateway,
     JwtService,
-    PlayCommand,
+    ResetCommand,
     RegisterCommand,
     ...usersProviders,
     ...bidProviders,
