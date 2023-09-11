@@ -52,7 +52,7 @@ export class ResetCommand {
             'Current user not found, please register first, or ask moderators to help (Xloctis or Nesqui).',
           ephemeral: true, // Сделать ответ видимым только для пользователя
         };
-        dto.reply(replyOptions);
+        await dto.reply(replyOptions);
         return;
       }
 
@@ -69,18 +69,18 @@ export class ResetCommand {
 
       // Отправлять ответ только пользователю, который выполнил команду
       const replyOptions: InteractionReplyOptions = {
-        content: 'Please check your dm',
+        content: 'discordMessage',
         ephemeral: true, // Сделать ответ видимым только для пользователя
       };
-      dto.reply(replyOptions);
+      await dto.reply(replyOptions);
     } catch (error) {
       // Отправлять ответ только пользователю, который выполнил команду
       const replyOptions: InteractionReplyOptions = {
         content: 'Please check your dm',
         ephemeral: true, // Сделать ответ видимым только для пользователя
       };
-      dto.reply(replyOptions);
-      discUser.send(JSON.stringify(error));
+      await dto.reply(replyOptions);
+      // discUser.send(JSON.stringify(error));
     }
   }
 }

@@ -1,22 +1,9 @@
-import { InjectDiscordClient, On, Once } from '@discord-nestjs/core';
-import {
-  Inject,
-  Injectable,
-  Logger,
-  UseGuards,
-  UseInterceptors,
-} from '@nestjs/common';
-import { Client, discordSort, GuildMember, Message } from 'discord.js';
-import DiscordNotifyType from './discord.interface';
-import { CreateDiscordDto } from './dto/create-discord.dto';
-
-import { MessageFromUserGuard } from './guards/message-from-user';
-import { MessageToUpperInterceptor } from './interceptors/message-to-upper';
+import { InjectDiscordClient } from '@discord-nestjs/core';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Client } from 'discord.js';
 import { User } from 'src/user/user.entity';
-import { Item } from 'src/item/item.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Bid } from 'src/bid/bid.entity';
-import { where } from 'sequelize';
 import { ConfigService } from '@nestjs/config';
 
 // const DISCORD_JOIN_ROLE_NAME = 'fresh';
