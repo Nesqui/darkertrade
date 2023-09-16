@@ -13,6 +13,7 @@ import {
 import { CommunityUser } from 'src/community/community-user.entity';
 import { Community } from 'src/community/community.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
+import { Offer } from 'src/offer/offer.entity';
 
 @Table
 export class User extends Model {
@@ -62,6 +63,9 @@ export class User extends Model {
 
   @HasMany(() => ExistingItem)
   existingItems: ExistingItem[];
+
+  @HasMany(() => Offer)
+  offers: Offer[];
 
   @AllowNull(false)
   @Column

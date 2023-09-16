@@ -12,6 +12,8 @@ import { Chat } from 'src/chat/chat.entity';
 import { Message } from 'src/messages/messages.entity';
 import { CommunityUser } from 'src/community/community-user.entity';
 import { BaseStat } from 'src/base-stat/base-stat.entity';
+import { Offer } from 'src/offer/offer.entity';
+import { OfferPair } from 'src/offer/offer-pair.entity';
 
 const initData = async (sequelize: Sequelize, configService: ConfigService) => {
   await sequelize.model('User').findOrCreate({
@@ -67,6 +69,8 @@ export const pgProviders = [
         Message,
         CommunityUser,
         BaseStat,
+        Offer,
+        OfferPair,
       ]);
       try {
         await sequelize.sync({ alter: false });

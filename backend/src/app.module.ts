@@ -15,6 +15,7 @@ import { CommunityModule } from './community/community.module';
 import { ChatModule } from './chat/chat.module';
 import { MessagesModule } from './messages/messages.module';
 import { BaseStatModule } from './base-stat/base-stat.module';
+import { OfferModule } from './offer/offer.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { BaseStatModule } from './base-stat/base-stat.module';
     ChatModule,
     MessagesModule,
     BaseStatModule,
+    OfferModule,
   ],
   controllers: [AppController],
   providers: [AppService],
