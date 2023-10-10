@@ -1,85 +1,85 @@
 <script setup lang="ts">
-import { AdminUserQuery, initBaseStatApi } from '@/hooks'
-import { Item, Attribute, initAttributesApi, initItemApi, PrefillItem, BaseStat } from '@/hooks'
-import { onBeforeMount, ref, watch, PropType } from 'vue'
-import { ElNotification } from 'element-plus'
-import { useAttributesStore } from '@/store'
+// import { AdminUserQuery, initBaseStatApi } from '@/hooks'
+// import { Item, Attribute, initAttributesApi, initItemApi, PrefillItem, BaseStat } from '@/hooks'
+// import { onBeforeMount, ref, watch, PropType } from 'vue'
+// import { ElNotification } from 'element-plus'
+// import { useAttributesStore } from '@/store'
 
-const requiredClear = ref(false)
-const attributeStore = useAttributesStore()
-const getAttributeNameById = attributeStore.getAttributeNameById
-const items = ref<Item[]>([])
-const attributesApi = initAttributesApi()
-const attributes = ref<Attribute[]>()
-const itemApi = initItemApi()
-const baseStatsApi = initBaseStatApi()
-const itemName = ref('')
-const itemAutoCompleteRef = ref()
-// const baseStats = ref<BaseStat[]>([])
-const loading = ref(false)
-const query = ref<AdminUserQuery>({
-  limit: 15,
-  offset: 0
-})
-const props = defineProps({
-  noWrapper: {
-    type: Boolean,
-    default: false
-  },
-  prefillItem: {
-    type: Object as PropType<PrefillItem>,
-    default: null
-  },
-  doAfterCreate: {
-    type: Function
-  }
-})
+// const requiredClear = ref(false)
+// const attributeStore = useAttributesStore()
+// const getAttributeNameById = attributeStore.getAttributeNameById
+// const items = ref<Item[]>([])
+// const attributesApi = initAttributesApi()
+// const attributes = ref<Attribute[]>()
+// const itemApi = initItemApi()
+// const baseStatsApi = initBaseStatApi()
+// const itemName = ref('')
+// const itemAutoCompleteRef = ref()
+// // const baseStats = ref<BaseStat[]>([])
+// const loading = ref(false)
+// const query = ref<AdminUserQuery>({
+//   limit: 15,
+//   offset: 0
+// })
+// const props = defineProps({
+//   noWrapper: {
+//     type: Boolean,
+//     default: false
+//   },
+//   prefillItem: {
+//     type: Object as PropType<PrefillItem>,
+//     default: null
+//   },
+//   doAfterCreate: {
+//     type: Function
+//   }
+// })
 
-const item = ref<Item>({
-  id: 0,
-  slot: '',
-  name: ''
-  // baseStats: []
-})
+// const item = ref<Item>({
+//   id: 0,
+//   slot: '',
+//   name: ''
+//   // baseStats: []
+// })
 
-const clearItem = () => {
-  itemName.value = ''
-  requiredClear.value = true
+// const clearItem = () => {
+//   itemName.value = ''
+//   requiredClear.value = true
 
-  item.value = {
-    id: 0,
-    slot: '',
-    name: ''
-    // baseStats: []
-  }
-}
+//   item.value = {
+//     id: 0,
+//     slot: '',
+//     name: ''
+//     // baseStats: []
+//   }
+// }
 
-const handleSelectItem = async (chosenItem: Item) => {
-  loading.value = true
-  item.value = chosenItem
-  itemAutoCompleteRef.value.inputRef.blur()
-  const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
-  res.sort((a, b) => a.statsLength - b.statsLength)
-  res.sort((x, y) => (x.inputRequired === y.inputRequired ? 0 : x.inputRequired ? 1 : -1))
-  // baseStats.value = res
-  loading.value = false
-}
+// const handleSelectItem = async (chosenItem: Item) => {
+//   loading.value = true
+//   item.value = chosenItem
+//   itemAutoCompleteRef.value.inputRef.blur()
+//   const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
+//   res.sort((a, b) => a.statsLength - b.statsLength)
+//   res.sort((x, y) => (x.inputRequired === y.inputRequired ? 0 : x.inputRequired ? 1 : -1))
+//   // baseStats.value = res
+//   loading.value = false
+// }
 
-watch(
-  () => query.value.offset,
-  async () => {
-    await init()
-  }
-)
+// watch(
+//   () => query.value.offset,
+//   async () => {
+//     await init()
+//   }
+// )
 
-const init = async () => {
-  loading.value = true
-  const res = await attributesApi.findAll()
-  attributes.value = res.sort((a, b) => {
-    return a.id - b.id
-  })
-  loading.value = false
-}
+// const init = async () => {
+//   loading.value = true
+//   const res = await attributesApi.findAll()
+//   attributes.value = res.sort((a, b) => {
+//     return a.id - b.id
+//   })
+//   loading.value = false
+// }
 
 // const updateBaseStat = async (baseStat: BaseStat) => {
 //   const req: any = { ...baseStat }
@@ -96,55 +96,55 @@ const init = async () => {
 //   }
 // }
 
-const addBaseStat = async () => {
-  try {
-    const res = await baseStatsApi.createBaseStat({
-      itemId: item.value.id
-    })
-    await handleSelectItem(item.value)
-    if (!res) ElNotification({ message: 'Added attr' })
-  } catch (error) {
-    console.log('🚀 ~ file: AdminBaseStats.vue:101 ~ addBaseStat ~ error:', error)
-  }
-}
+// const addBaseStat = async () => {
+//   try {
+//     const res = await baseStatsApi.createBaseStat({
+//       itemId: item.value.id
+//     })
+//     await handleSelectItem(item.value)
+//     if (!res) ElNotification({ message: 'Added attr' })
+//   } catch (error) {
+//     console.log('🚀 ~ file: AdminBaseStats.vue:101 ~ addBaseStat ~ error:', error)
+//   }
+// }
 
-const removeBaseStat = async (baseStat: BaseStat) => {
-  try {
-    if (!baseStat.id) return
-    const res = await baseStatsApi.removeBaseStat(baseStat.id)
-    if (!res) ElNotification({ message: 'Removed attr' })
-    await handleSelectItem(item.value)
-  } catch (error) {
-    console.log('🚀 ~ file: AdminBaseStats.vue:113 ~ removeBaseStat ~ error:', error)
-  }
-}
+// const removeBaseStat = async (baseStat: BaseStat) => {
+//   try {
+//     if (!baseStat.id) return
+//     const res = await baseStatsApi.removeBaseStat(baseStat.id)
+//     if (!res) ElNotification({ message: 'Removed attr' })
+//     await handleSelectItem(item.value)
+//   } catch (error) {
+//     console.log('🚀 ~ file: AdminBaseStats.vue:113 ~ removeBaseStat ~ error:', error)
+//   }
+// }
 
-onBeforeMount(async () => {
-  await init()
-  try {
-    items.value = await itemApi.findAll({
-      slot: ''
-    })
-  } catch (error) {
-    console.log('🚀 ~ file: AdminBaseStats.vue:126 ~ onBeforeMount ~ error:', error)
-  }
-})
+// onBeforeMount(async () => {
+//   await init()
+//   try {
+//     items.value = await itemApi.findAll({
+//       slot: ''
+//     })
+//   } catch (error) {
+//     console.log('🚀 ~ file: AdminBaseStats.vue:126 ~ onBeforeMount ~ error:', error)
+//   }
+// })
 
-const itemSearch = (queryString: string, cb: any) => {
-  let query = queryString
-  if (requiredClear.value) {
-    query = requiredClear.value ? '' : queryString
-    requiredClear.value = false
-  }
-  const results = query
-    ? items.value.filter((item) => item.name.toLowerCase().indexOf(query.toLowerCase()) != -1)
-    : items.value
-  // call callback function to return suggestions
-  cb(results)
-}
+// const itemSearch = (queryString: string, cb: any) => {
+//   let query = queryString
+//   if (requiredClear.value) {
+//     query = requiredClear.value ? '' : queryString
+//     requiredClear.value = false
+//   }
+//   const results = query
+//     ? items.value.filter((item) => item.name.toLowerCase().indexOf(query.toLowerCase()) != -1)
+//     : items.value
+//   // call callback function to return suggestions
+//   cb(results)
+// }
 </script>
 
-<template>
+<!-- <template>
   <div class="admin-base-stats">
     <el-button v-if="item.id" @click="() => addBaseStat()" link>Add New Stat</el-button>
     <span>itemId: {{ item.id }}</span>
@@ -159,8 +159,8 @@ const itemSearch = (queryString: string, cb: any) => {
       placeholder="Base item type"
       @select="handleSelectItem"
     />
-  </div>
-  <!-- <el-table v-if="!loading" :data="baseStats" style="width: 100%">
+  </div> -->
+<!-- <el-table v-if="!loading" :data="baseStats" style="width: 100%">
     <el-table-column width="240" prop="attributeId" label="attrId">
       <template #default="scope">
         <span>{{ getAttributeNameById(scope.row.attributeId) }}</span>
@@ -194,7 +194,7 @@ const itemSearch = (queryString: string, cb: any) => {
       </template>
     </el-table-column>
   </el-table> -->
-</template>
+<!-- </template>
 
 <style scoped lang="scss">
 .admin-base-stats {
@@ -206,4 +206,4 @@ const itemSearch = (queryString: string, cb: any) => {
   font-weight: 600;
   align-items: center;
 }
-</style>
+</style> -->
