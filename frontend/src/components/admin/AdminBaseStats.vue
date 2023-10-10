@@ -15,7 +15,7 @@ const itemApi = initItemApi()
 const baseStatsApi = initBaseStatApi()
 const itemName = ref('')
 const itemAutoCompleteRef = ref()
-const baseStats = ref<BaseStat[]>([])
+// const baseStats = ref<BaseStat[]>([])
 const loading = ref(false)
 const query = ref<AdminUserQuery>({
   limit: 15,
@@ -38,8 +38,8 @@ const props = defineProps({
 const item = ref<Item>({
   id: 0,
   slot: '',
-  name: '',
-  baseStats: []
+  name: ''
+  // baseStats: []
 })
 
 const clearItem = () => {
@@ -49,8 +49,8 @@ const clearItem = () => {
   item.value = {
     id: 0,
     slot: '',
-    name: '',
-    baseStats: []
+    name: ''
+    // baseStats: []
   }
 }
 
@@ -61,7 +61,7 @@ const handleSelectItem = async (chosenItem: Item) => {
   const res = await baseStatsApi.findAllByItemPK(item.value.id || 0)
   res.sort((a, b) => a.statsLength - b.statsLength)
   res.sort((x, y) => (x.inputRequired === y.inputRequired ? 0 : x.inputRequired ? 1 : -1))
-  baseStats.value = res
+  // baseStats.value = res
   loading.value = false
 }
 
@@ -81,20 +81,20 @@ const init = async () => {
   loading.value = false
 }
 
-const updateBaseStat = async (baseStat: BaseStat) => {
-  const req: any = { ...baseStat }
-  const id = req.id
-  delete req.id
-  delete req.createdAt
-  delete req.itemId
-  delete req.updatedAt
-  try {
-    const res = await baseStatsApi.updateBaseStat(id, req)
-    if (res[0] === 1) ElNotification({ message: 'Updated attr' })
-  } catch (error) {
-    console.log('🚀 ~ file: AdminBaseStats.vue:91 ~ updateBaseStat ~ error:', error)
-  }
-}
+// const updateBaseStat = async (baseStat: BaseStat) => {
+//   const req: any = { ...baseStat }
+//   const id = req.id
+//   delete req.id
+//   delete req.createdAt
+//   delete req.itemId
+//   delete req.updatedAt
+//   try {
+//     const res = await baseStatsApi.updateBaseStat(id, req)
+//     if (res[0] === 1) ElNotification({ message: 'Updated attr' })
+//   } catch (error) {
+//     console.log('🚀 ~ file: AdminBaseStats.vue:91 ~ updateBaseStat ~ error:', error)
+//   }
+// }
 
 const addBaseStat = async () => {
   try {
@@ -160,7 +160,7 @@ const itemSearch = (queryString: string, cb: any) => {
       @select="handleSelectItem"
     />
   </div>
-  <el-table v-if="!loading" :data="baseStats" style="width: 100%">
+  <!-- <el-table v-if="!loading" :data="baseStats" style="width: 100%">
     <el-table-column width="240" prop="attributeId" label="attrId">
       <template #default="scope">
         <span>{{ getAttributeNameById(scope.row.attributeId) }}</span>
@@ -193,7 +193,7 @@ const itemSearch = (queryString: string, cb: any) => {
         <el-button @click="() => removeBaseStat(scope.row)" link>Delete</el-button>
       </template>
     </el-table-column>
-  </el-table>
+  </el-table> -->
 </template>
 
 <style scoped lang="scss">

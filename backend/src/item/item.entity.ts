@@ -6,7 +6,7 @@ import {
   Unique,
   HasMany,
 } from 'sequelize-typescript';
-import { BaseStat } from 'src/base-stat/base-stat.entity';
+// import { BaseStat } from 'src/base-stat/base-stat.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Slot } from './slot.entity';
 
@@ -23,6 +23,6 @@ export class Item extends Model {
   @HasMany(() => ExistingItem)
   existingItems: ExistingItem[];
 
-  @HasMany(() => BaseStat)
-  baseStats: BaseStat[];
+  // @HasMany(() => BaseStat)
+  // baseStats: BaseStat[];
 }

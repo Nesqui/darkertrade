@@ -2,13 +2,22 @@
 import { ElNotification } from 'element-plus'
 import { computed, onBeforeMount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import BidList from '@/components/BidList.vue';
-import CreateBid from '@/components/CreateBid.vue';
-import { ExistingItem, initExistingItemApi, initItemApi, initUserApi, Item, SimilarCounters, useMoment, User } from '@/hooks'
-import ItemPreview from "@/components/ItemPreview.vue"
-import { useUserStore } from '@/store';
-import { Bid, QueryBidDto } from '@/hooks/bid';
-import SimilarItems from '@/components/SimilarItems.vue';
+import BidList from '@/components/BidList.vue'
+import CreateBid from '@/components/CreateBid.vue'
+import {
+  ExistingItem,
+  initExistingItemApi,
+  initItemApi,
+  initUserApi,
+  Item,
+  SimilarCounters,
+  useMoment,
+  User
+} from '@/hooks'
+import ItemPreview from '@/components/ItemPreview.vue'
+import { useUserStore } from '@/store'
+import { Bid, QueryBidDto } from '@/hooks/bid'
+import SimilarItems from '@/components/SimilarItems.vue'
 
 const userStore = useUserStore()
 const itemApi = initItemApi()
@@ -40,28 +49,31 @@ const similarCounters = ref<SimilarCounters>({
   WTB: 0
 })
 
-
-const hasOwnBid = () => item.value?.existingItems?.length && item.value?.existingItems[0].bids?.filter(bid => bid.status !== 'closed').find(bid => bid.userId === userStore.currentUser.id)
-const ownToUser = () => item.value?.existingItems?.length && item.value?.existingItems[0].userId === userStore.currentUser.id
+const hasOwnBid = () =>
+  item.value?.existingItems?.length &&
+  item.value?.existingItems[0].bids
+    ?.filter((bid) => bid.status !== 'closed')
+    .find((bid) => bid.userId === userStore.currentUser.id)
+const ownToUser = () =>
+  item.value?.existingItems?.length &&
+  item.value?.existingItems[0].userId === userStore.currentUser.id
 
 const bidCreatedHandler = (bid: Bid) => {
-  if (item.value?.existingItems)
-    item.value.existingItems[0].bids?.unshift(bid)
+  if (item.value?.existingItems) item.value.existingItems[0].bids?.unshift(bid)
   showBidCreator.value = false
 }
 
 const bidDeletedHandler = (bid: Bid) => {
   if (item.value?.existingItems) {
-
-    const index = item.value.existingItems[0].bids?.findIndex(currentBid => currentBid.id === bid.id)
-    if (index !== undefined && index != -1)
-      item.value.existingItems[0].bids?.splice(index, 1)
+    const index = item.value.existingItems[0].bids?.findIndex(
+      (currentBid) => currentBid.id === bid.id
+    )
+    if (index !== undefined && index != -1) item.value.existingItems[0].bids?.splice(index, 1)
   }
 }
 
 const changePublish = async () => {
-  if (!item.value?.existingItems?.length)
-    return
+  if (!item.value?.existingItems?.length) return
   actionsLoading.value = true
   try {
     await existingItemsApi.patch(item.value.existingItems[0].id!, {
@@ -78,8 +90,7 @@ const changePublish = async () => {
 }
 
 const deleteExistingItem = async () => {
-  if (!item.value?.existingItems?.length)
-    return
+  if (!item.value?.existingItems?.length) return
   actionsLoading.value = true
   try {
     await existingItemsApi.patch(item.value.existingItems[0].id!, {
@@ -113,16 +124,17 @@ const initPageData = async () => {
   }
 }
 
-watch(() => route.params.nickname, async () => {
-  await initPageData()
-})
+watch(
+  () => route.params.nickname,
+  async () => {
+    await initPageData()
+  }
+)
 
 const onDiscordNotificationChange = async (value: boolean) => {
-  if (!item.value?.existingItems?.length && !item.value?.existingItems)
-    return
+  if (!item.value?.existingItems?.length && !item.value?.existingItems) return
 
-  if (!item.value?.existingItems[0].id)
-    return
+  if (!item.value?.existingItems[0].id) return
 
   try {
     discordNotificationLoading.value = true
@@ -145,26 +157,53 @@ onBeforeMount(async () => {
 
 <template>
   <div class="item">
-    <img src="@/assets/images/shop1.png" alt="" class="bg">
+    <img src="@/assets/images/shop1.png" alt="" class="bg" />
     <div class="wrapper">
       <div class="item-actions">
         <h2>{{ showBidCreator ? 'Bid creating' : item ? item.name : 'item' }}</h2>
         <div v-if="!loading" class="item-actions__list">
-          <el-button v-if="user && user.nickname" @click="$router.push(`/user/${user?.nickname}/items`)" size="large">All
-            items</el-button>
-          <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
-            v-if="isAuth && !ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems" size="large">Create
-            bid +</el-button>
-          <el-button :loading="actionsLoading" @click="showBidCreator = !showBidCreator"
-            v-if="!ownToUser() && showBidCreator" size="large">Cancel</el-button>
-          <el-button :loading="actionsLoading" @click="changePublish"
-            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true" size="large">Make
-            private</el-button>
-          <el-button :loading="actionsLoading" @click="changePublish"
+          <el-button
+            v-if="user && user.nickname"
+            @click="$router.push(`/user/${user?.nickname}/items`)"
+            size="large"
+            >All items</el-button
+          >
+          <el-button
+            :loading="actionsLoading"
+            @click="showBidCreator = !showBidCreator"
+            v-if="isAuth && !ownToUser() && !hasOwnBid() && !showBidCreator && item?.existingItems"
+            size="large"
+            >Create bid +</el-button
+          >
+          <el-button
+            :loading="actionsLoading"
+            @click="showBidCreator = !showBidCreator"
+            v-if="!ownToUser() && showBidCreator"
+            size="large"
+            >Cancel</el-button
+          >
+          <el-button
+            :loading="actionsLoading"
+            @click="changePublish"
+            v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === true"
+            size="large"
+            >Make private</el-button
+          >
+          <el-button
+            :loading="actionsLoading"
+            @click="changePublish"
             v-if="ownToUser() && item?.existingItems && item.existingItems[0].published === false"
-            size="large">Publish</el-button>
-          <el-popconfirm v-if="ownToUser()" width="350" @confirm="deleteExistingItem" confirm-button-text="OK"
-            cancel-button-text="No, Thanks" :title="`Are you sure to delete this item?`">
+            size="large"
+            >Publish</el-button
+          >
+          <el-popconfirm
+            v-if="ownToUser()"
+            width="350"
+            @confirm="deleteExistingItem"
+            confirm-button-text="OK"
+            cancel-button-text="No, Thanks"
+            :title="`Are you sure to delete this item?`"
+          >
             <template #reference>
               <el-button :loading="actionsLoading" size="large">Delete</el-button>
             </template>
@@ -185,30 +224,58 @@ onBeforeMount(async () => {
           <div class="item-details">
             <div class="item-info">
               <h2>Info</h2>
-              <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">Item created: {{
-                moment.fromNow(item.existingItems[0].createdAt) }}</p>
-              <p v-if="item.existingItems">Item published: {{ item.existingItems[0].published ? "Yes" : "No" }}</p>
-              <div v-if="ownToUser() && item?.existingItems && item.existingItems[0].id" class="settings">
+              <p v-if="item.existingItems?.length && item.existingItems[0].createdAt">
+                Item created: {{ moment.fromNow(item.existingItems[0].createdAt) }}
+              </p>
+              <p v-if="item.existingItems">
+                Item published: {{ item.existingItems[0].published ? 'Yes' : 'No' }}
+              </p>
+              <div
+                v-if="ownToUser() && item?.existingItems && item.existingItems[0].id"
+                class="settings"
+              >
                 <el-divider />
                 <h2>Settings</h2>
                 <div class="settings__discord">
                   <span>Notify on new bids</span>
-                  <el-switch v-model="item.existingItems[0].discordNotification" :loading="discordNotificationLoading"
-                    @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
+                  <el-switch
+                    v-model="item.existingItems[0].discordNotification"
+                    :loading="discordNotificationLoading"
+                    @change="onDiscordNotificationChange"
+                    size="large"
+                    active-text="On"
+                    inactive-text="Off"
+                  />
                 </div>
               </div>
             </div>
-            <ItemPreview :noHover="true" v-if="item?.existingItems" :item="item" :creator="item.existingItems[0].user"
-              :updated-at="item.existingItems[0].updatedAt" :wantedPrice="item.existingItems[0].wantedPrice"
-              :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats"
-              :rarity="item.existingItems[0].rarity" />
+            <ItemPreview
+              :noHover="true"
+              v-if="item?.existingItems"
+              :item="item"
+              :creator="item.existingItems[0].user"
+              :updated-at="item.existingItems[0].updatedAt"
+              :wantedPrice="item.existingItems[0].wantedPrice"
+              :offerType="item.existingItems[0].offerType"
+              :stats="item?.existingItems[0].stats"
+              :rarity="item.existingItems[0].rarity"
+            />
           </div>
         </el-tab-pane>
-        <el-tab-pane v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids"
-          :label="`Bids (${item.existingItems[0].bids.length})`" name="Bids">
+        <el-tab-pane
+          v-if="item?.existingItems && item.existingItems[0] && item.existingItems[0].bids"
+          :label="`Bids (${item.existingItems[0].bids.length})`"
+          name="Bids"
+        >
           <h2>Bids:</h2>
-          <BidList @on-bid-deleted="bidDeletedHandler" v-if="item" :item="item" :filter="filterBids"
-            :existing-item="item.existingItems[0]" :bids="item.existingItems[0].bids" />
+          <BidList
+            @on-bid-deleted="bidDeletedHandler"
+            v-if="item"
+            :item="item"
+            :filter="filterBids"
+            :existing-item="item.existingItems[0]"
+            :bids="item.existingItems[0].bids"
+          />
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -221,8 +288,18 @@ onBeforeMount(async () => {
           Similar WTB {{ `(${similarCounters.WTB})` }}
         </el-button>
       </el-button-group>
-      <SimilarItems v-if="activeName === 'WTS'" :counters="similarCounters" offer-type="WTS" :existing-item="item.existingItems[0]" />
-      <SimilarItems v-else :counters="similarCounters" offer-type="WTB" :existing-item="item.existingItems[0]" />
+      <SimilarItems
+        v-if="activeName === 'WTS'"
+        :counters="similarCounters"
+        offer-type="WTS"
+        :existing-item="item.existingItems[0]"
+      />
+      <SimilarItems
+        v-else
+        :counters="similarCounters"
+        offer-type="WTB"
+        :existing-item="item.existingItems[0]"
+      />
     </div>
   </div>
 </template>
@@ -247,7 +324,7 @@ onBeforeMount(async () => {
     left: 0;
     top: 0;
     width: 100%;
-    opacity: 0.10;
+    opacity: 0.1;
     background-repeat: no-repeat;
     background-size: cover;
   }
@@ -294,10 +371,11 @@ onBeforeMount(async () => {
   }
 }
 
-@media (max-width:420px) {
+@media (max-width: 420px) {
   .similar {
     display: none;
-    .el-button {}
+    .el-button {
+    }
   }
 
   .item {
@@ -310,8 +388,6 @@ onBeforeMount(async () => {
       height: 35px;
       padding: 2px 12px;
     }
-
-    ;
 
     .item-details {
       flex-direction: column;
@@ -336,7 +412,6 @@ onBeforeMount(async () => {
 
 <style lang="scss">
 .item {
-
   .el-tabs__content {
     padding-top: 1rem;
   }

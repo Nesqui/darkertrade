@@ -18,7 +18,7 @@ export class CreateBaseStatDto {
   @Min(-100)
   @Max(1000)
   itemId: number;
-  
+
   @ApiProperty({
     type: Number,
   })

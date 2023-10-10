@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { AdminUserQuery, initUserApi, truncate, useMoment, User } from '@/hooks'
 import { onBeforeMount, ref, watch } from 'vue'
-import NicknameOnline from '../NicknameOnline.vue';
+import NicknameOnline from '../NicknameOnline.vue'
 
 const moment = useMoment()
 const userApi = initUserApi()
@@ -20,9 +20,12 @@ const paginate = (page: number) => {
   query.value.offset = (page - 1) * query.value.limit
 }
 
-watch(() => query.value.offset, async () => {
-  await init()
-})
+watch(
+  () => query.value.offset,
+  async () => {
+    await init()
+  }
+)
 
 const init = async () => {
   const res = await userApi.findAll(query.value)
@@ -53,7 +56,6 @@ onBeforeMount(async () => {
         </template>
       </el-table-column>
 
-
       <el-table-column width="195" prop="discordId" label="discordId">
         <template #default="scope">
           <el-tooltip effect="dark" :content="scope.row.discord" placement="top-start">
@@ -77,13 +79,27 @@ onBeforeMount(async () => {
       </el-table-column>
       <el-table-column label="actions" align="right">
         <template #default="scope">
-          <el-button @click="banUserId = scope.row.id; dialogVisible = true" link>BAN</el-button>
+          <el-button
+            @click="
+              () => {
+                banUserId = scope.row.id
+                dialogVisible = true
+              }
+            "
+            link
+            >BAN</el-button
+          >
         </template>
       </el-table-column>
     </el-table>
     <div class="pagination-block">
-      <el-pagination @current-change="paginate" :page-size="query.limit" background layout="prev, pager, next"
-        :total="count" />
+      <el-pagination
+        @current-change="paginate"
+        :page-size="query.limit"
+        background
+        layout="prev, pager, next"
+        :total="count"
+      />
     </div>
 
     <el-dialog v-model="dialogVisible" width="30%">
@@ -94,12 +110,9 @@ onBeforeMount(async () => {
 
         <div class="actions">
           <el-button @click="dialogVisible = false">Cancel</el-button>
-          <el-button type="primary" @click="ban">
-            Confirm
-          </el-button>
+          <el-button type="primary" @click="ban"> Confirm </el-button>
         </div>
       </div>
-
     </el-dialog>
   </div>
 </template>
@@ -125,4 +138,3 @@ onBeforeMount(async () => {
   }
 }
 </style>
-

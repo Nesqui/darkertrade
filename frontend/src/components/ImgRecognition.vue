@@ -67,13 +67,13 @@ const statRecognition = (text: string, item?: Item) => {
           parsedAttributes.additional.push({
             attributeId: matchingAttribute.id,
             value: numericValue,
-            isBaseStat: false
+            isBase: false
           })
         } else {
           parsedAttributes.base.push({
             attributeId: matchingAttribute.id,
             value: numericValue,
-            isBaseStat: false
+            isBase: true
           })
         }
       }
@@ -81,6 +81,10 @@ const statRecognition = (text: string, item?: Item) => {
   }
 
   emit('statRecognitionFinished', parsedAttributes)
+  console.log(
+    '🚀 ~ file: ImgRecognition.vue:84 ~ statRecognition ~ parsedAttributes:',
+    parsedAttributes
+  )
   return parsedAttributes
 }
 

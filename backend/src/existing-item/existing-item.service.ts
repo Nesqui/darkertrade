@@ -26,8 +26,8 @@ const LIMITS = {
   WTS: 20,
 };
 
-const MAX_NOT_BASE_STATS_LENGTH = 5;
-const MAX_BASE_STATS_LENGTH = 1;
+const MAX_NOT_BASE_STATS_LENGTH = 10;
+const MAX_BASE_STATS_LENGTH = 10;
 
 @Injectable()
 export class ExistingItemService {
@@ -64,13 +64,13 @@ export class ExistingItemService {
       throw new ForbiddenException('You cant create item without stats');
 
     if (
-      createExistingItemDto.stats.filter((stat) => !stat.isBaseStat).length >
+      createExistingItemDto.stats.filter((stat) => !stat.isBase).length >
       MAX_NOT_BASE_STATS_LENGTH
     )
       throw new ForbiddenException('You cant create this item');
 
     if (
-      createExistingItemDto.stats.filter((stat) => stat.isBaseStat).length >
+      createExistingItemDto.stats.filter((stat) => stat.isBase).length >
       MAX_BASE_STATS_LENGTH
     )
       throw new ForbiddenException('You cant create this item');

@@ -30,6 +30,16 @@ export class CreateStatDto {
   })
   @IsBoolean()
   @IsOptional()
-  @Transform(({ obj }) => obj.isBaseStat === 'true' || obj.isBaseStat === true)
-  readonly isBaseStat: boolean = false;
+  @Transform(({ obj }) => obj.isBase === 'true' || obj.isBase === true)
+  readonly isBase: boolean = false;
+
+  @ApiProperty({
+    type: Boolean,
+  })
+  @IsBoolean()
+  @IsOptional()
+  @Transform(
+    ({ obj }) => obj.isApproximately === 'true' || obj.isApproximately === true,
+  )
+  readonly isApproximately: boolean = false;
 }

@@ -40,14 +40,14 @@ export class ItemController {
     return this.itemService.findAll(itemQuery);
   }
 
-  @Get('base')
-  @ApiQuery({
-    type: QueryItemDto,
-  })
-  @UseGuards(JwtOptionalAuthGuard)
-  getBase() {
-    return this.itemService.getBase();
-  }
+  // @Get('base')
+  // @ApiQuery({
+  //   type: QueryItemDto,
+  // })
+  // @UseGuards(JwtOptionalAuthGuard)
+  // getBase() {
+  //   return this.itemService.getBase();
+  // }
 
   @Get('market')
   @ApiQuery({

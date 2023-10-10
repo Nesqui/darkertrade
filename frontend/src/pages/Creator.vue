@@ -1,26 +1,43 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeMount, PropType, ref, watch } from 'vue'
-import { Item, Attribute, initItemApi, ExistingItem, Stat, initExistingItemApi, PrefillItem, initLimits, BaseStat, StatRecognition } from '../hooks'
-import { useAttributesStore } from '../store/attributes';
-import ItemPreview from '../components/ItemPreview.vue';
-import { ElNotification } from 'element-plus';
+import {
+  Item,
+  Attribute,
+  initItemApi,
+  ExistingItem,
+  Stat,
+  initExistingItemApi,
+  PrefillItem,
+  initLimits,
+  // BaseStat,
+  StatRecognition
+} from '../hooks'
+import { useAttributesStore } from '../store/attributes'
+import ItemPreview from '../components/ItemPreview.vue'
 import CountExistingItem from '../components/CountExistingItems.vue'
-import { useRouter } from 'vue-router';
-import { useItemStore } from '@/store';
-import SimilarItems from '@/components/SimilarItems.vue';
-import ImgRecognition from '@/components/ImgRecognition.vue';
+import { useRouter } from 'vue-router'
+import SimilarItems from '@/components/SimilarItems.vue'
+import ImgRecognition from '@/components/ImgRecognition.vue'
+import StatsList from '@/components/StatsList.vue'
 
 const router = useRouter()
 
-const statPlaceHolder = ['Resourcefulness', 'Knowledge', 'Agility', 'Strength', 'Action Speed'][Math.floor(Math.random() * 5)]
+const statPlaceHolder = ['Resourcefulness', 'Knowledge', 'Agility', 'Strength', 'Action Speed'][
+  Math.floor(Math.random() * 5)
+]
+
 const attributeStore = useAttributesStore()
-const getAttributeSymbolById = attributeStore.getAttributeSymbolById;
+const getAttributeSymbolById = attributeStore.getAttributeSymbolById
 const attributeAutoCompleteRef = ref()
-const attributes = attributeStore.attributes
 const existingItemApi = initExistingItemApi()
-const maxAttributes = 5
-const attributeName = ref('')
-const value = ref(1)
+const maxAttributes = 10
+
+const statForm = ref({
+  attributeName: '',
+  value: 1,
+  isBase: true
+})
+
 const wantedPrice = ref(100)
 const offerType = ref<'WTB' | 'WTS' | 'screenshot'>('screenshot')
 const itemName = ref('')
@@ -35,13 +52,12 @@ const items = ref<Item[]>([])
 const itemAutoCompleteRef = ref()
 const requiredClear = ref(false)
 const discordNotification = ref(true)
-const itemStore = useItemStore()
 const colors = [
   'rgba(98, 190, 11)',
   'rgba(74, 155, 209, 1)',
   'rgba(173, 90, 255, 1)',
   'rgba(247, 162, 45, 1)',
-  'rgba(227, 216, 140, 1)',
+  'rgba(227, 216, 140, 1)'
 ]
 const props = defineProps({
   noWrapper: {
@@ -53,7 +69,7 @@ const props = defineProps({
     default: null
   },
   doAfterCreate: {
-    type: Function,
+    type: Function
   }
 })
 
@@ -63,17 +79,16 @@ const predefineColors = computed(() => {
 })
 
 const rarity = computed(() => {
-  const colorIndex = colors.findIndex(color => color === selectedColor.value)
-  if (colorIndex !== -1)
-    return colorIndex + 1
-  return stats.value.filter(stat => !stat.isBaseStat).length;
+  const colorIndex = colors.findIndex((color) => color === selectedColor.value)
+  if (colorIndex !== -1) return colorIndex + 1
+  return stats.value.filter((stat) => !stat.isBase).length
 })
 
 const item = ref<Item>({
   id: 0,
   slot: '',
-  name: '',
-  baseStats: []
+  name: ''
+  // baseStats: []
 })
 
 const clearItem = () => {
@@ -83,26 +98,27 @@ const clearItem = () => {
   item.value = {
     id: 0,
     slot: '',
-    name: '',
-    baseStats: []
+    name: ''
+    // baseStats: []
   }
-
 }
 
 const clearAttribute = (stat?: Stat) => {
-  attributeName.value = ''
+  statForm.value.attributeName = ''
   requiredClear.value = true
 }
 
-const existingItem = computed((): ExistingItem => ({
-  itemId: item.value.id!,
-  stats: [...stats.value, ...virtualStats.value],
-  published: published.value,
-  wantedPrice: wantedPrice.value,
-  offerType: offerType.value === 'screenshot' ? 'WTS' : offerType.value,
-  discordNotification: discordNotification.value,
-  rarity: rarity.value
-}))
+const existingItem = computed(
+  (): ExistingItem => ({
+    itemId: item.value.id!,
+    stats: [...stats.value],
+    published: published.value,
+    wantedPrice: wantedPrice.value,
+    offerType: offerType.value === 'screenshot' ? 'WTS' : offerType.value,
+    discordNotification: discordNotification.value,
+    rarity: rarity.value
+  })
+)
 
 const itemSearch = (queryString: string, cb: any) => {
   let query = queryString
@@ -111,36 +127,17 @@ const itemSearch = (queryString: string, cb: any) => {
     requiredClear.value = false
   }
   const results = query
-    ? items.value.filter(item => item.name.toLowerCase().indexOf(query.toLowerCase()) != -1)
+    ? items.value.filter((item) => item.name.toLowerCase().indexOf(query.toLowerCase()) != -1)
     : items.value
   // call callback function to return suggestions
   cb(results)
 }
 
-const attributeSearch = (queryString: string, cb: any) => {
-  let results = attributes
-  let query = queryString
-
-  if (requiredClear.value) {
-    query = requiredClear.value ? '' : queryString
-    requiredClear.value = false
-  }
-
-  if (stats.value.length) {
-    results = results.filter(attribute => !stats.value.find(stat => stat.attributeId === attribute.id))
-  }
-
-  results = query
-    ? results.filter(attribute => attribute.name.toLowerCase().indexOf(query.toLowerCase()) !== -1)
-    : results
-  // call callback function to return suggestions
-  cb(results)
-}
-
 const clearForm = () => {
-  attributeName.value = ''
+  statForm.value.attributeName = ''
   itemName.value = ''
-  value.value = 1
+  statForm.value.value = 1
+  statForm.value.isBase = false
   attributeId.value = 0
 }
 
@@ -149,57 +146,40 @@ const addStatValidator = computed(() => {
     return false
   }
 
-  if (!attributeId.value || !value.value) {
+  if (!attributeId.value || !statForm.value.value) {
     return false
   }
 
-  if (stats.value.find(stat => stat.attributeId === attributeId.value)) {
-    return false
-  }
+  // Одинаковые статы доступны для выбора
+  // if (stats.value.find((stat) => stat.attributeId === attributeId.value)) {
+  //   return false
+  // }
 
   return true
 })
-
-const onChangeColor = () => {
-  baseStatValue.value = getMinRequiredStat()
-}
-
-// Вывод минимального порога для ввода бейз стата
-const getMinRequiredStat = () => {
-  const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
-  if (!currentItem?.baseStats) {
-    return 0
-  }
-
-  // const currentStatsLength = stats.value.length
-  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == rarity.value)
-  return requiredStats[0] ? requiredStats[0].min : 0
-}
 
 const addStat = () => {
   if (!addStatValidator.value) return
   stats.value.push({
     attributeId: attributeId.value,
-    value: value.value,
-    isBaseStat: false
+    value: statForm.value.value,
+    isBase: false
   })
   clearForm()
   selectedColor.value = colors[stats.value.length - 1]
-  baseStatValue.value = getMinRequiredStat()
 }
 
 const handleSelectItem = (chosenItem: Item) => {
   item.value = chosenItem
   itemAutoCompleteRef.value.inputRef.blur()
-  baseStatValue.value = getMinRequiredStat()
 }
 
-const handleSelectAttribute = (attribute: Attribute, stat?: Stat) => {
+const handleSelectAttribute = ({ attribute, stat }: { attribute: Attribute; stat?: Stat }) => {
   if (stat) {
     stat.attributeId = attribute.id
     return
   }
-  value.value = 1
+  statForm.value.value = 1
   attributeId.value = attribute.id
   // valueRef.value.blur()
   attributeAutoCompleteRef.value.blur()
@@ -207,30 +187,24 @@ const handleSelectAttribute = (attribute: Attribute, stat?: Stat) => {
 
 const onStatRecognitionFinished = (parsedStats: StatRecognition) => {
   // const countOfSkippedStats = parsedStats.splice(0, items.values.find(item => item)
-  parsedStats.additional.forEach(stat => {
-    stats.value.push({
-      attributeId: stat.attributeId,
-      value: stat.value,
-      isBaseStat: false
-    })
+  ;[parsedStats.additional, parsedStats.base].forEach((statsParsed) => {
+    statsParsed.forEach((stat) =>
+      stats.value.push({
+        attributeId: stat.attributeId,
+        value: stat.value,
+        isBase: stat.isBase
+      })
+    )
   })
-
-  if (requiredBaseStats.value.length) {
-    //TODO несколько бейз статов для ввода
-    const stat = requiredBaseStats.value[0]
-    const recognizedVirtalStat = parsedStats.base.find(parsedStat => parsedStat.attributeId === stat.attributeId)
-    if (recognizedVirtalStat) {
-      baseStatValue.value = recognizedVirtalStat.value
-    }
-  }
 
   offerType.value = 'WTS'
 }
 
 const deleteStat = (index: number) => {
   stats.value.splice(index, 1)
-  baseStatValue.value = getMinRequiredStat()
-  selectedColor.value = stats.value.length ? colors[stats.value.length - 1] : 'rgba(222, 222, 222, 1)'
+  selectedColor.value = stats.value.length
+    ? colors[stats.value.length - 1]
+    : 'rgba(222, 222, 222, 1)'
 }
 
 const createExistingItem = async () => {
@@ -245,6 +219,7 @@ const createExistingItem = async () => {
       router.push(`/user/${resExistingItem.user.nickname}/items/${resExistingItem.id}`)
     }
   } catch (error) {
+    console.log('🚀 ~ file: Creator.vue:271 ~ createExistingItem ~ error:', error)
   } finally {
     loading.value = false
   }
@@ -260,8 +235,8 @@ const clear = () => {
   item.value = {
     id: 0,
     slot: '',
-    name: '',
-    baseStats: []
+    name: ''
+    // baseStats: []
   }
   stats.value = []
   prefillData()
@@ -269,45 +244,12 @@ const clear = () => {
 
 const prefillData = () => {
   if (props.prefillItem) {
-    item.value.id = props.prefillItem.id;
+    item.value.id = props.prefillItem.id
     item.value.name = props.prefillItem.name
     item.value.slot = props.prefillItem.slot
     offerType.value = props.prefillItem.offerType
   }
 }
-
-const baseStatValue = ref(0)
-
-// Массив бейз статов которые нужно ввести польователю 
-const virtualStats = computed<Stat[] | []>(() => {
-  if (requiredBaseStats.value.length && stats.value.length)
-    return [{
-      attributeId: requiredBaseStats.value[0].attributeId,
-      value: baseStatValue.value,
-      isBaseStat: true
-    }]
-  return []
-})
-
-// Массив бейз статов которые нужно ввести польователю 
-const requiredBaseStats = computed<BaseStat[]>(() => {
-  const currentItem = itemStore.items.find(currentItem => currentItem.id === item.value.id)
-  if (!currentItem?.baseStats) {
-    return []
-  }
-
-  // const currentStatsLength = stats.value.length
-  const requiredStats = currentItem.baseStats.filter(stat => stat.inputRequired && stat.statsLength == rarity.value)
-  return requiredStats
-})
-
-const additionalStatsAttributesName = ref<string[]>([])
-
-watch(() => stats.value, () => {
-  additionalStatsAttributesName.value= stats.value.map(stat => (attributes.find(a => a.id === stat.attributeId))?.name || '' )
-}, {
-  deep: true
-})
 
 onBeforeMount(async () => {
   try {
@@ -317,6 +259,7 @@ onBeforeMount(async () => {
     })
     prefillData()
   } catch (error) {
+    console.log('🚀 ~ file: Creator.vue:353 ~ onBeforeMount ~ error:', error)
   } finally {
     loading.value = false
   }
@@ -331,130 +274,169 @@ onBeforeMount(async () => {
       <SimilarItems :existing-item="existingItem" offer-type="WTB" />
     </div>
 
-    <div class="item-creator" :class="{ 'wrapper': !noWrapper }">
-      <el-tabs v-if="!prefillItem?.offerType" v-model="offerType">
-        <el-tab-pane label="Screenshot" name="screenshot"></el-tab-pane>
-        <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
-        <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
-      </el-tabs>
-
-
-      <ImgRecognition v-show="offerType === 'screenshot'" @startRecognition="clear"
-        @itemRecognitionFinished="handleSelectItem" @statRecognitionFinished="onStatRecognitionFinished" />
-
-      <div v-show="offerType !== 'screenshot'" class="header">
+    <div class="item-creator" :class="{ wrapper: !noWrapper }">
+      <div class="item-creator__tabs">
+        <el-tabs class="w-100" v-if="!prefillItem?.offerType" v-model="offerType">
+          <el-tab-pane label="Screenshot" name="screenshot"></el-tab-pane>
+          <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
+          <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
+        </el-tabs>
         <div class="settings__discord">
-          <el-switch v-model="discordNotification" size="large" active-text="On" inactive-text="Off" />
-          <span>discord DM</span>
+          <el-switch
+            v-model="discordNotification"
+            size="large"
+            active-text="On"
+            inactive-text="Off"
+          />
         </div>
-
-        <CountExistingItem v-if="offerType !== 'screenshot'" :showOnly="offerType" />
       </div>
+
+      <ImgRecognition
+        v-show="offerType === 'screenshot'"
+        @startRecognition="clear"
+        @itemRecognitionFinished="handleSelectItem"
+        @statRecognitionFinished="onStatRecognitionFinished"
+      />
+
       <div v-show="offerType !== 'screenshot'" class="item-creator__wrapper">
-        <div class="item-creator__item">
-          <el-autocomplete v-if="!prefillItem?.id" ref="itemAutoCompleteRef" value-key="name" v-model="itemName"
-            @focus.prevent="clearItem" clearable :fetch-suggestions="itemSearch" placeholder="Base item type"
-            @select="handleSelectItem" />
-          <div v-if="!prefillItem?.offerType" class="item-creator__attributes__actions">
-            <div class="labeled-switch">
-              <!-- <label class="sub-title" for="">Offer type:</label> -->
-            </div>
+        <div class="item-creator__form">
+          <div>
+            <label>Select item:</label>
+            <el-autocomplete
+              v-if="!prefillItem?.id"
+              ref="itemAutoCompleteRef"
+              value-key="name"
+              v-model="itemName"
+              @focus.prevent="clearItem"
+              clearable
+              :fetch-suggestions="itemSearch"
+              placeholder="Base item type"
+              @select="handleSelectItem"
+            />
           </div>
+
           <div class="item-creator__attributes__line">
             <div>
-              <div class="sub-title">
-                {{ existingItem.offerType === 'WTB' ? `Declared maximum price:` : `Preferrable sell price:` }}
-              </div>
-              <el-input-number :step-strictly="true" :precision="0" :step="25" :min="25" :max="9999" type="number"
-                placeholder="Wanted Price" maxlength="5" v-model.number="wantedPrice"></el-input-number>
+              <label>
+                {{
+                  existingItem.offerType === 'WTB'
+                    ? `Declared maximum price:`
+                    : `Preferrable sell price:`
+                }}
+              </label>
+              <el-input-number
+                :step-strictly="true"
+                :precision="0"
+                :step="25"
+                :min="25"
+                :max="9999"
+                type="number"
+                placeholder="Wanted Price"
+                maxlength="5"
+                v-model.number="wantedPrice"
+              ></el-input-number>
             </div>
           </div>
-          <div class="item-creator__attributes__actions">
-            <div>
-              <div class="sub-title">
-                Stat name:
-              </div>
-              <el-autocomplete @click="clearAttribute" ref="attributeAutoCompleteRef" value-key="name"
-                v-model="attributeName" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
-                @select="handleSelectAttribute" />
+          <div class="stats-item">
+            <div class="w-100">
+              <label>Stat name:</label>
+              <el-autocomplete
+                @click="clearAttribute"
+                ref="attributeAutoCompleteRef"
+                value-key="name"
+                v-model="statForm.attributeName"
+                :fetch-suggestions="attributeStore.attributeSearch"
+                clearable
+                :placeholder="statPlaceHolder"
+                @select="(attribute: Attribute) => handleSelectAttribute({attribute})"
+              />
             </div>
             <div>
-              <div class="sub-title">
-                Stat value:
-              </div>
-              <el-input-number :disabled="!attributeStore.getAttributeById(attributeId)" :precision="1"
+              <label>Stat value:</label>
+              <el-input-number
+                :disabled="!attributeStore.getAttributeById(attributeId)"
+                :precision="1"
                 :step="getAttributeSymbolById(attributeId) ? 0.1 : 1"
                 :min="attributeStore.getAttributeById(attributeId)?.min || -200"
-                :max="attributeStore.getAttributeById(attributeId)?.max || 200" placeholder="Value" maxlength="3"
-                ref="valueRef" v-model="value" />
+                :max="attributeStore.getAttributeById(attributeId)?.max || 200"
+                placeholder="Value"
+                maxlength="3"
+                ref="valueRef"
+                v-model="statForm.value"
+              />
             </div>
+            <el-checkbox size="large" v-model="statForm.isBase" label="Base" border></el-checkbox>
+
             <el-button size="large" :disabled="!addStatValidator" @click="addStat">Add</el-button>
           </div>
           <div class="stats">
-            <h3 v-if="stats.length">Additional stats:</h3>
-            <div class="stats-item" v-for="(stat, index) in stats" :key="index">
-              <span class="stats-details">
-              <el-autocomplete @click="() => clearAttribute(stat)" value-key="name"
-                v-model="additionalStatsAttributesName[index]" :fetch-suggestions="attributeSearch" clearable :placeholder=statPlaceHolder
-                @select="(attribute: Attribute) => handleSelectAttribute(attribute, stat)" />
-              </span>
-
-              <div class="d-flex align-center">
-                <el-input-number :disabled="!attributeStore.getAttributeById(stat.attributeId)" :precision="1"
-                  :step="getAttributeSymbolById(stat.attributeId) ? 0.1 : 1" width="100"
-                  :min="attributeStore.getAttributeById(stat.attributeId)?.min || -200"
-                  :max="attributeStore.getAttributeById(stat.attributeId)?.max || 200" placeholder="Value" maxlength="3"
-                  ref="valueRef" v-model="stat.value" />
-
-                <el-button size="large" @click="() => deleteStat(index)">Delete</el-button>
-              </div>
-            </div>
-          </div>
-
-          <div v-if="stats.length && requiredBaseStats.length" class="stats">
-            <h3>Base stats:</h3>
-            <div class="stats-item__base" v-for="(stat, index) in requiredBaseStats" :key="index">
-              <div>
-                <span>{{ (attributes.find(a => a.id === stat.attributeId))?.name }}</span>
-              </div>
-              <div v-if="stat.min !== stat.max">
-                <el-input-number :precision="1" :step="1" :min="stat.min" :max="stat.max" placeholder="Value"
-                  maxlength="3" v-model="baseStatValue" />
-              </div>
-              <div>
-                <span v-if="stat.min !== stat.max">
-                  {{ stat.min }} - {{ stat.max }}
-                </span>
-                <span v-else>
-                  {{ stat.min }}
-                </span>
-              </div>
-            </div>
+            <label v-if="stats.length">Stats:</label>
+            <StatsList
+              :stats="stats"
+              @deleteStat="deleteStat"
+              ,
+              @clearAttribute="clearAttribute"
+              @handleSelectAttribute="handleSelectAttribute"
+            />
           </div>
 
           <div class="color-picker">
             Manual set rarity color (Optional):
-            <el-color-picker v-model="selectedColor" @change="onChangeColor" show-alpha :predefine="predefineColors" />
+            <el-color-picker v-model="selectedColor" show-alpha :predefine="predefineColors" />
           </div>
         </div>
-        <ItemPreview v-if="offerType !== 'screenshot'" :rarity="rarity" :loading="loading" :item="item"
-          :wantedPrice="wantedPrice" :offer-type="offerType" :no-hover="true" :stats="[...stats, ...virtualStats]" />
+
+        <div>
+          <ItemPreview
+            v-if="offerType !== 'screenshot'"
+            :rarity="rarity"
+            :loading="loading"
+            :item="item"
+            :wantedPrice="wantedPrice"
+            :offer-type="offerType"
+            :no-hover="true"
+            :stats="[...stats]"
+            class="mb-1"
+          />
+          <el-button class="w-100 mb-1" v-if="item.id || stats.length" @click="clear" size="large">
+            Clear</el-button
+          >
+
+          <div
+            v-show="offerType !== 'screenshot'"
+            class="d-flex align-center justify-space-between"
+          >
+            <span>Limits:</span>
+            <CountExistingItem v-if="offerType !== 'screenshot'" :showOnly="offerType" />
+          </div>
+        </div>
       </div>
 
-      <div class="item-creator__actions" v-if="offerType !== 'screenshot'">
-        <div class="create"
-          v-if="(limits.canCreateWtb() && existingItem.offerType === 'WTB') || (limits.canCreateWts() && existingItem.offerType === 'WTS')">
-          <el-button :disabled="!stats.length || !wantedPrice || !item.id || loading" @click="createAndPublish"
-            size="large">{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button>
-          <el-button v-if="!prefillItem" :disabled="!stats.length || loading || !item.id" @click="createExistingItem"
-            size="large">Create private item</el-button>
+      <div class="item-creator__footer" v-if="offerType !== 'screenshot'">
+        <div
+          class="create"
+          v-if="
+            (limits.canCreateWtb() && existingItem.offerType === 'WTB') ||
+            (limits.canCreateWts() && existingItem.offerType === 'WTS')
+          "
+        >
+          <el-button
+            :disabled="!stats.length || !wantedPrice || !item.id || loading"
+            @click="createAndPublish"
+            size="large"
+            >{{ prefillItem ? 'Create item and make a bid' : 'Create public item' }}</el-button
+          >
+          <el-button
+            v-if="!prefillItem"
+            :disabled="!stats.length || loading || !item.id"
+            @click="createExistingItem"
+            size="large"
+            >Create private item</el-button
+          >
         </div>
         <div v-else>
           <p>You can always delete some {{ existingItem.offerType }} offers via profile</p>
         </div>
-        <el-button v-if="item.id || stats.length" @click="clear" size="large">
-          Clear</el-button>
-
       </div>
     </div>
 
@@ -497,20 +479,23 @@ h4 {
   gap: 1rem;
 }
 
-.header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-}
-
 .item-creator {
   max-height: $maxHeight;
   width: 100%;
+  min-width: 1020px;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   overflow: hidden;
+
+  &__tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--el-border-color);
+    margin-bottom: 15px;
+  }
 
   &__wrapper {
     position: relative;
@@ -525,11 +510,11 @@ h4 {
     width: var(--wrapper-large-width);
   }
 
-  &__item {
+  &__form {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: .7rem;
+    gap: 1rem;
   }
 
   &__attributes {
@@ -549,12 +534,12 @@ h4 {
     }
   }
 
-  &__attributes__actions {
+  .stats-item {
     align-items: flex-end;
     position: relative;
-    // justify-content: flex-end;
+    justify-content: flex-end;
     display: flex;
-    gap: .55rem;
+    gap: 1rem;
   }
 
   // CREATE AND PUBLISH BUTTONS
@@ -567,22 +552,8 @@ h4 {
   }
 
   .stats {
-    padding: 1rem 0 .5rem 0;
+    padding: 1rem 0 0.5rem 0;
     flex-grow: 1;
-  }
-
-  .stats-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: .25rem;
-    gap: 1rem;
-  }
-
-  .stats-item__base {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
   }
 
   .actions {
@@ -593,19 +564,19 @@ h4 {
   }
 }
 
-@media (max-width:420px) {
+@media (max-width: 420px) {
   .item-creator {
     overflow-y: auto;
     max-height: unset;
+    min-width: unset;
   }
 
   .similar {
     display: none;
   }
 
-
   .stats {
-    h3 {
+    label {
       margin-bottom: 1rem;
     }
   }
@@ -639,7 +610,7 @@ h4 {
   }
 
   // CREATE AND PUBLISH BUTTONS
-  .item-creator__actions {
+  .item-creator__footer {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -654,7 +625,7 @@ h4 {
       margin-bottom: 1rem;
     }
 
-    .el-button+.el-button {
+    .el-button + .el-button {
       margin: 0;
     }
   }
@@ -679,18 +650,27 @@ h4 {
     width: 100%;
   }
 
+  &__tabs {
+    .el-tabs__header {
+      margin-bottom: unset;
+    }
+    .el-tabs__nav-wrap::after {
+      background-color: unset;
+    }
+  }
+
+  &__form {
+    button {
+      width: 100px;
+    }
+  }
+
   .el-input {
     height: var(--el-component-size);
   }
 
   &__wrapper {
     max-height: unset;
-  }
-
-  .stats-item__base {
-    .el-input {
-      height: 35px;
-    }
   }
 }
 </style>

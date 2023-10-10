@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { QueryItemDto, Slot } from "../hooks";
+import { ref } from 'vue'
+import { QueryItemDto, Slot } from '../hooks'
 
 defineProps<{ filterItem: QueryItemDto }>()
-const slots = ref<Slot[]>(['Amulet',
+const slots = ref<Slot[]>([
+  'Amulet',
   'Ring',
   'Cape',
   'Head',
@@ -11,30 +12,38 @@ const slots = ref<Slot[]>(['Amulet',
   'Gloves',
   'Legs',
   'Boots',
-  'Weapon',])
+  'Weapon'
+])
 </script>
 
 <template>
   <div class="human">
     <div class="wrapper">
       <!-- <div class="img"></div> -->
-      <div v-for="(slot, index) in slots" :key="index" :class="{
-        'tat-frame': true,
-        'darker-title': true,
-        [slot.toLowerCase()]: true,
-        'active': filterItem.slot === slot
-      }" @click="filterItem.slot = filterItem.slot === slot ? '' : slot">{{ slot.substring(0, 1) }}</div>
+      <div
+        v-for="(slot, index) in slots"
+        :key="index"
+        :class="{
+          'tat-frame': true,
+          'darker-title': true,
+          [slot.toLowerCase()]: true,
+          active: filterItem.slot === slot
+        }"
+        @click="filterItem.slot = filterItem.slot === slot ? '' : slot"
+      >
+        {{ slot.substring(0, 1) }}
+      </div>
 
       <div class="tat-frame no-hover item-description">
-        <span><label class="darker-title">A</label>Amulet</span>
-        <span><label class="darker-title">B</label>Boots</span>
-        <span><label class="darker-title">C</label>Cape</span>
-        <span><label class="darker-title">C</label>Chest</span>
-        <span><label class="darker-title">G</label>Gloves</span>
-        <span><label class="darker-title">H</label>Head</span>
-        <span><label class="darker-title">L</label>Legs</span>
-        <span><label class="darker-title">R</label>Ring</span>
-        <span><label class="darker-title">W</label>Weapon</span>
+        <span><strong class="darker-title">A</strong>Amulet</span>
+        <span><strong class="darker-title">B</strong>Boots</span>
+        <span><strong class="darker-title">C</strong>Cape</span>
+        <span><strong class="darker-title">C</strong>Chest</span>
+        <span><strong class="darker-title">G</strong>Gloves</span>
+        <span><strong class="darker-title">H</strong>Head</span>
+        <span><strong class="darker-title">L</strong>Legs</span>
+        <span><strong class="darker-title">R</strong>Ring</span>
+        <span><strong class="darker-title">W</strong>Weapon</span>
       </div>
     </div>
   </div>
@@ -53,8 +62,8 @@ $y-offset: 35px;
   align-items: center;
   justify-content: center;
   position: relative;
-
-  background-image: url("@/assets/images/dummy.png");
+  border-radius: 15px;
+  background-image: url('@/assets/images/dummy.png');
   background-size: contain;
   background-repeat: no-repeat;
 
@@ -83,7 +92,7 @@ $y-offset: 35px;
   }
 
   .item-description {
-    padding: 1rem .6rem;
+    padding: 1rem 0.6rem;
     right: 0px;
     bottom: 15px;
     min-width: 90px;
@@ -91,7 +100,7 @@ $y-offset: 35px;
     font-size: 12px;
     display: flex;
     flex-direction: column;
-    gap: .1rem;
+    gap: 0.1rem;
 
     .darker-title {
       font-size: 13px;
@@ -150,11 +159,9 @@ $y-offset: 35px;
     top: calc($y-offset + 250px);
     left: calc($x-offset + 133px);
   }
-
 }
 
-
-@media (max-width:420px) {
+@media (max-width: 420px) {
   .human {
     $item-mobile-size: 30px;
     $human-mobile-height: 350px;
@@ -163,7 +170,7 @@ $y-offset: 35px;
 
     .wrapper {
       height: $human-mobile-height;
-      width: var(--wrapper-mobile-width)
+      width: var(--wrapper-mobile-width);
     }
 
     .tat-frame {
@@ -180,7 +187,7 @@ $y-offset: 35px;
       font-size: 11px;
       display: flex;
       flex-direction: column;
-      gap: .1rem;
+      gap: 0.1rem;
 
       .darker-title {
         font-size: 12px;
@@ -209,7 +216,7 @@ $y-offset: 35px;
     }
 
     .ring {
-      top: $y-mobile-offset+ 120px;
+      top: $y-mobile-offset + 120px;
       left: $x-mobile-offset + 220px;
     }
 
@@ -239,7 +246,6 @@ $y-offset: 35px;
       top: $y-mobile-offset + 200px;
       left: $x-mobile-offset + 130px;
     }
-
   }
 }
 </style>

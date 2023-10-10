@@ -1,14 +1,14 @@
-import { useApi } from "."
+import { useApi } from '.'
 
 export interface Stat {
   id?: number
   value: number
-  attributeId: number,
-  isBaseStat: boolean
+  attributeId: number
+  isBase: boolean
 }
 
 export interface StatRecognition {
-  base: Stat[],
+  base: Stat[]
   additional: Stat[]
 }
 

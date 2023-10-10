@@ -44,5 +44,9 @@ export class Stat extends Model {
 
   @Default(false)
   @Column
-  isBaseStat: boolean;
+  isBase: boolean;
+
+  @Default(false)
+  @Column
+  isApproximately: boolean;
 }

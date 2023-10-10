@@ -1,10 +1,9 @@
-
 <script setup lang="ts">
-import ItemPreview from './ItemPreview.vue';
-import { onMounted, PropType, ref } from 'vue';
-import { ExistingItem, Item } from '../hooks';
-import { CreateBidDto, initBidApi } from '../hooks/bid';
-import { ElNotification } from 'element-plus';
+import ItemPreview from './ItemPreview.vue'
+import { onMounted, PropType, ref } from 'vue'
+import { ExistingItem, Item } from '../hooks'
+import { CreateBidDto, initBidApi } from '../hooks/bid'
+import { ElNotification } from 'element-plus'
 import ChoseExistingItem from './ChoseExistingItem.vue'
 
 const emit = defineEmits(['bidCreated'])
@@ -14,19 +13,19 @@ const suggestedItem = ref<ExistingItem>()
 const props = defineProps({
   item: {
     type: Object as PropType<Item>,
-    required: true,
-  },
+    required: true
+  }
 })
 
 const form = ref({
-  amount: 150,
-});
+  amount: 150
+})
 
 const submitBid = async () => {
   if (props.item.existingItems) {
     const req: CreateBidDto = {
       existingItemId: props.item.existingItems[0].id!,
-      price: form.value.amount,
+      price: form.value.amount
     }
 
     if (suggestedItem.value?.id) {
@@ -41,7 +40,7 @@ const submitBid = async () => {
     message: 'Existing item Id not found, please contact us in discord channel'
   })
   return
-};
+}
 
 const onItemChosen = (chosenExistingItem: ExistingItem) => {
   suggestedItem.value = chosenExistingItem
@@ -49,23 +48,33 @@ const onItemChosen = (chosenExistingItem: ExistingItem) => {
 }
 
 onMounted(() => {
-  form.value.amount = props.item.existingItems && props.item.existingItems[0].wantedPrice || 150
+  form.value.amount = (props.item.existingItems && props.item.existingItems[0].wantedPrice) || 150
 })
-
 </script>
 
 <template>
   <div v-if="item?.existingItems?.length" class="bidding">
     <div class="item-details">
       <div class="place-bid wtb" v-if="item.existingItems[0].offerType === 'WTB'">
-        <p v-if="!suggestedItem">Make sure item you are creating matches the one you have in game</p>
-        <ChoseExistingItem v-if="item.existingItems[0].offerType === 'WTB'" @onItemChosen="onItemChosen" :item="item" />
+        <p v-if="!suggestedItem">
+          Make sure item you are creating matches the one you have in game
+        </p>
+        <ChoseExistingItem
+          v-if="item.existingItems[0].offerType === 'WTB'"
+          @onItemChosen="onItemChosen"
+          :item="item"
+        />
         <el-form :model="form" class="place-bid__form">
           <div class="confirm">
             <p>After bidding seller has to accept your offer.</p>
             <el-form-item>
-              <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
-                :title="`Are you sure to bid this item?`">
+              <el-popconfirm
+                width="350"
+                @confirm="submitBid"
+                confirm-button-text="OK"
+                cancel-button-text="No, Thanks"
+                :title="`Are you sure to bid this item?`"
+              >
                 <template #reference>
                   <el-button :disabled="!suggestedItem" size="large">Create Bid</el-button>
                 </template>
@@ -78,14 +87,25 @@ onMounted(() => {
         <p>What price are you offering</p>
         <el-form :model="form" class="place-bid__form">
           <el-form-item prop="amount">
-            <el-input-number v-model="form.amount" :min="25" :step="25" :step-strictly="true" :precision="0"
-              :max="9999" />
+            <el-input-number
+              v-model="form.amount"
+              :min="25"
+              :step="25"
+              :step-strictly="true"
+              :precision="0"
+              :max="9999"
+            />
           </el-form-item>
           <div class="confirm">
             <p>After bidding seller has to accept your offer.</p>
             <el-form-item>
-              <el-popconfirm width="350" @confirm="submitBid" confirm-button-text="OK" cancel-button-text="No, Thanks"
-                :title="`Are you sure to bid this item?`">
+              <el-popconfirm
+                width="350"
+                @confirm="submitBid"
+                confirm-button-text="OK"
+                cancel-button-text="No, Thanks"
+                :title="`Are you sure to bid this item?`"
+              >
                 <template #reference>
                   <el-button size="large">Create Bid</el-button>
                 </template>
@@ -94,13 +114,18 @@ onMounted(() => {
           </div>
         </el-form>
       </div>
-      <ItemPreview v-if="item?.existingItems" :item="item" :wantedPrice="item.existingItems[0].wantedPrice"
-        :offerType="item.existingItems[0].offerType" :stats="item?.existingItems[0].stats" :rarity="item.existingItems[0].rarity" />
+      <ItemPreview
+        v-if="item?.existingItems"
+        :item="item"
+        :wantedPrice="item.existingItems[0].wantedPrice"
+        :creator="item.existingItems[0].user"
+        :offerType="item.existingItems[0].offerType"
+        :stats="item?.existingItems[0].stats"
+        :rarity="item.existingItems[0].rarity"
+      />
     </div>
   </div>
 </template>
-
-
 
 <style lang="scss" scoped>
 .bidding {
@@ -142,8 +167,7 @@ h2 {
   width: 100%;
 }
 
-
-@media (max-width:420px) {
+@media (max-width: 420px) {
   .item-details {
     flex-direction: column;
     align-items: center;
