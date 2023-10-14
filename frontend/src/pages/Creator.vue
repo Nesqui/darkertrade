@@ -75,7 +75,8 @@ const props = defineProps({
 
 const selectedColor = ref('rgba(222, 222, 222, 1)')
 const predefineColors = computed(() => {
-  return colors.slice(stats.value.length, colors.length)
+  // return colors.slice(stats.value.length, colors.length)
+  return colors
 })
 
 const rarity = computed(() => {
