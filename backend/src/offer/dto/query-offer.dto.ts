@@ -16,8 +16,8 @@ export class QueryOfferDto {
     type: Boolean,
   })
   @IsBoolean()
-  @Transform(({ obj }) => obj.mine === 'true' || obj.mine === true)
-  mine: boolean;
+  @Transform(({ obj }) => obj.hideMine === 'true' || obj.hideMine === true)
+  hideMine: boolean;
 
   @ApiProperty({
     type: Number,

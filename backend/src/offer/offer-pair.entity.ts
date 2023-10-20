@@ -13,6 +13,7 @@ import {
   Max,
 } from 'sequelize-typescript';
 import { Offer } from './offer.entity';
+import { Checkout } from 'src/checkout/checkout.entity';
 
 @Table
 export class OfferPair extends Model {
@@ -55,4 +56,11 @@ export class OfferPair extends Model {
 
   @BelongsTo(() => Offer)
   offer: Offer;
+
+  @BelongsTo(() => Checkout)
+  checkout: Checkout;
+
+  @ForeignKey(() => Checkout)
+  @Column
+  checkoutId: number;
 }

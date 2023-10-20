@@ -22,6 +22,11 @@
     }
 }
 
+.selected-color {
+    width: 15px;
+    height: 15px;
+}
+
 .rarity-0 {
     color: var(--rarity-0)
 }
@@ -46,6 +51,30 @@
     color: var(--rarity-5)
 }
 
+.rarity-bg-0 {
+    background-color: var(--rarity-0)
+}
+
+.rarity-bg-1 {
+    background-color: var(--rarity-1)
+}
+
+.rarity-bg-2 {
+    background-color: var(--rarity-2)
+}
+
+.rarity-bg-3 {
+    background-color: var(--rarity-3)
+}
+
+.rarity-bg-4 {
+    background-color: var(--rarity-4)
+}
+
+.rarity-bg-5 {
+    background-color: var(--rarity-5)
+}
+
 html,
 body {
     overflow: hidden;
@@ -63,6 +92,70 @@ body {
 
 .bg {
     z-index: -1;
+}
+
+
+.offer-pairs-amount {
+    text-align: left;
+}
+
+.offer-pair-divider {
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.offer-pair {
+    text-align: right;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.offer-pair-price {
+    width: 55px;
+}
+
+.offer-pair-amount {
+    width: 20px;
+}
+
+.offer-pair-price {
+    text-align: right !important;
+}
+
+.offer-pairs-item {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 8px;
+    background-color: var(--el-color-primary-light-3);
+    gap: 20px;
+    cursor: pointer;
+    max-height: 29px;
+    font-size: 17px;
+    line-height: 19px;
+}
+
+.offer-pairs-item:not(:last-child) {
+    margin-bottom: 4px;
+}
+
+.offer-pairs-item:hover {
+    background-color: var(--grey);
+    color: white;
+}
+
+.el-color-dropdown__main-wrapper,
+.el-color-alpha-slider,
+.el-color-dropdown__value {
+    display: none;
+}
+
+.el-color-picker__panel {
+    .el-color-dropdown__link-btn {
+        display: none;
+    }
 }
 
 @media (max-width:420px) {

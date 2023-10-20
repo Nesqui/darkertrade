@@ -20,6 +20,9 @@ import { Chat } from './chat.entity';
 import { AuthDto } from './dto/auth.dto';
 import { sendMessageDto } from './dto/create-message.dto';
 import { GetChatDto, QueryChatDto, ReadChatDto } from './dto/query-chat.dto';
+import { Checkout } from 'src/checkout/checkout.entity';
+import { OfferPair } from 'src/offer/offer-pair.entity';
+import { Offer } from 'src/offer/offer.entity';
 type ChatOfferType = 'receivedOffers' | 'sentOffers';
 
 type EmitTypes =
@@ -59,6 +62,12 @@ export class ChatGateway {
     private itemRepository: typeof Item,
     @Inject('BIDS_REPOSITORY')
     private bidRepository: typeof Bid,
+    @Inject('OFFERS_REPOSITORY')
+    private offerRepository: typeof Offer,
+    @Inject('OFFER_PAIRS_REPOSITORY')
+    private offerPairsRepository: typeof OfferPair,
+    @Inject('CHECKOUT_REPOSITORY')
+    private checkoutRepository: typeof Checkout,
   ) {}
   afterInit(server: Server) {
     console.log(server);
@@ -272,27 +281,83 @@ export class ChatGateway {
     this.countMessages(userIds);
   };
 
-  onBidAccepted = async (bid: Bid) => {
+  createChat = async (name: string, userIds: Array<string | number>) => {
     const community = await this.communityRepository.create();
 
     const chat = await this.chatRepository.create({
-      name: 'onBidAccepted',
+      name,
       communityId: community.id,
     });
 
-    bid.chatId = chat.id;
-    await bid.save();
+    if (userIds.length)
+      await this.communityUsersRepository.bulkCreate(
+        userIds.map((userId) => ({
+          userId,
+          communityId: community.id,
+        })),
+      );
 
-    await this.communityUsersRepository.bulkCreate([
+    return chat;
+  };
+
+  onOfferPairAccepted = async (checkout: Checkout) => {
+    const chat = await this.createChat('onOfferPairAccepted', [
+      checkout.purchaserId,
+      checkout.sellerId,
+    ]);
+
+    checkout.chatId = chat.id;
+    await checkout.save();
+
+    await this.messagesRepository.bulkCreate([
       {
-        userId: bid.userId,
-        communityId: community.id,
+        chatId: chat.id,
+        read: false,
+        userId: checkout.purchaserId,
+        text: `Chat started.
+        ${new Date(chat.createdAt).toLocaleDateString('en-GB')} at ${new Date(
+          chat.createdAt,
+        ).toLocaleTimeString('en-GB')}`,
       },
       {
-        userId: bid.existingItem.user.id,
-        communityId: community.id,
+        chatId: chat.id,
+        read: false,
+        userId: checkout.sellerId,
+        text: `Offer accepted ${new Date().toLocaleDateString(
+          'en-GB',
+        )} at ${new Date().toLocaleTimeString()}`,
       },
     ]);
+
+    const miscPurchases = await this.offerRepository.findOne(
+      this.getMiscChatsRequest('Purchases', checkout.purchaserId),
+    );
+
+    const miscSales = await this.offerRepository.findOne(
+      this.getMiscChatsRequest('Sales', checkout.sellerId),
+    );
+
+    await this.notifyUser(checkout.purchaserId, 'chatCreated', {
+      offerType: 'miscPurchases',
+      miscPurchases,
+    });
+
+    await this.notifyUser(checkout.sellerId, 'chatCreated', {
+      offerType: 'miscSales',
+      miscSales,
+    });
+
+    await this.countMessages([checkout.purchaserId, checkout.sellerId]);
+  };
+
+  onBidAccepted = async (bid: Bid) => {
+    const chat = await this.createChat('onBidAccepted', [
+      bid.userId,
+      bid.existingItem.user.id,
+    ]);
+
+    bid.chatId = chat.id;
+    await bid.save();
 
     const existingItem = await this.existingItemRepository.findOne({
       where: {
@@ -356,7 +421,7 @@ export class ChatGateway {
     await this.countMessages([bid.userId, bid.existingItem.user.id]);
   };
 
-  async _readMessagesOnChat(userId: number, chatId: number) {
+  private async _readMessagesOnChat(userId: number, chatId: number) {
     await this.messagesRepository.update(
       {
         read: true,
@@ -374,15 +439,62 @@ export class ChatGateway {
     await this.countMessages([userId]);
   }
 
+  private getMiscChatsRequest = (
+    type: 'Purchases' | 'Sales',
+    userId: number,
+    checkoutId?: number,
+  ) => {
+    const typedWhereQuery = {};
+    if (type === 'Purchases') typedWhereQuery['purchaserId'] = userId;
+    else typedWhereQuery['sellerId'] = userId;
+
+    if (checkoutId) typedWhereQuery['id'] = checkoutId;
+
+    const request = {
+      where: {
+        archived: false,
+      },
+      include: [
+        {
+          model: this.offerPairsRepository,
+          required: true,
+          include: [
+            {
+              model: this.checkoutRepository,
+              where: typedWhereQuery,
+              required: true,
+              include: [
+                {
+                  model: this.userRepository,
+                  as: 'purchaser',
+                  attributes: ['nickname', 'id', 'online'],
+                },
+                {
+                  model: this.userRepository,
+                  as: 'seller',
+                  attributes: ['nickname', 'id', 'online'],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          model: this.itemRepository,
+        },
+        {
+          model: this.userRepository,
+          attributes: ['nickname', 'id', 'online'],
+        },
+      ],
+    };
+
+    return request;
+  };
+
   @SubscribeMessage('auth')
   @UseGuards(JwtWSAuthGuard)
   async auth(@MessageBody() auth: AuthDto, @ConnectedSocket() socket: Socket) {
     this.users[auth.user.id] = socket;
-
-    console.log(
-      'CONNECT ---------------- Connected users -> ',
-      Object.keys(this.users),
-    );
     await this.notifyUser(auth.user.id, 'authorized');
   }
 
@@ -446,9 +558,19 @@ export class ChatGateway {
       ],
     });
 
+    const miscSales = await this.offerRepository.findAll(
+      this.getMiscChatsRequest('Sales', query.user.id),
+    );
+
+    const miscPurchases = await this.offerRepository.findAll(
+      this.getMiscChatsRequest('Purchases', query.user.id),
+    );
+
     await this.notifyUser(query.user.id, 'chatsReceived', {
       sentOffers,
       receivedOffers,
+      miscPurchases,
+      miscSales,
     });
   }
 

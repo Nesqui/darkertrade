@@ -9,6 +9,9 @@ import { communityUsersProviders } from 'src/community/community-user.provider';
 import { bidProviders } from 'src/bid/bid.providers';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
 import { itemsProviders } from 'src/item/item.providers';
+import { offerPairProviders } from 'src/offer/offer-pair.providers';
+import { offerProviders } from 'src/offer/offer.providers';
+import { checkoutProviders } from 'src/checkout/checkout.providers';
 
 @Module({
   providers: [
@@ -22,6 +25,9 @@ import { itemsProviders } from 'src/item/item.providers';
     ...bidProviders,
     ...existingItemProviders,
     ...itemsProviders,
+    ...offerProviders,
+    ...offerPairProviders,
+    ...checkoutProviders,
   ],
   exports: [ChatGateway],
 })

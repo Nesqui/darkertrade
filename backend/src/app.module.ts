@@ -16,6 +16,7 @@ import { ChatModule } from './chat/chat.module';
 import { MessagesModule } from './messages/messages.module';
 // import { BaseStatModule } from './base-stat/base-stat.module';
 import { OfferModule } from './offer/offer.module';
+import { CheckoutModule } from './checkout/checkout.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { OfferModule } from './offer/offer.module';
     MessagesModule,
     // BaseStatModule,
     OfferModule,
+    CheckoutModule,
   ],
   controllers: [AppController],
   providers: [AppService],
