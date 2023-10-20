@@ -82,7 +82,11 @@ const spliceItem = (index: number) => {}
   <div class="create-offer">
     <div class="offer-pairs">
       <div class="mb-1">
-        <div class="offer-pairs-item" v-for="(pair, index) of offer.offerPairs" :key="index">
+        <div
+          class="offer-pairs-item__editable"
+          v-for="(pair, index) of offer.offerPairs"
+          :key="index"
+        >
           <div>
             <label for="">Rarity</label>
             <div class="color-picker">
@@ -127,6 +131,11 @@ const spliceItem = (index: number) => {}
   flex-direction: column;
   justify-content: center;
   align-items: center;
+}
+
+.offer-pairs-item__editable {
+  display: flex;
+  gap: 0.5rem;
 }
 .offer-pairs {
   margin-bottom: 15px;
