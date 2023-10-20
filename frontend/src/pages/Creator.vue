@@ -19,6 +19,7 @@ import { useRouter } from 'vue-router'
 import SimilarItems from '@/components/SimilarItems.vue'
 import ImgRecognition from '@/components/ImgRecognition.vue'
 import StatsList from '@/components/StatsList.vue'
+import { colors } from '../hooks'
 
 const router = useRouter()
 
@@ -52,13 +53,6 @@ const items = ref<Item[]>([])
 const itemAutoCompleteRef = ref()
 const requiredClear = ref(false)
 const discordNotification = ref(true)
-const colors = [
-  'rgba(98, 190, 11)',
-  'rgba(74, 155, 209, 1)',
-  'rgba(173, 90, 255, 1)',
-  'rgba(247, 162, 45, 1)',
-  'rgba(227, 216, 140, 1)'
-]
 const props = defineProps({
   noWrapper: {
     type: Boolean,
@@ -634,18 +628,6 @@ h4 {
 </style>
 
 <style lang="scss">
-.el-color-dropdown__main-wrapper,
-.el-color-alpha-slider,
-.el-color-dropdown__value {
-  display: none;
-}
-
-.el-color-picker__panel {
-  .el-color-dropdown__link-btn {
-    display: none;
-  }
-}
-
 .item-creator {
   .el-autocomplete {
     width: 100%;

@@ -4,7 +4,6 @@ import { useLocalStorage, useStorage } from '@vueuse/core'
 import { ref } from 'vue'
 
 export const useChatStore = defineStore('chat', () => {
-
   // const selectedChat = useStorage<ChatMessagesResponse | null>('selectedChat', null)
   const selectedChat = useLocalStorage<ChatMessagesResponse>('selectedChat', {
     chatId: 0,
@@ -13,9 +12,12 @@ export const useChatStore = defineStore('chat', () => {
     users: []
   })
 
-  const currentChatOfferType = useLocalStorage<ChatOfferType>('currentChatOfferType', 'receivedOffers')
+  const currentChatOfferType = useLocalStorage<ChatOfferType>(
+    'currentChatOfferType',
+    'receivedOffers'
+  )
 
-  const messagePagination = useLocalStorage('messagePagination',{
+  const messagePagination = useLocalStorage('messagePagination', {
     limit: 10,
     offset: 0
   })
@@ -43,7 +45,8 @@ export const useChatStore = defineStore('chat', () => {
   const expand = useLocalStorage('expand', {
     chats: '',
     offerType: 'receivedOffers',
-    existingItem: ''
+    existingItem: '',
+    offer: ''
   })
 
   return {

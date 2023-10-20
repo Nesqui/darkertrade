@@ -10,6 +10,7 @@ import {
   BelongsToMany,
   Validate,
 } from 'sequelize-typescript';
+import { Checkout } from 'src/checkout/checkout.entity';
 import { CommunityUser } from 'src/community/community-user.entity';
 import { Community } from 'src/community/community.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
@@ -66,6 +67,12 @@ export class User extends Model {
 
   @HasMany(() => Offer)
   offers: Offer[];
+
+  @HasMany(() => Checkout, 'sellerId')
+  sales: Offer[];
+
+  @HasMany(() => Checkout, 'purchaserId')
+  purchases: Offer[];
 
   @AllowNull(false)
   @Column

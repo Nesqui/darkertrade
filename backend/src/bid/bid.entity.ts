@@ -12,6 +12,7 @@ import {
   Default,
 } from 'sequelize-typescript';
 import { Chat } from 'src/chat/chat.entity';
+import { Checkout } from 'src/checkout/checkout.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { User } from 'src/user/user.entity';
 
@@ -56,4 +57,11 @@ export class Bid extends Model {
 
   @BelongsTo(() => Chat, { foreignKey: 'chatId' })
   chat: Chat;
+
+  @BelongsTo(() => Checkout)
+  checkout: Checkout;
+
+  @ForeignKey(() => Checkout)
+  @Column
+  checkoutId: number;
 }

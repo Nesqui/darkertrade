@@ -14,6 +14,7 @@ import { CommunityUser } from 'src/community/community-user.entity';
 // import { BaseStat } from 'src/base-stat/base-stat.entity';
 import { Offer } from 'src/offer/offer.entity';
 import { OfferPair } from 'src/offer/offer-pair.entity';
+import { Checkout } from 'src/checkout/checkout.entity';
 
 const initData = async (sequelize: Sequelize, configService: ConfigService) => {
   await sequelize.model('User').findOrCreate({
@@ -71,10 +72,11 @@ export const pgProviders = [
         // BaseStat,
         Offer,
         OfferPair,
+        Checkout,
       ]);
       try {
-        // await sequelize.sync({ alter: false });
-        await sequelize.sync({ alter: true });
+        await sequelize.sync({ alter: false });
+        // await sequelize.sync({ alter: true });
         await initData(sequelize, ConfigService);
       } catch (error) {
         console.error(error);

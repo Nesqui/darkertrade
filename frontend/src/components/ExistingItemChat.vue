@@ -1,12 +1,30 @@
 <script setup lang="ts">
-import { Chat, ChatMessagesResponse, ChatsCountsResponse, ChatsResponse, ExistingItem, initUserApi, Message } from "@/hooks";
-import useSocket, { UnreadMessagesCount } from "@/hooks/ws";
-import { useChatStore, useUserStore } from "@/store";
-import { storeToRefs } from "pinia";
-import { computed, nextTick, onBeforeMount, onBeforeUnmount, onMounted, PropType, ref, watch, watchEffect } from "vue";
-import { useRoute, useRouter } from 'vue-router';
+import {
+  Chat,
+  ChatMessagesResponse,
+  ChatsCountsResponse,
+  ChatsResponse,
+  ExistingItem,
+  initUserApi,
+  Message
+} from '@/hooks'
+import useSocket, { UnreadMessagesCount } from '@/hooks/ws'
+import { useChatStore, useUserStore } from '@/store'
+import { storeToRefs } from 'pinia'
+import {
+  computed,
+  nextTick,
+  onBeforeMount,
+  onBeforeUnmount,
+  onMounted,
+  PropType,
+  ref,
+  watch,
+  watchEffect
+} from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import UnreadCount from './UnreadCount.vue'
-import NicknameOnline from "./NicknameOnline.vue";
+import NicknameOnline from './NicknameOnline.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -26,8 +44,7 @@ const push = async (url: string) => {
   await router.push({
     path: url
   })
-  if (redirect)
-    router.go(0)
+  if (redirect) router.go(0)
 }
 
 const { emit } = useSocket()
@@ -35,7 +52,7 @@ const { emit } = useSocket()
 const props = defineProps({
   isConnected: {
     type: Boolean,
-    required: true,
+    required: true
   },
   offers: {
     type: Object as PropType<ExistingItem[]>,
@@ -70,11 +87,11 @@ onBeforeMount(() => {
 //   socket.value.off('countMessages', onCountMessages)
 // })
 
-// FIND OPENED CHATS WITHOUT MESSAGES 
+// FIND OPENED CHATS WITHOUT MESSAGES
 const loadChats = (opened: number) => {
   if (opened) {
     loadingMessages.value = true
-    emit("findAllChat")
+    emit('findAllChat')
   }
 }
 
@@ -83,17 +100,16 @@ const pagination = ref({
   offset: 0
 })
 
-// Get chat by id and get Messages 
+// Get chat by id and get Messages
 const initChat = async (chatId: number) => {
   chatStore.currentChatOfferType = props.offerType
-  emit("getChat", { chatId, ...pagination.value })
+  emit('getChat', { chatId, ...pagination.value })
 }
 
 const unreadMessagesCountByChatId = (chatId: number) => {
   if (props.unreadMessagesCount) {
-    const chat = props.unreadMessagesCount.find(chat => chat.chatId === chatId)
-    if (chat)
-      return +chat.unreadMessages
+    const chat = props.unreadMessagesCount.find((chat) => chat.chatId === chatId)
+    if (chat) return +chat.unreadMessages
   }
   return 0
 }
@@ -107,7 +123,6 @@ const unreadMessagesCountByOffer = () => {
   if (!props.offers.length) return 0
   return props.offers.reduce((pv, cv) => pv + unreadMessagesCountByExistingItem(cv), 0)
 }
-
 </script>
 
 <template>
@@ -116,8 +131,7 @@ const unreadMessagesCountByOffer = () => {
     <el-collapse-item class="" :name="offerType">
       <template #title>
         <div class="chat-items__title">
-          <span>
-            {{ offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers' }}</span>
+          <span> {{ offerType === 'receivedOffers' ? 'Received offers' : 'Sent offers' }}</span>
           <UnreadCount :count="unreadMessagesCountByOffer()" />
         </div>
       </template>
@@ -128,17 +142,32 @@ const unreadMessagesCountByOffer = () => {
             <template #title>
               <div class="item-name">
                 <div class="item-name__li">
-                  <el-button v-if="offerType === 'receivedOffers'"
-                    :class="{ 'icon-active': route.path === `/user/${userStore.currentUser.nickname}/items/${existingItem.id}` }"
-                    @click.stop="push(`/user/${userStore.currentUser.nickname}/items/${existingItem.id}`)"
-                    circle><el-icon>
-                      <View />
-                    </el-icon></el-button>
-                  <el-button v-else
-                    :class="{ 'icon-active': route.path === `/user/${existingItem.user?.nickname}/items/${existingItem.id}` }"
-                    @click.stop="push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)" circle><el-icon>
-                      <View />
-                    </el-icon></el-button>
+                  <el-button
+                    v-if="offerType === 'receivedOffers'"
+                    :class="{
+                      'icon-active':
+                        route.path ===
+                        `/user/${userStore.currentUser.nickname}/items/${existingItem.id}`
+                    }"
+                    @click.stop="
+                      push(`/user/${userStore.currentUser.nickname}/items/${existingItem.id}`)
+                    "
+                    circle
+                    ><el-icon> <View /> </el-icon
+                  ></el-button>
+                  <el-button
+                    v-else
+                    :class="{
+                      'icon-active':
+                        route.path ===
+                        `/user/${existingItem.user?.nickname}/items/${existingItem.id}`
+                    }"
+                    @click.stop="
+                      push(`/user/${existingItem.user?.nickname}/items/${existingItem.id}`)
+                    "
+                    circle
+                    ><el-icon> <View /> </el-icon
+                  ></el-button>
                 </div>
                 <div class="item-name__li">
                   <span class="darker-title">
@@ -161,7 +190,11 @@ const unreadMessagesCountByOffer = () => {
 
             <!-- CHATS  -->
             <div v-for="(bid, kIndex) in existingItem.bids" :key="kIndex" :name="index">
-              <div class="bid" v-if="offerType === 'receivedOffers'" @click="initChat(bid.chatId || 0)">
+              <div
+                class="bid"
+                v-if="offerType === 'receivedOffers'"
+                @click="initChat(bid.chatId || 0)"
+              >
                 <strong>
                   <NicknameOnline :user="bid.user" />
                 </strong>
@@ -191,7 +224,6 @@ const unreadMessagesCountByOffer = () => {
 
 <style scoped lang="scss">
 .chat-items {
-
   &__title {
     display: flex;
     align-items: center;
@@ -200,7 +232,7 @@ const unreadMessagesCountByOffer = () => {
   }
 
   .item {
-    margin-bottom: .1rem;
+    margin-bottom: 0.1rem;
     background-color: #0000004a;
     // padding: .25rem 1rem;
   }

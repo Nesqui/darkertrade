@@ -8,5 +8,6 @@ export type Slot =
   | 'Legs'
   | 'Boots'
   | 'Weapon'
+  | 'Utility'
   | null
   | undefined;

@@ -89,10 +89,10 @@ const select = async (url: string) => {
         >Materials</el-menu-item
       >
       <el-menu-item
-        @click.middle="() => openBlank('/consumables/')"
+        @click.middle="() => openBlank('/misc/')"
         :disabled="!isAuth"
-        index="/consumables/"
-        >Consumables</el-menu-item
+        index="/misc/"
+        >Misc</el-menu-item
       > -->
       <el-menu-item @click.middle="() => openBlank('/faq')" index="/faq"
         >How's it works?</el-menu-item
