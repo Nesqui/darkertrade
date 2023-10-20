@@ -14,6 +14,7 @@ import {
 import { useAttributesStore, useItemStore, useUserStore } from '../store'
 import NicknameOnline from './NicknameOnline.vue'
 
+const emit = defineEmits(['previewClick'])
 const itemApi = initItemApi()
 const itemStore = useItemStore()
 const attributeStore = useAttributesStore()
@@ -62,6 +63,7 @@ const props = defineProps({
     type: Object as PropType<Item>
   },
   stats: {
+    required: false,
     type: Object as PropType<Stat[]>
   },
   noHover: {
@@ -77,7 +79,7 @@ const props = defineProps({
     type: Number
   },
   rarity: {
-    required: true,
+    required: false,
     type: Number
   },
   updatedAt: {
@@ -85,10 +87,17 @@ const props = defineProps({
     type: String
   },
   creator: {
+    required: false,
     type: Object as PropType<User>
+  },
+  selector: {
+    type: Boolean,
+    required: false
   }
 })
-
+const onPreviewClick = () => {
+  emit('previewClick', props.item)
+}
 const baseStats = computed(() => props.stats?.filter((stat) => stat.isBase) || [])
 const additionalStats = computed(() => props.stats?.filter((stat) => !stat.isBase) || [])
 
@@ -139,12 +148,11 @@ const getDivineItem = (name: ItemName): string => {
           <strong class="offer-header__small">{{ offerType }}</strong>
         </div>
       </div>
-      <div class="item-img">
+      <div class="item-img" @click="() => onPreviewClick()">
         <img v-if="item?.id" :src="itemApi.getImg(item)" alt="" />
         <div v-else class="img-avatar">?</div>
       </div>
       <div class="item-description">
-        
         <div class="stats" v-if="baseStats.length">
           <div class="text-divider">Base stats:</div>
           <span
@@ -182,7 +190,7 @@ const getDivineItem = (name: ItemName): string => {
           <div class="text-divider">Description:</div>
           <p>{{ getDivineItem(item.name) }}</p>
         </div>
-        <div class="text-divider" v-if="!wantedPrice">Category</div>
+        <div class="text-divider" v-if="!wantedPrice && !selector">Category</div>
         <div class="price" v-if="wantedPrice">
           <div class="text-divider">Price</div>
           <span class="darker-title"> {{ wantedPrice }} gold</span>

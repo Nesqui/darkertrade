@@ -37,9 +37,11 @@ const onOfferCreated = async () => {
 
 const getMarket = async () => {
   loadings.value.market = true
-  const { rows, count } = await offerApi.getMarket(filter.value)
-  offers.value = rows
-  loadings.value.market = false
+  if (props.itemId) {
+    const { rows, count } = await offerApi.getMarket(filter.value)
+    offers.value = rows
+    loadings.value.market = false
+  }
 }
 
 onBeforeMount(async () => {
@@ -60,10 +62,10 @@ onBeforeMount(async () => {
       />
       <el-button @click="showForm = !showForm">{{ showForm ? 'Back' : 'Create offer' }}</el-button>
     </div>
-    <teamplate v-if="showForm">
+    <template v-if="showForm">
       <div class="text-divider">Offer creator</div>
       <CreateOffer :itemId="itemId" @onOfferCreated="onOfferCreated" :offerType="offerType" />
-    </teamplate>
+    </template>
     <template v-else>
       <div class="text-divider">{{ offerType === 'WTS' ? 'Sellers' : 'Buyers' }}</div>
       <div v-if="!loadings.market" class="offer-market">

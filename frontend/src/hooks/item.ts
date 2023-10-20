@@ -21,6 +21,7 @@ const env = import.meta.env.VITE_ENV
 export interface QueryItemDto {
   id?: number
   slot?: Slot
+  ignore?: Slot
   offerType?: 'WTB' | 'WTS'
   name?: ItemName
   hideMine?: boolean

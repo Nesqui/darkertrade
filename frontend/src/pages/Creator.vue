@@ -250,7 +250,8 @@ onBeforeMount(async () => {
   try {
     loading.value = true
     items.value = await itemApi.findAll({
-      slot: ''
+      slot: '',
+      ignore: 'Misc'
     })
     prefillData()
   } catch (error) {

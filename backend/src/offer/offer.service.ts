@@ -50,6 +50,10 @@ export class OfferService {
       };
     }
 
+    if (query.itemId) {
+      offersWhere['itemId'] = query.itemId;
+    }
+
     const offers = await this.offerRepository.findAndCountAll({
       where: offersWhere,
       limit: query.limit,

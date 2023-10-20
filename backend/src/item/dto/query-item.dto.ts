@@ -34,6 +34,13 @@ export class QueryItemDto {
     type: String,
   })
   @IsOptional()
+  @IsString()
+  ignore: Slot;
+
+  @ApiProperty({
+    type: String,
+  })
+  @IsOptional()
   @IsEnum(['WTB', 'WTS', ''])
   readonly offerType: OfferType;
 
