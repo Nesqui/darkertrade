@@ -1,84 +1,84 @@
 <script setup lang="ts">
-import {
-  Chat,
-  ChatMessagesResponse,
-  ChatsCountsResponse,
-  ChatsResponse,
-  ExistingItem,
-  initUserApi,
-  Message,
-  Offer
-} from '@/hooks'
-import useSocket, { UnreadMessagesCount } from '@/hooks/ws'
-import { useChatStore, useUserStore } from '@/store'
-import { storeToRefs } from 'pinia'
-import {
-  computed,
-  nextTick,
-  onBeforeMount,
-  onBeforeUnmount,
-  onMounted,
-  PropType,
-  ref,
-  watch,
-  watchEffect
-} from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import UnreadCount from './UnreadCount.vue'
-import NicknameOnline from './NicknameOnline.vue'
+// import {
+//   Chat,
+//   ChatMessagesResponse,
+//   ChatsCountsResponse,
+//   ChatsResponse,
+//   ExistingItem,
+//   initUserApi,
+//   Message,
+//   Offer
+// } from '@/hooks'
+// import useSocket, { UnreadMessagesCount } from '@/hooks/ws'
+// import { useChatStore, useUserStore } from '@/store'
+// import { storeToRefs } from 'pinia'
+// import {
+//   computed,
+//   nextTick,
+//   onBeforeMount,
+//   onBeforeUnmount,
+//   onMounted,
+//   PropType,
+//   ref,
+//   watch,
+//   watchEffect
+// } from 'vue'
+// import { useRoute, useRouter } from 'vue-router'
+// import UnreadCount from './UnreadCount.vue'
+// import NicknameOnline from './NicknameOnline.vue'
 
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
-const chatStore = useChatStore()
-const expand = computed(() => chatStore.expand)
+// const route = useRoute()
+// const router = useRouter()
+// const userStore = useUserStore()
+// const chatStore = useChatStore()
+// const expand = computed(() => chatStore.expand)
 
-const loadingMessages = ref(false)
-const push = async (url: string) => {
-  await router.push({
-    path: '/redirect'
-  })
-  let redirect = false
-  if (route.path === url) {
-    redirect = true
-  }
-  await router.push({
-    path: url
-  })
-  if (redirect) router.go(0)
-}
+// const loadingMessages = ref(false)
+// const push = async (url: string) => {
+//   await router.push({
+//     path: '/redirect'
+//   })
+//   let redirect = false
+//   if (route.path === url) {
+//     redirect = true
+//   }
+//   await router.push({
+//     path: url
+//   })
+//   if (redirect) router.go(0)
+// }
 
-const { emit } = useSocket()
+// const { emit } = useSocket()
 
-const props = defineProps({
-  isConnected: {
-    type: Boolean,
-    required: true
-  },
-  offers: {
-    type: Object as PropType<Offer[]>,
-    required: true
-  },
-  offerType: {
-    type: String as PropType<'miscSales' | 'miscPurchases'>,
-    required: true
-  },
-  unreadMessagesCount: {
-    type: Object as PropType<UnreadMessagesCount[]>,
-    required: true
-  }
-})
+// const props = defineProps({
+//   isConnected: {
+//     type: Boolean,
+//     required: true
+//   },
+//   offers: {
+//     type: Object as PropType<Offer[]>,
+//     required: true
+//   },
+//   offerType: {
+//     type: String as PropType<'miscSales' | 'miscPurchases'>,
+//     required: true
+//   },
+//   unreadMessagesCount: {
+//     type: Object as PropType<UnreadMessagesCount[]>,
+//     required: true
+//   }
+// })
 
-onBeforeMount(() => {
-  // if (expand.value.chats) {
-  //   emit("countMessages")
-  // }
-  // socket.value.on('chatsCountsReceived', onChatsCountsReceived)
-  // socket.value.on('chatsReceived', onChatsReceived)
-  // socket.value.on('receiveChatMessages', onChatMessagesReceive)
-  // socket.value.on('receiveMessage', onMessagesReceive)
-  // socket.value.on('countMessages', onCountMessages)
-})
+// onBeforeMount(() => {
+// if (expand.value.chats) {
+//   emit("countMessages")
+// }
+// socket.value.on('chatsCountsReceived', onChatsCountsReceived)
+// socket.value.on('chatsReceived', onChatsReceived)
+// socket.value.on('receiveChatMessages', onChatMessagesReceive)
+// socket.value.on('receiveMessage', onMessagesReceive)
+// socket.value.on('countMessages', onCountMessages)
+// })
 
 // onBeforeUnmount(() => {
 //   socket.value.off('chatsCountsReceived', onChatsCountsReceived)
@@ -89,31 +89,31 @@ onBeforeMount(() => {
 // })
 
 // FIND OPENED CHATS WITHOUT MESSAGES
-const loadChats = (opened: number) => {
-  if (opened) {
-    loadingMessages.value = true
-    emit('findAllChat')
-  }
-}
+// const loadChats = (opened: number) => {
+//   if (opened) {
+//     loadingMessages.value = true
+//     emit('findAllChat')
+//   }
+// }
 
-const pagination = ref({
-  limit: 10,
-  offset: 0
-})
+// const pagination = ref({
+//   limit: 10,
+//   offset: 0
+// })
 
-// Get chat by id and get Messages
-const initChat = async (chatId: number) => {
-  chatStore.currentChatOfferType = props.offerType
-  emit('getChat', { chatId, ...pagination.value })
-}
+// // Get chat by id and get Messages
+// const initChat = async (chatId: number) => {
+//   chatStore.currentChatOfferType = props.offerType
+//   emit('getChat', { chatId, ...pagination.value })
+// }
 
-const unreadMessagesCountByChatId = (chatId: number) => {
-  if (props.unreadMessagesCount) {
-    const chat = props.unreadMessagesCount.find((chat) => chat.chatId === chatId)
-    if (chat) return +chat.unreadMessages
-  }
-  return 0
-}
+// const unreadMessagesCountByChatId = (chatId: number) => {
+//   if (props.unreadMessagesCount) {
+//     const chat = props.unreadMessagesCount.find((chat) => chat.chatId === chatId)
+//     if (chat) return +chat.unreadMessages
+//   }
+//   return 0
+// }
 
 // const unreadMessagesCountByExistingItem = (existingItem: ExistingItem) => {
 //   if (!existingItem.bids?.length) return 0
@@ -132,17 +132,15 @@ const unreadMessagesCountByChatId = (chatId: number) => {
 </script>
 
 <template>
-  <!-- OFFER TYPES - RECEIVED OFFERS -->
-  <el-collapse class="chat-items" v-model="expand.offerType" accordion @change="loadChats">
+  <div></div>
+  <!-- <el-collapse class="chat-items" v-model="expand.offerType" accordion @change="loadChats">
     <el-collapse-item class="" :name="offerType">
       <template #title>
         <div class="chat-items__title">
           <span> Misc {{ offerType === 'miscPurchases' ? ' purchases' : 'sales' }}</span>
-          <!-- <UnreadCount :count="unreadMessagesCountByOffer()" /> -->
         </div>
       </template>
       <div v-for="(offer, index) in offers" :key="index">
-        <!-- EXISTING ITEMS  -->
         <el-collapse v-model="expand.offer" accordion>
           <el-collapse-item class="item">
             <template #title>
@@ -158,12 +156,10 @@ const unreadMessagesCountByChatId = (chatId: number) => {
                   </strong>
                 </div>
                 <div class="item-name__li">
-                  <!-- <UnreadCount :count="unreadMessagesCountByExistingItem(existingItem)" /> -->
                 </div>
               </div>
             </template>
 
-            <!-- CHATS  -->
             <div
               v-for="(offerPair, kIndex) in offer.offerPairs"
               :key="kIndex"
@@ -179,71 +175,70 @@ const unreadMessagesCountByChatId = (chatId: number) => {
               />
 
               <strong>{{ offerPair.checkout.price }}</strong>
-              <!-- <UnreadCount :count="unreadMessagesCountByChatId(offerPair.chatId || 0)" /> -->
             </div>
           </el-collapse-item>
         </el-collapse>
       </div>
     </el-collapse-item>
-  </el-collapse>
+  </el-collapse> -->
 </template>
 
 <style scoped lang="scss">
-.chat-items {
-  &__title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-  }
+// .chat-items {
+//   &__title {
+//     display: flex;
+//     align-items: center;
+//     justify-content: space-between;
+//     width: 100%;
+//   }
 
-  .item {
-    margin-bottom: 0.1rem;
-    background-color: #0000004a;
-    // padding: .25rem 1rem;
-  }
+//   .item {
+//     margin-bottom: 0.1rem;
+//     background-color: #0000004a;
+//     // padding: .25rem 1rem;
+//   }
 
-  .item-name {
-    display: flex;
-    // grid-template-columns: auto auto;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.5rem;
-    width: 100%;
+//   .item-name {
+//     display: flex;
+//     // grid-template-columns: auto auto;
+//     align-items: center;
+//     justify-content: space-between;
+//     gap: 0.5rem;
+//     width: 100%;
 
-    &__li {
-      display: flex;
-      align-items: center;
-      height: 100%;
-      justify-content: flex-start;
+//     &__li {
+//       display: flex;
+//       align-items: center;
+//       height: 100%;
+//       justify-content: flex-start;
 
-      .darker-title {
-        white-space: nowrap;
-        overflow: hidden;
-        white-space: nowrap;
-        width: 144px;
-        text-align: left;
-      }
-    }
+//       .darker-title {
+//         white-space: nowrap;
+//         overflow: hidden;
+//         white-space: nowrap;
+//         width: 144px;
+//         text-align: left;
+//       }
+//     }
 
-    .darker-title {
-      font-size: 14px;
-      font-weight: 400;
-    }
-  }
+//     .darker-title {
+//       font-size: 14px;
+//       font-weight: 400;
+//     }
+//   }
 
-  .offer-pair-info {
-    padding: 1rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+//   .offer-pair-info {
+//     padding: 1rem;
+//     cursor: pointer;
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//   }
 
-  .offer-pair:hover {
-    background-color: #0000006f;
-  }
-}
+//   .offer-pair:hover {
+//     background-color: #0000006f;
+//   }
+// }
 </style>
 
 <style lang="scss"></style>

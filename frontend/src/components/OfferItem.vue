@@ -15,7 +15,7 @@ const quantity = ref(1)
 
 const props = defineProps({
   offer: {
-    type: Object as PropType<Offer & { averagePrice: number }>,
+    type: Object as PropType<Offer>,
     required: true
   }
 })
@@ -28,7 +28,10 @@ const acceptOfferPair = async () => {
     loading.value = true
     const checkout = await offerApi.acceptOfferPair(selectedPair.value.id, quantity.value)
     selectedPair.value.checkouts.push(checkout)
-  } catch (error) {}
+  } catch (error) {
+    console.log('error: ', error)
+  }
+
   loading.value = false
 }
 const isCurrentUser = computed(() => props.offer.userId === currentUser.id)

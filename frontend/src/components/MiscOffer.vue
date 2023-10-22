@@ -8,7 +8,7 @@ import CreateOffer from '../components/CreateOffer.vue'
 const userStore = useUserStore()
 const offerApi = initOfferApi()
 
-const offers = ref<Offer[] & { averagePrice: number }[]>([])
+const offers = ref<Offer[]>([])
 const isAuth = computed(() => userStore.isAuth)
 const props = defineProps(['offerType', 'itemId'])
 

@@ -14,7 +14,7 @@ const loadings = ref({
 
 const selectedOfferPair = ref<OfferPair>()
 
-const offers = ref<Offer[] & { averagePrice: number }[]>([])
+const offers = ref<Offer[]>([])
 
 const getMine = async () => {
   loadings.value.market = true

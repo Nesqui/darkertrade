@@ -1,4 +1,4 @@
-import { Attribute, Checkout, ExistingOffer, Item, OfferName, Slot, User, useApi } from '.'
+import { Checkout, Item, User, useApi } from '.'
 
 const env = import.meta.env.VITE_ENV
 
@@ -41,6 +41,7 @@ export interface Offer {
   archived: boolean
   offerPairs: OfferPair[]
   id: number
+  averagePrice?: number
 }
 
 export interface OfferPair {
@@ -54,7 +55,7 @@ export interface OfferPair {
 }
 
 export interface CountedOffersResponse {
-  rows: Offer[] & { averagePrice: number }[]
+  rows: Offer[]
   count: number
 }
 
@@ -68,7 +69,7 @@ export const initOfferApi = () => {
     return res.data
   }
 
-  const getMine = async (): Promise<Offer[] & { averagePrice: number }[]> => {
+  const getMine = async (): Promise<Offer[]> => {
     const res = await axiosClient('offer/mine')
     return res.data
   }
