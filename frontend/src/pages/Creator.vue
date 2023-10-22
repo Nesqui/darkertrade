@@ -214,7 +214,7 @@ const createExistingItem = async () => {
       router.push(`/user/${resExistingItem.user.nickname}/items/${resExistingItem.id}`)
     }
   } catch (error) {
-    console.log('🚀 ~ file: Creator.vue:271 ~ createExistingItem ~ error:', error)
+    console.log('🚀 error:', error)
   } finally {
     loading.value = false
   }
@@ -370,7 +370,6 @@ onBeforeMount(async () => {
             <StatsList
               :stats="stats"
               @deleteStat="deleteStat"
-              ,
               @clearAttribute="clearAttribute"
               @handleSelectAttribute="handleSelectAttribute"
             />
@@ -444,7 +443,7 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-$maxHeight: 790px;
+$maxHeight: 890px;
 
 .similar {
   max-height: $maxHeight;
@@ -501,7 +500,7 @@ h4 {
     display: flex;
     gap: 1rem;
     margin-bottom: 2rem;
-    max-height: 600px;
+    max-height: 700px;
     flex: 1;
   }
 

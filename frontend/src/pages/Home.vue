@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount } from 'vue'
+import { onBeforeMount, ref } from 'vue'
 import { initAttributesApi, initItemApi } from '../hooks'
 import { useAttributesStore, useItemStore } from '../store'
 // import AllChats from '../components/AllChats.vue'
@@ -12,15 +12,24 @@ const attributeStore = useAttributesStore()
 // const reconnecting = ref(false)
 const itemApi = initItemApi()
 const itemStore = useItemStore()
+const loading = ref(true)
 
 onBeforeMount(async () => {
-  const attributes = await attributeApi.findAll()
-  attributeStore.saveAll(attributes)
-  itemStore.saveAll(
-    await itemApi.findAll({
-      slot: ''
-    })
-  )
+  try {
+    loading.value = true
+    const attributes = await attributeApi.findAll()
+    attributeStore.saveAll(attributes)
+    itemStore.saveAll(
+      await itemApi.findAll({
+        slot: ''
+      })
+    )
+  } catch (error) {
+    console.log('🚀 ~ error:', error)
+  } finally {
+    loading.value = false
+  }
+
   // if (isAuth.value) connect()
 })
 
@@ -62,7 +71,7 @@ onBeforeMount(async () => {
   <div class="main">
     <TopMenu />
     <div class="main-wrapper">
-      <router-view />
+      <router-view v-if="!loading" />
     </div>
     <!-- <AllChats v-if="isAuth && isConnected" />
     <div v-else-if="isAuth" @click="forceReconnect" class="ws-error">

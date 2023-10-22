@@ -45,7 +45,7 @@ const statRecognition = (text: string, item?: Item) => {
 
   // Разделяем строку на строки по символу перевода строки
   const lines = text.split('\n')
-  console.log('🚀 ~ file: ImgRecognition.vue:49 ~ statRecognition ~ lines:', lines)
+  // console.log('🚀 ~ file: ImgRecognition.vue:49 ~ statRecognition ~ lines:', lines)
   const parsedAttributes: StatRecognition = {
     base: [],
     additional: []
@@ -81,10 +81,10 @@ const statRecognition = (text: string, item?: Item) => {
   }
 
   emit('statRecognitionFinished', parsedAttributes)
-  console.log(
-    '🚀 ~ file: ImgRecognition.vue:84 ~ statRecognition ~ parsedAttributes:',
-    parsedAttributes
-  )
+  // console.log(
+  //   '🚀 ~ file: ImgRecognition.vue:84 ~ statRecognition ~ parsedAttributes:',
+  //   parsedAttributes
+  // )
   return parsedAttributes
 }
 
