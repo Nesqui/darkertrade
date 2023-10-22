@@ -97,11 +97,11 @@ const spliceItem = (index: number) => {
           </div>
           <div>
             <label for="">Quantity</label>
-            <el-input-number :min="1" :max="999" v-model="pair.quantity" />
+            <el-input-number :min="1" :max="9999" v-model="pair.quantity" />
           </div>
           <div>
             <label for="">Wanted price</label>
-            <el-input-number :min="1" :max="999" v-model="pair.wantedPrice" />
+            <el-input-number :min="1" :max="9999" v-model="pair.wantedPrice" />
           </div>
 
           <div>
