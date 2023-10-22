@@ -251,6 +251,10 @@ export class DiscordGateway {
       this.addUserToChannel(channel, itemCreatorDiscord),
       this.addUserToChannel(channel, bidCreatorDiscord),
     ]);
+    .
+    await channel.send(
+      `trade between <@${itemCreatorDiscord.id}> <@${bidCreatorDiscord.id}>`,
+    );
 
     await channel.send({
       embeds: [
