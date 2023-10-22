@@ -198,6 +198,9 @@ export class DiscordGateway {
       this.addUserToChannel(channel, sellerDiscord),
       this.addUserToChannel(channel, purchaserDiscord),
     ]);
+    await channel.send(
+      `trade between <@${sellerDiscord.id}> <@${purchaserDiscord.id}>`,
+    );
 
     await channel.send({
       embeds: [
@@ -210,7 +213,7 @@ export class DiscordGateway {
       ],
     });
 
-    const DMMessage = `Offer was accepted: we are create conversation room for you.\n<#${channel.id}>`;
+    const DMMessage = `Offer was accepted: we have created chat room for you.\n<#${channel.id}>`;
     await Promise.all([
       sellerDiscord.send(DMMessage),
       purchaserDiscord.send(DMMessage),
@@ -262,7 +265,7 @@ export class DiscordGateway {
       ],
     });
 
-    const DMMessage = `Bid was accepted: we are create conversation room for you.\n<#${channel.id}>`;
+    const DMMessage = `Bid was accepted: we have created chat room for you.\n<#${channel.id}>`;
     await Promise.all([
       itemCreatorDiscord.send(DMMessage),
       bidCreatorDiscord.send(DMMessage),
