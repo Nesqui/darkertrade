@@ -36,6 +36,9 @@ export class DiscordGateway {
     private ItemService: ItemService,
   ) {}
 
+  readonly PROD_GUILD = '1080677659551477930';
+  readonly PROD_CATEGORY = '1165011027646218250';
+
   onBidCreated = async (bid: Bid) => {
     const discordId = bid.existingItem.user.discordId;
 
@@ -155,17 +158,17 @@ export class DiscordGateway {
       .setTitle(`Bid | ${item.name}`)
       .setURL(itemUrl)
       .setThumbnail(this.ItemService.getItemImageByName(item.name))
-      .addFields(fields)
+      .addFields(fields) // добавка ПолИморф4
       .setTimestamp()
       .setFooter({ text: `Trade and Trader Bot` });
   };
 
   createTradeChannel = async (name = 'Trade conversation') => {
-    const guildId = this.configService.get('DISCORD_GUILD_ID');
+    const guildId =
+      this.configService.get('DISCORD_GUILD_ID') || this.PROD_GUILD;
     const guild = this.client.guilds.cache.get(guildId);
     const categoryId =
-      this.configService.get('DISCORD_TRADE_CATEGORY_ID') ||
-      '1165011027646218250';
+      this.configService.get('DISCORD_TRADE_CATEGORY_ID') || this.PROD_CATEGORY;
 
     const channel = await guild.channels.create({
       name: name,
