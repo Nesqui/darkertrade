@@ -19,8 +19,10 @@ defineProps({
     <span class="offer-pair-amount">{{ offerPair.quantity }}</span>
     <span class="offer-pair-divider">X</span>
     <span class="offer-pair-price darker-title">{{ `${offerPair.wantedPrice} G` }} </span>
-    <span class="offer-pair-divider">Checkouts:</span>
-    <span v-if="checkouts !== undefined" class="offer-pair-amount">{{ checkouts }} </span>
+    <template v-if="checkouts !== undefined">
+      <span class="offer-pair-divider">Checkouts:</span>
+      <span class="offer-pair-amount">{{ checkouts }} </span>
+    </template>
   </div>
 </template>
 

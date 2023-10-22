@@ -75,7 +75,9 @@ const isValid = computed(() => {
   return true
 })
 
-const spliceItem = (index: number) => {}
+const spliceItem = (index: number) => {
+  offer.value.offerPairs.splice(index, 1)
+}
 </script>
 
 <template>
@@ -95,11 +97,11 @@ const spliceItem = (index: number) => {}
           </div>
           <div>
             <label for="">Quantity</label>
-            <el-input-number :min="1" v-model="pair.quantity" />
+            <el-input-number :min="1" :max="999" v-model="pair.quantity" />
           </div>
           <div>
             <label for="">Wanted price</label>
-            <el-input-number :min="1" v-model="pair.wantedPrice" />
+            <el-input-number :min="1" :max="999" v-model="pair.wantedPrice" />
           </div>
 
           <div>
@@ -135,7 +137,11 @@ const spliceItem = (index: number) => {}
 
 .offer-pairs-item__editable {
   display: flex;
-  gap: 0.5rem;
+  gap: 1rem;
+}
+
+.offer-pairs-item__editable:not(:last-child) {
+  margin-bottom: 1.5rem;
 }
 .offer-pairs {
   margin-bottom: 15px;

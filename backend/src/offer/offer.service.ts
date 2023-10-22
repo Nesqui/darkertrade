@@ -55,6 +55,10 @@ export class OfferService {
       };
     }
 
+    if (query.itemId) {
+      offersWhere['itemId'] = query.itemId;
+    }
+
     if (user) {
       const where = {};
       if (query.offerType === 'WTS') where['purchaserId'] = user.id;

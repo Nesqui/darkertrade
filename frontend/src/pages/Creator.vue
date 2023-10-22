@@ -69,7 +69,8 @@ const props = defineProps({
 
 const selectedColor = ref('rgba(222, 222, 222, 1)')
 const predefineColors = computed(() => {
-  return colors.slice(stats.value.length, colors.length)
+  // return colors.slice(stats.value.length, colors.length)
+  return colors
 })
 
 const rarity = computed(() => {
@@ -249,7 +250,8 @@ onBeforeMount(async () => {
   try {
     loading.value = true
     items.value = await itemApi.findAll({
-      slot: ''
+      slot: '',
+      ignore: 'Misc'
     })
     prefillData()
   } catch (error) {
@@ -465,6 +467,8 @@ h4 {
 .creator {
   display: flex;
   gap: 2rem;
+  width: 95%;
+  justify-content: center;
 }
 
 .settings__discord {
@@ -477,6 +481,7 @@ h4 {
   max-height: $maxHeight;
   width: 100%;
   min-width: 1020px;
+  max-width: 1120px;
   overflow-y: hidden;
   display: flex;
   flex-direction: column;

@@ -150,6 +150,10 @@ const onOfferDeleted = async (id: number) => {
 .user-actions {
   display: flex;
   justify-content: end;
-  gap: 1px;
+  gap: 3px;
+
+  button {
+    margin: 0;
+  }
 }
 </style>

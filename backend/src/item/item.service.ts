@@ -55,6 +55,8 @@ export class ItemService {
   async findAll(itemQuery: QueryItemDto) {
     const where = {};
     if (itemQuery.slot) where['slot'] = itemQuery.slot;
+    if (itemQuery.ignore)
+      where['slot'] = { [sequelize.Op.not]: itemQuery.ignore };
     return await this.itemsRepository.findAll({
       where,
     });

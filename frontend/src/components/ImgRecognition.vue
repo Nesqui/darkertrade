@@ -224,6 +224,10 @@ img {
 }
 
 @media (max-width: 420px) {
+  img {
+    width: 100%;
+  }
+
   .upload-description {
     display: flex;
     flex-direction: column;

@@ -76,12 +76,6 @@ const select = async (url: string) => {
       <el-menu-item @click.middle="() => openBlank('/misc/')" index="/misc/"
         >Misc items</el-menu-item
       >
-      <!-- <el-menu-item
-        @click.middle="() => openBlank('/materials/')"
-        :disabled="!isAuth"
-        index="/materials/"
-        >Materials</el-menu-item
-      > -->
       <el-menu-item @click.middle="() => openBlank('/faq')" index="/faq"
         >How's it works?</el-menu-item
       >
@@ -103,16 +97,16 @@ const select = async (url: string) => {
         @click.middle="() => openBlank(`/user/${userStore.currentUser.nickname}/items`)"
         :disabled="!isAuth"
         :index="`/user/${userStore.currentUser.nickname}/items`"
-        >auctions</el-menu-item
+        >My auctions</el-menu-item
       >
       <el-menu-item
         @click.middle="() => openBlank('/misc/mine')"
         :disabled="!isAuth"
         index="/misc/mine"
-        >misc items</el-menu-item
+        >My misc items</el-menu-item
       >
       <el-menu-item @click.middle="() => openBlank('/bids/')" :disabled="!isAuth" index="/bids/"
-        >bids</el-menu-item
+        >My bids</el-menu-item
       >
       <el-menu-item v-if="isAuth" @click="userStore.logout" index="/">Logout</el-menu-item>
       <el-menu-item v-else index="/auth">Sign In</el-menu-item>
