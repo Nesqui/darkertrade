@@ -82,6 +82,10 @@ onBeforeMount(async () => {
             </el-popconfirm>
           </div>
         </div>
+        <div v-if="!offers.length" class="wrapper">
+          <h3>Misc items:</h3>
+          <p>You are not holding any offers</p>
+        </div>
       </div>
     </div>
     <div class="offer-wrapper" v-else>
@@ -184,6 +188,7 @@ onBeforeMount(async () => {
   padding: 16px 0;
   align-items: center;
   justify-content: center;
+  width: 75px;
 
   img {
     height: 80px;

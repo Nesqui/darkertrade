@@ -12,8 +12,7 @@ const slots = ref<Slot[]>([
   'Gloves',
   'Legs',
   'Boots',
-  'Weapon',
-  'Utility'
+  'Weapon'
 ])
 </script>
 

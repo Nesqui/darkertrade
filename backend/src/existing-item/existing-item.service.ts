@@ -413,14 +413,14 @@ export class ExistingItemService {
       },
     });
 
-    try {
-      // DELETE CHAT
-      if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
-        this.chatGateway.onExistingItemUnpublish(id);
-      }
-    } catch (error) {
-      console.log('unpublish err', error);
-    }
+    // try {
+    //   // DELETE CHAT
+    //   if (!updateExistingItemDto.published || updateExistingItemDto.archived) {
+    //     this.chatGateway.onExistingItemUnpublish(id);
+    //   }
+    // } catch (error) {
+    //   console.log('unpublish err', error);
+    // }
 
     return updateExistingItemDto.archived || (await this.findOne(id));
   }

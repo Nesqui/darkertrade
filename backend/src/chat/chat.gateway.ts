@@ -235,10 +235,6 @@ export class ChatGateway {
 
       // const groupByUserCounts = groupBy(counts, 'userId');
       this.notifyUser(+userId, 'countMessages', counts);
-      console.log(
-        '🚀 ~ file: chat.gateway.ts:238 ~ ChatGateway ~ userIds.forEach ~ counts:',
-        counts,
-      );
     });
   };
 
