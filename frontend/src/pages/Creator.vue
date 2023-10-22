@@ -253,7 +253,6 @@ onBeforeMount(async () => {
     })
     prefillData()
   } catch (error) {
-    console.log('🚀 ~ file: Creator.vue:353 ~ onBeforeMount ~ error:', error)
   } finally {
     loading.value = false
   }
@@ -275,14 +274,15 @@ onBeforeMount(async () => {
           <el-tab-pane label="Create sell offer" name="WTS"></el-tab-pane>
           <el-tab-pane label="Create buy offer" name="WTB"></el-tab-pane>
         </el-tabs>
-        <div class="settings__discord">
+        <!-- <div class="settings__discord">
           <el-switch
             v-model="discordNotification"
+            disabled
             size="large"
             active-text="On"
             inactive-text="Off"
           />
-        </div>
+        </div> -->
       </div>
 
       <ImgRecognition

@@ -38,10 +38,18 @@ export class Checkout extends Model {
   @BelongsTo(() => Chat)
   chat: Chat;
 
-  @HasOne(() => OfferPair)
+  @ForeignKey(() => OfferPair)
+  @Column
+  offerPairId: number;
+
+  @BelongsTo(() => OfferPair)
   offerPair: OfferPair;
 
-  @HasOne(() => Bid)
+  @ForeignKey(() => Bid)
+  @Column
+  bidId: number;
+
+  @BelongsTo(() => Bid)
   bid: Bid;
 
   @Default(1)
@@ -55,4 +63,11 @@ export class Checkout extends Model {
   @Default('gold')
   @Column
   currency: 'gold' | 'key' | 'gold ingot' | 'ruby silver ingot';
+
+  @Default('offerPairAccepted')
+  @Column
+  type: 'offerPairAccepted' | 'bidAccepted';
+
+  @Column
+  discordChannelId: string;
 }

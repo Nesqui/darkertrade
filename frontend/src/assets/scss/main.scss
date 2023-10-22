@@ -94,6 +94,15 @@ body {
     z-index: -1;
 }
 
+.icon-active {
+    background-color: var(--el-color-danger) !important;
+    color: var(--el-bg-color) !important;
+}
+
+.icon-active:hover {
+    background-color: var(--el-color-danger) !important;
+    color: var(--el-bg-color) !important;
+}
 
 .offer-pairs-amount {
     text-align: left;

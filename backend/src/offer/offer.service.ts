@@ -18,6 +18,7 @@ import { CreateCheckoutDto } from 'src/checkout/dto/create-checkout.dto';
 import { AcceptOfferPairDto } from './dto/accept-offer-pair.dto';
 import { ChatGateway } from 'src/chat/chat.gateway';
 import DiscordGateway from 'src/discord/discord.gateway';
+import { Checkout } from 'src/checkout/checkout.entity';
 
 const MAX_RARITY_GROUP_LENGTH = 5; // Максимальное количество пар в одной рарити группе
 const MAX_OFFERS_PER_ITEM = 3;
@@ -31,6 +32,8 @@ export class OfferService {
     private userRepository: typeof User,
     @Inject('ITEMS_REPOSITORY')
     private itemRepository: typeof Item,
+    @Inject('CHECKOUT_REPOSITORY')
+    private checkoutRepository: typeof Checkout,
     @Inject('OFFER_PAIRS_REPOSITORY')
     private offerPairRepository: typeof OfferPair,
     private checkoutService: CheckoutService,
@@ -44,10 +47,23 @@ export class OfferService {
       offerType: query.offerType,
     };
 
+    const offerPairRepositoryIncludes = [];
+
     if (query.hideMine && user) {
       offersWhere['userId'] = {
         [sequelize.Op.not]: user.id,
       };
+    }
+
+    if (user) {
+      const where = {};
+      if (query.offerType === 'WTS') where['purchaserId'] = user.id;
+      else where['sellerId'] = user.id;
+      offerPairRepositoryIncludes.push({
+        model: this.checkoutRepository,
+        required: false,
+        where,
+      });
     }
 
     const offers = await this.offerRepository.findAndCountAll({
@@ -64,6 +80,7 @@ export class OfferService {
         },
         {
           model: this.offerPairRepository,
+          include: offerPairRepositoryIncludes,
         },
       ],
       attributes: [
@@ -88,6 +105,63 @@ export class OfferService {
     return offers;
   }
 
+  async getMine(user: User) {
+    const offersWhere = {
+      archived: false,
+      userId: user.id,
+    };
+
+    const offers = await this.offerRepository.findAll({
+      where: offersWhere,
+      include: [
+        {
+          model: this.itemRepository,
+        },
+        {
+          model: this.offerPairRepository,
+          include: [
+            {
+              model: this.checkoutRepository,
+              limit: 50,
+              required: false,
+              include: [
+                {
+                  model: this.userRepository,
+                  as: 'seller',
+                  attributes: ['nickname', 'id', 'online'],
+                },
+                {
+                  model: this.userRepository,
+                  as: 'purchaser',
+                  attributes: ['nickname', 'id', 'online'],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      attributes: [
+        [
+          sequelize.literal(
+            '(SELECT AVG("wantedPrice" / "quantity") FROM "OfferPairs" WHERE "OfferPairs"."offerId" = "Offer"."id")',
+          ),
+          'averagePrice',
+        ],
+        'offerType',
+        'itemId',
+        'id',
+        'archived',
+        'createdAt',
+        'updatedAt',
+        'userId',
+      ],
+      group: ['Offer.id', 'item.id', 'offerPairs.id'], // Группируем по ID оффераб
+      order: [['createdAt', 'DESC']],
+    });
+
+    return offers;
+  }
+
   async acceptOfferPair(
     offerPairId: number,
     acceptOfferPairDto: AcceptOfferPairDto,
@@ -104,6 +178,19 @@ export class OfferService {
       ],
     });
 
+    const key = currentOffer.offerType === 'WTS' ? 'purchaserId' : 'sellerId';
+    const existingCheckout = await this.checkoutRepository.findOne({
+      where: {
+        [key]: user.id,
+        offerPairId,
+      },
+    });
+
+    if (existingCheckout)
+      throw new ForbiddenException(
+        'You cant create new offer for this item, please use already created chat',
+      );
+
     if (+currentOffer.userId === +user.id)
       throw new ForbiddenException('You cant accept your own offer');
 
@@ -119,12 +206,20 @@ export class OfferService {
       price: +(
         acceptOfferPairDto.quantity * currentOffer.offerPairs[0].wantedPrice
       ).toFixed(),
+      offerPairId: currentOffer.offerPairs[0].id,
     };
 
-    const checkout = await this.checkoutService.createOfferPair(payload);
-    currentOffer.offerPairs[0].checkoutId = checkout.id;
-    await currentOffer.offerPairs[0].save();
-    return await this.chatGateway.onOfferPairAccepted(checkout);
+    const _checkout = await this.checkoutService.createOfferPair(payload);
+    const checkout = await this.checkoutService.getById(_checkout.id);
+    // return await this.chatGateway.onOfferPairAccepted(checkout);
+    const discordChannelId = await this.discordGateway.onOfferPairAccepted(
+      checkout,
+    );
+
+    checkout.discordChannelId = discordChannelId;
+    await checkout.save();
+
+    return checkout;
   }
 
   // Проверка превышения количества пар в одной рарити группе

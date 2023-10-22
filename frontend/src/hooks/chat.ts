@@ -1,4 +1,5 @@
 import { Bid } from './bid'
+import { Checkout } from './checkout'
 import { ExistingItem } from './existingItem'
 import { Offer } from './offer'
 import { User } from './user'
@@ -9,7 +10,8 @@ export interface Chat {
   messages: Message[]
   communityId: number
   community: Community
-  bid: Bid
+  bid?: Bid
+  checkout?: Checkout
 }
 
 export interface Community {

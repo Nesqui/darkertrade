@@ -282,11 +282,6 @@ const unreadMessagesCountByOffer = () => {
   .bid:hover {
     background-color: #0000006f;
   }
-
-  .icon-active {
-    background-color: var(--el-color-danger);
-    color: var(--el-bg-color);
-  }
 }
 </style>
 

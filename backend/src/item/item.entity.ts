@@ -9,6 +9,7 @@ import {
 // import { BaseStat } from 'src/base-stat/base-stat.entity';
 import { ExistingItem } from 'src/existing-item/existing-item.entity';
 import { Slot } from './slot.entity';
+import { Offer } from 'src/offer/offer.entity';
 
 @Table
 export class Item extends Model {
@@ -22,6 +23,9 @@ export class Item extends Model {
 
   @HasMany(() => ExistingItem)
   existingItems: ExistingItem[];
+
+  @HasMany(() => Offer)
+  offers: Offer[];
 
   // @HasMany(() => BaseStat)
   // baseStats: BaseStat[];

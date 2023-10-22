@@ -20,10 +20,24 @@ const props = defineProps({
   }
 })
 
+const loading = ref(false)
+
 const acceptOfferPair = async () => {
   if (!selectedPair.value) return
+  try {
+    loading.value = true
+    const checkout = await offerApi.acceptOfferPair(selectedPair.value.id, quantity.value)
+    selectedPair.value.checkouts.push(checkout)
+  } catch (error) {}
+  loading.value = false
+}
+const isCurrentUser = computed(() => props.offer.userId === currentUser.id)
 
-  await offerApi.acceptOfferPair(selectedPair.value.id, quantity.value)
+const goToDiscord = () => {
+  const link = `https://discord.com/channels/${import.meta.env.VITE_DISCORD_GUILD_ID}/${
+    selectedPair.value?.checkouts[0].discordChannelId
+  }`
+  window.open(link, '_blank')
 }
 
 const onOfferDeleted = async (id: number) => {
@@ -59,16 +73,22 @@ const onOfferDeleted = async (id: number) => {
         <div class="d-flex justify-space-between">
           <div>
             <label for="">Quantity:</label>
-            <el-input-number v-model="quantity" />
+            <el-input-number :disabled="isCurrentUser" v-model="quantity" />
           </div>
-          <div>
+          <div v-if="!selectedPair?.checkouts.length">
             <label for="">Checkout:</label>
             <el-button
-              :disabled="!quantity || !selectedPair"
+              :disabled="!quantity || !selectedPair || isCurrentUser || loading"
               @click="acceptOfferPair"
               size="large"
               >{{ offer.offerType === 'WTS' ? 'Buy' : 'Sell' }}</el-button
             >
+          </div>
+          <div v-else>
+            <label for="">Chat:</label>
+            <el-button @click="goToDiscord" size="large"
+              ><img src="@/assets/svg/discord-icon.svg" class="icon" alt=""
+            /></el-button>
           </div>
         </div>
       </div>
@@ -111,6 +131,10 @@ const onOfferDeleted = async (id: number) => {
   height: 170px;
   min-height: 150px;
   overflow: hidden;
+}
+
+.icon {
+  width: 23px;
 }
 
 .offer-actions-wrapper {

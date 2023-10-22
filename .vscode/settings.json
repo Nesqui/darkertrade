@@ -22,5 +22,8 @@
     "less",
     "postcss",
     "vue" // necessary for stylelint diagnostics in .vue <style> tag
-  ]
+  ],
+  "turboConsoleLog.includeFileNameAndLineNum": false,
+  "turboConsoleLog.insertEnclosingFunction": false,
+  "turboConsoleLog.insertEnclosingClass": false
 }

@@ -1,25 +1,43 @@
 <script setup lang="ts">
-import { useUserStore } from "@/store";
-import { computed, ref } from "vue";
+import { useUserStore } from '@/store'
+import { computed, ref } from 'vue'
 
 const userStore = useUserStore()
 const isAuth = computed(() => userStore.isAuth)
 </script>
 
 <template>
-  <img src="@/assets/images/library1.png" alt="" class="bg">
-  <div class="faq wrapper">
-    <div class="img-wrapper">
-      <div class="text-divider">I want to buy</div>
-      <img src="@/assets/images/wtb.png" alt="">
-      <div class="text-divider">I want to sell</div>
-      <img src="@/assets/images/wts.png" alt="">
-      <div class="text-divider">Bids</div>
-      <img src="@/assets/images/bid.png" alt="">
-    </div>
-    <div class="links">
-      <router-link v-if="isAuth" to="/creator">Go to creator</router-link>
-      <router-link to="/market">Go to market</router-link>
+  <img src="@/assets/images/library1.png" alt="" class="bg" />
+  <div class="wrapper">
+    <h2>About Trade and Trader</h2>
+    <div class="faq">
+      <div>
+        <label for="">
+          {{ new Date('4.14.2023').toLocaleDateString() }}
+        </label>
+        <iframe
+          width="100%"
+          height="300px"
+          src="https://www.youtube.com/embed/6awDm91KD0U?si=W7GnbgGlgWYO4h31?showinfo=0&rel=0"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      </div>
+      <div>
+        <label for="">
+          {{ new Date('4.13.2023').toLocaleDateString() }}
+        </label>
+        <iframe
+          width="100%"
+          height="300px"
+          src="https://www.youtube.com/embed/KxaZJViRAKA?si=QnBHXueNN3BmXl3p?showinfo=0&rel=0"
+          title="YouTube video player"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowfullscreen
+        ></iframe>
+      </div>
     </div>
   </div>
 </template>
@@ -30,7 +48,7 @@ const isAuth = computed(() => userStore.isAuth)
   left: 0;
   top: 0;
   width: 100%;
-  opacity: 0.55;
+  opacity: 0.1;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -57,6 +75,9 @@ const isAuth = computed(() => userStore.isAuth)
 
 .faq {
   width: var(--wrapper-xxl-width);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 35px;
 
   .img-wrapper {
     width: 100%;
@@ -69,7 +90,6 @@ const isAuth = computed(() => userStore.isAuth)
   }
 }
 
-
 @media (max-width: 1255px) {
   .bg {
     left: 50%;
@@ -79,7 +99,7 @@ const isAuth = computed(() => userStore.isAuth)
   }
 
   .faq {
-    padding: .5rem 2rem;
+    padding: 0.5rem 2rem;
 
     .img-wrapper {
       display: flex;
@@ -96,3 +116,4 @@ const isAuth = computed(() => userStore.isAuth)
 }
 </style>
 
+<style lang="scss"></style>

@@ -12,4 +12,6 @@ export interface Checkout {
   quantity: number
   price: number
   currency: 'gold' | 'key' | 'gold ingot' | 'ruby silver ingot'
+  type: 'offerPairAccepted' | 'bidAccepted'
+  discordChannelId: string
 }

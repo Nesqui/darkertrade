@@ -77,10 +77,11 @@ onBeforeMount(async () => {
       </div>
       <div v-else class="offer-market">
         <el-skeleton
-          :rows="4"
-          v-for="(v, index) of new Array(3)"
+          :rows="2"
+          v-for="(v, index) of new Array(5)"
           :key="index"
           animated
+          class="mb-3"
         ></el-skeleton>
       </div>
     </template>

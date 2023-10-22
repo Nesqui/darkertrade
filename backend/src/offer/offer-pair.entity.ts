@@ -11,6 +11,7 @@ import {
   DataType,
   Min,
   Max,
+  HasMany,
 } from 'sequelize-typescript';
 import { Offer } from './offer.entity';
 import { Checkout } from 'src/checkout/checkout.entity';
@@ -57,10 +58,6 @@ export class OfferPair extends Model {
   @BelongsTo(() => Offer)
   offer: Offer;
 
-  @BelongsTo(() => Checkout)
-  checkout: Checkout;
-
-  @ForeignKey(() => Checkout)
-  @Column
-  checkoutId: number;
+  @HasMany(() => Checkout)
+  checkouts: Checkout[];
 }

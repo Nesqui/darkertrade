@@ -10,6 +10,10 @@ import { CreateItemDto } from './dto/create-item.dto';
 import { QueryItemDto } from './dto/query-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { Item } from './item.entity';
+import { Offer } from 'src/offer/offer.entity';
+import { OfferPair } from 'src/offer/offer-pair.entity';
+import { Checkout } from 'src/checkout/checkout.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class ItemService {
@@ -18,12 +22,20 @@ export class ItemService {
     // @Inject('BASE_STAT_REPOSITORY') private baseStatRepository: typeof BaseStat,
     @Inject('USERS_REPOSITORY') private usersRepository: typeof User,
     @Inject('BIDS_REPOSITORY') private bidsRepository: typeof Bid,
+
+    @Inject('OFFERS_REPOSITORY') private offerRepository: typeof Offer,
+    @Inject('OFFER_PAIRS_REPOSITORY')
+    private offerPairRepository: typeof OfferPair,
+    @Inject('CHECKOUT_REPOSITORY') private checkoutRepository: typeof Checkout,
+
     @Inject('EXISTING_ITEM_REPOSITORY')
     private existingItemRepository: typeof ExistingItem,
     @Inject('STATS_REPOSITORY')
     private statRepository: typeof Stat,
     @Inject('SEQUELIZE')
     private db,
+
+    private configService: ConfigService,
   ) {}
 
   create(createItemDto: CreateItemDto) {
@@ -47,6 +59,38 @@ export class ItemService {
       where,
     });
   }
+
+  async getItemByCheckoutId(checkoutId: number) {
+    const checkout = await this.checkoutRepository.findByPk(checkoutId, {
+      include: [
+        {
+          model: this.offerPairRepository,
+          include: [
+            {
+              model: this.offerRepository,
+              include: [
+                {
+                  model: this.itemsRepository,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!checkout) return null;
+    return checkout.offerPair.offer.item;
+  }
+
+  async getItemById(id: number) {
+    return await this.itemsRepository.findByPk(id);
+  }
+
+  // http://localhost:5173/items/60px-Cobalt_Ingot.png
+  getItemImageByName = (name: string) =>
+    this.configService.get('APP_URL') +
+    `/items/60px-${name.replace(/ /g, '_')}.png`;
 
   async findUserItem(userId: number, existingItemId: number, user: User) {
     const existingItemWhere = {

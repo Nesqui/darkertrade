@@ -3,6 +3,8 @@ import { Chat, ChatMessagesResponse, ChatOfferType, User } from '../hooks'
 import { useLocalStorage, useStorage } from '@vueuse/core'
 import { ref } from 'vue'
 
+// export type SelectedChatType = 'existingItem' | 'offer'
+
 export const useChatStore = defineStore('chat', () => {
   // const selectedChat = useStorage<ChatMessagesResponse | null>('selectedChat', null)
   const selectedChat = useLocalStorage<ChatMessagesResponse>('selectedChat', {

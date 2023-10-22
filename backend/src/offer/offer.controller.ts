@@ -51,6 +51,12 @@ export class OfferController {
     return this.offerService.filter(query, user);
   }
 
+  @Get('/mine')
+  @UseGuards(JwtOptionalAuthGuard)
+  getMine(@ReqUser() user: User) {
+    return this.offerService.getMine(user);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   update(

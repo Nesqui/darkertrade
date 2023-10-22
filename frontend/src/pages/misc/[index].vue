@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import MiscOffer from '../components/MiscOffer.vue'
+import MiscOffer from '../../components/MiscOffer.vue'
 
-const itemId = 133
+const itemId = 134
 </script>
 
 <template>
@@ -12,7 +12,7 @@ const itemId = 133
     <div class="wrapper selector-wrapper">
       <el-autocomplete placeholder="Healing Potion" />
       <div class="item-img">
-        <img src="/items/60px-Cobalt_Ingot.png" alt="" />
+        <img src="/items/60px-Healing_Potion.png" alt="" />
       </div>
     </div>
 
@@ -49,7 +49,7 @@ const itemId = 133
   left: 0;
   top: 0;
   width: 100%;
-  opacity: 0.55;
+  opacity: 0.1;
   background-repeat: no-repeat;
   background-size: cover;
 }

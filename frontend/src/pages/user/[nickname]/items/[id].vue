@@ -234,11 +234,12 @@ onBeforeMount(async () => {
                 v-if="ownToUser() && item?.existingItems && item.existingItems[0].id"
                 class="settings"
               >
-                <el-divider />
+                <!-- <el-divider />
                 <h2>Settings</h2>
                 <div class="settings__discord">
                   <span>Notify on new bids</span>
                   <el-switch
+                    disabled
                     v-model="item.existingItems[0].discordNotification"
                     :loading="discordNotificationLoading"
                     @change="onDiscordNotificationChange"
@@ -246,7 +247,7 @@ onBeforeMount(async () => {
                     active-text="On"
                     inactive-text="Off"
                   />
-                </div>
+                </div> -->
               </div>
             </div>
             <ItemPreview

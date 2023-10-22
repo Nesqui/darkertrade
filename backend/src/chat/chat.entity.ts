@@ -10,6 +10,7 @@ import {
   HasOne,
 } from 'sequelize-typescript';
 import { Bid } from 'src/bid/bid.entity';
+import { Checkout } from 'src/checkout/checkout.entity';
 import { Community } from 'src/community/community.entity';
 import { Message } from 'src/messages/messages.entity';
 
@@ -35,4 +36,7 @@ export class Chat extends Model {
 
   @HasOne(() => Bid)
   bid: Bid;
+
+  @HasOne(() => Checkout)
+  checkout: Checkout;
 }

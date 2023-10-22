@@ -50,8 +50,7 @@ export interface OfferPair {
   offerId: number
   offer: Offer
   rarity: number
-  checkout: Checkout
-  checkoutId: number
+  checkouts: Checkout[]
 }
 
 export interface CountedOffersResponse {
@@ -66,6 +65,11 @@ export const initOfferApi = () => {
     const res = await axiosClient('offer', {
       params
     })
+    return res.data
+  }
+
+  const getMine = async (): Promise<Offer[] & { averagePrice: number }[]> => {
+    const res = await axiosClient('offer/mine')
     return res.data
   }
 
@@ -84,7 +88,7 @@ export const initOfferApi = () => {
     return res.data
   }
 
-  const acceptOfferPair = async (offerPairId: number, quantity: number) => {
+  const acceptOfferPair = async (offerPairId: number, quantity: number): Promise<Checkout> => {
     const res = await axiosClient.post(`offer/accept/offerPair/${offerPairId}`, { quantity })
     return res.data
   }
@@ -94,6 +98,7 @@ export const initOfferApi = () => {
     getMarket,
     update,
     create,
-    acceptOfferPair
+    acceptOfferPair,
+    getMine
   }
 }

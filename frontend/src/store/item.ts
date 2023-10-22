@@ -3,14 +3,17 @@ import { Item, User } from '../hooks'
 import { useLocalStorage } from '@vueuse/core'
 
 export const useItemStore = defineStore('item', () => {
-    const items = useLocalStorage('items', [] as Item[])
+  const items = useLocalStorage('items', [] as Item[])
 
-    const saveAll = (_items:Item[]) => {
-      items.value = _items
-    }
+  const saveAll = (_items: Item[]) => {
+    items.value = _items
+  }
 
-    return {
-      items,
-      saveAll
-    }
+  const getItemById = (id: number) => items.value.find((item) => item.id === id)
+
+  return {
+    items,
+    getItemById,
+    saveAll
+  }
 })

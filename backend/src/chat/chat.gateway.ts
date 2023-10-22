@@ -69,12 +69,12 @@ export class ChatGateway {
     @Inject('CHECKOUT_REPOSITORY')
     private checkoutRepository: typeof Checkout,
   ) {}
+
   afterInit(server: Server) {
-    console.log(server);
+    console.log('WS server initialized');
   }
 
   handleDisconnect(client: Socket) {
-    console.log(client.id);
     for (const key in this.users) {
       if (this.users[key].id === client.id) {
         delete this.users[key];
@@ -235,6 +235,10 @@ export class ChatGateway {
 
       // const groupByUserCounts = groupBy(counts, 'userId');
       this.notifyUser(+userId, 'countMessages', counts);
+      console.log(
+        '🚀 ~ file: chat.gateway.ts:238 ~ ChatGateway ~ userIds.forEach ~ counts:',
+        counts,
+      );
     });
   };
 
@@ -329,22 +333,21 @@ export class ChatGateway {
       },
     ]);
 
-    const miscPurchases = await this.offerRepository.findOne(
-      this.getMiscChatsRequest('Purchases', checkout.purchaserId),
+    const miscPurchases = await this.offerRepository.findAll(
+      this.getMiscChatsRequest('Purchases', checkout.purchaserId, checkout.id),
     );
-
-    const miscSales = await this.offerRepository.findOne(
-      this.getMiscChatsRequest('Sales', checkout.sellerId),
+    const miscSales = await this.offerRepository.findAll(
+      this.getMiscChatsRequest('Sales', checkout.sellerId, checkout.id),
     );
 
     await this.notifyUser(checkout.purchaserId, 'chatCreated', {
       offerType: 'miscPurchases',
-      miscPurchases,
+      miscPurchase: miscPurchases[0],
     });
 
     await this.notifyUser(checkout.sellerId, 'chatCreated', {
       offerType: 'miscSales',
-      miscSales,
+      miscSale: miscSales[0],
     });
 
     await this.countMessages([checkout.purchaserId, checkout.sellerId]);
@@ -445,10 +448,12 @@ export class ChatGateway {
     checkoutId?: number,
   ) => {
     const typedWhereQuery = {};
+
     if (type === 'Purchases') typedWhereQuery['purchaserId'] = userId;
     else typedWhereQuery['sellerId'] = userId;
 
     if (checkoutId) typedWhereQuery['id'] = checkoutId;
+    console.log({ typedWhereQuery });
 
     const request = {
       where: {
@@ -461,8 +466,8 @@ export class ChatGateway {
           include: [
             {
               model: this.checkoutRepository,
-              where: typedWhereQuery,
               required: true,
+              where: typedWhereQuery,
               include: [
                 {
                   model: this.userRepository,
@@ -561,9 +566,17 @@ export class ChatGateway {
     const miscSales = await this.offerRepository.findAll(
       this.getMiscChatsRequest('Sales', query.user.id),
     );
+    console.log(
+      '🚀 ~ file: chat.gateway.ts:565 ~ ChatGateway ~ miscSales:',
+      miscSales.length,
+    );
 
     const miscPurchases = await this.offerRepository.findAll(
       this.getMiscChatsRequest('Purchases', query.user.id),
+    );
+    console.log(
+      '🚀 ~ file: chat.gateway.ts:573 ~ ChatGateway ~ miscPurchases:',
+      miscPurchases.length,
     );
 
     await this.notifyUser(query.user.id, 'chatsReceived', {
@@ -694,11 +707,14 @@ export class ChatGateway {
     @MessageBody() query: GetChatDto,
     @ConnectedSocket() socket: Socket,
   ) {
-    const chat = await this.chatRepository.findOne({
-      where: {
-        id: query.chatId,
-      },
-      include: [
+    const existingChat = await this.chatRepository.findByPk(query.chatId, {
+      attributes: ['name'],
+    });
+    let include = [];
+
+    // BID INCLUDES
+    if (existingChat.name !== 'onOfferPairAccepted')
+      include = [
         {
           model: this.bidRepository,
           include: [
@@ -728,7 +744,49 @@ export class ChatGateway {
             },
           ],
         },
-      ],
+      ];
+    else
+      include = [
+        {
+          model: this.checkoutRepository,
+          include: [
+            {
+              model: this.offerPairsRepository,
+              include: [
+                {
+                  model: this.offerRepository,
+                },
+              ],
+            },
+            {
+              model: this.userRepository,
+              as: 'purchaser',
+              attributes: ['nickname', 'id', 'online'],
+            },
+            {
+              model: this.userRepository,
+              as: 'seller',
+              attributes: ['nickname', 'id', 'online'],
+            },
+          ],
+        },
+        {
+          model: this.communityRepository,
+          include: [
+            {
+              model: this.userRepository,
+              attributes: {
+                exclude: ['password', 'discord', 'discordId', 'hash'],
+              },
+            },
+          ],
+        },
+      ];
+    const chat = await this.chatRepository.findOne({
+      where: {
+        id: query.chatId,
+      },
+      include,
     });
 
     if (!chat.community.users.find((user) => user.id === query.user.id)) {

@@ -3,4 +3,6 @@ export class CreateCheckoutDto {
   readonly quantity: number;
   readonly price: number;
   readonly purchaserId: number;
+  readonly offerPairId?: number;
+  readonly bidId?: number;
 }

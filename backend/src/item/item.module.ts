@@ -11,6 +11,9 @@ import { bidProviders } from 'src/bid/bid.providers';
 import { pgProviders } from 'src/pg/pg.providers';
 // import { baseStatProviders } from 'src/base-stat/base-stat.providers';
 import { UserService } from 'src/user/user.service';
+import { offerPairProviders } from 'src/offer/offer-pair.providers';
+import { offerProviders } from 'src/offer/offer.providers';
+import { checkoutProviders } from 'src/checkout/checkout.providers';
 
 @Module({
   imports: [PgModule],
@@ -23,9 +26,13 @@ import { UserService } from 'src/user/user.service';
     ...statsProviders,
     ...usersProviders,
     ...bidProviders,
+    ...offerPairProviders,
+    ...offerProviders,
+    ...checkoutProviders,
     ...pgProviders,
     // ...baseStatProviders,
     JwtService,
   ],
+  exports: [ItemService],
 })
 export class ItemModule {}

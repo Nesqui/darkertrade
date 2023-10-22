@@ -267,6 +267,15 @@ export class BidService {
             },
           ],
         },
+        {
+          model: this.existingItemRepository,
+          as: 'suggestedExistingItem',
+          include: [
+            {
+              model: this.userRepository,
+            },
+          ],
+        },
         this.userRepository,
       ],
     });
@@ -276,12 +285,9 @@ export class BidService {
 
     bid.status = 'accepted';
 
+    const discordChannelId = await this.discordGateway.onBidAccepted(bid);
+    bid.discordChannelId = discordChannelId;
     await bid.save();
-    try {
-      await this.discordGateway.onBidAccepted(bid);
-      await this.chatGateway.onBidAccepted(bid);
-    } catch (error) {}
-
     return 'accepted';
   }
 
@@ -309,7 +315,11 @@ export class BidService {
 
     bid.status = 'closed';
     try {
-      await this.chatGateway.onBidClosed(bid);
+      // await this.chatGateway.onBidClosed(bid);
+      await this.discordGateway.archiveChannel(
+        bid.discordChannelId,
+        'Bid closed',
+      );
     } catch (error) {}
     await bid.save();
     return 'closed';

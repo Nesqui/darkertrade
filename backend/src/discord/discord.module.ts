@@ -9,12 +9,16 @@ import { DiscordGateway } from './discord.gateway';
 import { ResetCommand } from './commands/reset.command';
 import { RegisterCommand } from './commands/register.command';
 import { usersProviders } from 'src/user/user.providers';
+import { itemsProviders } from 'src/item/item.providers';
 import { bidProviders } from 'src/bid/bid.providers';
 import { existingItemProviders } from 'src/existing-item/existing-item.providers';
+import { ItemService } from 'src/item/item.service';
+import { ItemModule } from 'src/item/item.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ItemModule,
     DiscordModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -47,6 +51,7 @@ import { existingItemProviders } from 'src/existing-item/existing-item.providers
     ...usersProviders,
     ...bidProviders,
     ...existingItemProviders,
+    ...itemsProviders,
   ],
   exports: [DiscordGateway],
 })

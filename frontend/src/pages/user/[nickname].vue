@@ -16,26 +16,27 @@ const router = useRouter()
 const limits = initLimits()
 const userStore = useUserStore()
 
-
 const push = async (url: string) => {
   let redirect = false
   if (route.path === url) {
     redirect = true
   }
   await router.push({
-    path: url,
+    path: url
   })
-  if (redirect)
-    router.go(0)
+  if (redirect) router.go(0)
 }
 
-watch(() => route.params.nickname, async () => {
-  await initUserData()
-})
+watch(
+  () => route.params.nickname,
+  async () => {
+    await initUserData()
+  }
+)
 
 const initUserData = async () => {
   const userNickname = route.params.nickname
-  
+
   if (typeof userNickname === 'string') {
     user.value = await userApi.findByNickname(userNickname)
     if (!user.value) {
@@ -54,7 +55,6 @@ const onDiscordNotificationChange = async (value: boolean) => {
     discordNotificationLoading.value = false
   }
 }
-
 
 onBeforeMount(async () => {
   try {
@@ -82,22 +82,28 @@ onBeforeMount(async () => {
           <h2 class="darker-title user-nickname">Loading</h2>
         </div>
         <div v-else class="profile__info">
-          <img src="@/assets/images/avatar.png" alt="" class="bg">
+          <img src="@/assets/images/avatar.png" alt="" class="bg" />
           <h2 class="darker-title user-nickname">
             {{ user.nickname }}
           </h2>
         </div>
-
       </div>
-      <div v-if="user && userStore.currentUser.id === user.id" class="settings">
+      <!-- <div v-if="user && userStore.currentUser.id === user.id" class="settings">
         <span>Discord DM:</span>
         <div class="settings__discord">
-          <el-switch v-model="user.discordNotification" :loading="discordNotificationLoading"
-            @change="onDiscordNotificationChange" size="large" active-text="On" inactive-text="Off" />
+          <el-switch
+            disabled
+            v-model="user.discordNotification"
+            :loading="discordNotificationLoading"
+            @change="onDiscordNotificationChange"
+            size="large"
+            active-text="On"
+            inactive-text="Off"
+          />
         </div>
-      </div>
+      </div> -->
       <div v-if="user && userStore.currentUser.id === user.id" class="restrictions">
-       <CountExistingItem />
+        <CountExistingItem />
       </div>
     </div>
     <router-view v-if="user" />
@@ -149,7 +155,7 @@ onBeforeMount(async () => {
 
   .wrapper {
     gap: 2rem;
-    padding: 1rem .5rem;
+    padding: 1rem 0.5rem;
     width: var(--wrapper-small-width);
     display: flex;
     flex-direction: column;
@@ -169,7 +175,6 @@ onBeforeMount(async () => {
     position: relative;
   }
 
-
   .avatar-wrapper {
     display: flex;
     justify-content: center;
@@ -179,14 +184,14 @@ onBeforeMount(async () => {
   &__info {
     display: flex;
     flex-direction: column;
-    gap: .2rem;
+    gap: 0.2rem;
     font-weight: 600;
     font-size: 16px;
     margin-bottom: 1rem;
     font-weight: 400;
   }
 
-  .el-button+.el-button {
+  .el-button + .el-button {
     margin-left: 0;
   }
 
@@ -197,7 +202,7 @@ onBeforeMount(async () => {
 
     &__item {
       width: 100%;
-      padding: .25rem 0;
+      padding: 0.25rem 0;
     }
 
     &__item:not(:last-child) {
@@ -214,7 +219,7 @@ onBeforeMount(async () => {
   }
 }
 
-@media (max-width:1280px) {
+@media (max-width: 1280px) {
   .profile {
     flex-direction: column;
     align-items: center;
@@ -228,7 +233,7 @@ onBeforeMount(async () => {
       min-height: unset;
       flex-direction: column;
       align-items: center;
-      gap: .5rem;
+      gap: 0.5rem;
 
       .loader,
       .profile__info {
@@ -246,14 +251,13 @@ onBeforeMount(async () => {
       }
     }
 
-
     .bg {
       display: none;
     }
   }
 }
 
-@media (max-width:420px) {
+@media (max-width: 420px) {
   .profile {
     display: flex;
     flex-direction: column;
@@ -285,7 +289,7 @@ onBeforeMount(async () => {
     }
 
     .wrapper {
-      gap: .5rem;
+      gap: 0.5rem;
       min-height: 100px;
     }
   }

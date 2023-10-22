@@ -10,6 +10,7 @@ import {
   Min,
   Max,
   Default,
+  HasOne,
 } from 'sequelize-typescript';
 import { Chat } from 'src/chat/chat.entity';
 import { Checkout } from 'src/checkout/checkout.entity';
@@ -55,13 +56,12 @@ export class Bid extends Model {
   @Column
   chatId: number;
 
+  @Column
+  discordChannelId: string;
+
   @BelongsTo(() => Chat, { foreignKey: 'chatId' })
   chat: Chat;
 
-  @BelongsTo(() => Checkout)
+  @HasOne(() => Checkout)
   checkout: Checkout;
-
-  @ForeignKey(() => Checkout)
-  @Column
-  checkoutId: number;
 }
