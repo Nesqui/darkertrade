@@ -46,7 +46,7 @@ onBeforeMount(async () => {
     }
     // prefillData()
   } catch (error) {
-    console.log('🚀 ~ file: Creator.vue:353 ~ onBeforeMount ~ error:', error)
+    console.log('🚀error:', error)
   } finally {
     loading.value = false
   }

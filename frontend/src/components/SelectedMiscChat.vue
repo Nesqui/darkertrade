@@ -73,8 +73,6 @@ const conversationContact = computed(() => {
 const clearActiveChat = async () => {
   emit('clearActiveChat')
 }
-
-console.log({ selectedChat: selectedChat.value })
 </script>
 
 <template>
